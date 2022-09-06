@@ -1,6 +1,6 @@
-namespace shopping_bag.Models
+namespace shopping_bag.DTOs
 {
-    public class WeatherForecast
+    public class WeatherForecastDto
     {
         public DateTime Date { get; set; }
 
