@@ -1,16 +1,32 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using shopping_bag.Models.User;
+using shopping_bag.Services;
+using System.Security.Claims;
 
 namespace shopping_bag.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    [AllowAnonymous] // TODO: Change all endpoints without AllowAnonymous to require authorization after it has been implemented
+    [Authorize]
+    [Route("api/[controller]")]
     public class BaseApiController : ControllerBase
     {
-        /*
-         * This is a base controller which all other controllers inherit.
-         * In the future it should provide easy access to common operations such as getting current user
-         */
+        protected readonly IUserService _userService;
+        protected BaseApiController(IUserService userService)
+        {
+            _userService = userService;
+        }
+
+        protected async Task<User> GetCurrentUser()
+        {
+            var email = User?.FindFirst(ClaimTypes.Email);
+
+            if (email == null)
+            {
+                return null;
+            }
+
+            return await _userService.GetUserByEmail(email.Value);
+        }
     }
 }

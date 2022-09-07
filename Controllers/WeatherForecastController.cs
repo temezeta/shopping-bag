@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using shopping_bag.DTOs;
+using shopping_bag.Services;
 
 namespace shopping_bag.Controllers
 {
@@ -12,7 +13,7 @@ namespace shopping_bag.Controllers
 
         private readonly ILogger<WeatherForecastController> _logger;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, IUserService userService) : base(userService)
         {
             _logger = logger;
         }
