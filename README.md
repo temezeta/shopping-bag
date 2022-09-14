@@ -1,6 +1,8 @@
 ## Requirements
 
-[.NET 6 SDK](https://dotnet.microsoft.com/en-us/download/visual-studio-sdks)
+- [.NET 6 SDK](https://dotnet.microsoft.com/en-us/download/visual-studio-sdks)
+- [MS SQL Server Express](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
+- Recommended: [SQL Server Management Studio]()
 
 ## Recommended IDE
 
@@ -10,12 +12,26 @@
 
 ## Getting started
 
-1. Install Visual Studio 2022 & select Web development (top left)
-2. Clone repository
-3. Open `shopping-bag.sln` with Visual Studio
-4. Select `shopping-bag` from the top bar dropdown with green Play-button
-5. Click the button to start backend
-6. Swagger page should open in browser
+1. Install database tools & [create a new database](https://docs.microsoft.com/en-us/sql/relational-databases/databases/create-a-database?view=sql-server-ver16)
+2. Install Visual Studio 2022 & select Web development (top left)
+3. Clone repository
+4. Open `shopping-bag.sln` with Visual Studio
+5. In user secrets or appsettings file (don't commit), change the connection string to match the database you created.
+6. Select `shopping-bag` from the top bar dropdown with green Play-button
+7. Click the button to start backend
+8. Swagger page should open in browser
+
+## Getting started with Docker
+
+1. Follow steps 1-5 from above
+2. Install [Docker Desktop](https://docs.docker.com/desktop/windows/wsl/)
+3. Ensure WSL 2 support is enabled and virtualization (SVM etc.) is enabled in BIOS
+4. If you can start Docker Desktop and `wsl -l -v` command returns version 2 distro you should be fine
+5. Install dotnet ef tools in PowerShell etc. `dotnet tool install --global dotnet-ef`
+6. Build `shopping-bag.csproj` project by right clicking it in Visual Studio Solution Explorer and Build
+7. Select `docker-compose` from the top bar dropdown with green Play-button
+8. Click the button to start backend
+9. Swagger page should open in browser
 
 ## Structure
 

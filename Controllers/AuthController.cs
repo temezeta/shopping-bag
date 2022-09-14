@@ -72,7 +72,7 @@ namespace shopping_bag.Controllers
             var user = email != null ? await _userService.GetUserByEmail(email) : null;
             var refreshToken = Request.Cookies["refreshToken"];
 
-            if(refreshToken == null || user == null)
+            if(refreshToken == null || user?.RefreshToken == null)
             {
                 return BadRequest();
             } 

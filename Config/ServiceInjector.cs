@@ -11,7 +11,7 @@ namespace shopping_bag.Config
             // Services
             services.AddScoped<IUserService, UserService>();
             // Stores
-            services.AddScoped<IUserStore, DummyUserStore>();
+            services.AddScoped<IUserStore, UserStore>();
         }
     }
 }

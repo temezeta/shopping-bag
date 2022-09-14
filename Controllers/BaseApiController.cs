@@ -17,7 +17,7 @@ namespace shopping_bag.Controllers
             _userService = userService;
         }
 
-        protected async Task<User> GetCurrentUser()
+        protected async Task<User?> GetCurrentUser()
         {
             var email = User?.FindFirst(ClaimTypes.Email);
 
