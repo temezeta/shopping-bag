@@ -17,21 +17,21 @@
 3. Clone repository
 4. Open `shopping-bag.sln` with Visual Studio
 5. In user secrets or appsettings file (don't commit), change the connection string to match the database you created.
-6. Select `shopping-bag` from the top bar dropdown with green Play-button
-7. Click the button to start backend
-8. Swagger page should open in browser
+6. Install dotnet ef tools in PowerShell etc. `dotnet tool install --global dotnet-ef`
+7. Select `shopping-bag` from the top bar dropdown with green Play-button
+8. Click the button to start backend
+9. Swagger page should open in browser
 
 ## Getting started with Docker
 
-1. Follow steps 1-5 from above
+1. Follow steps 1-6 from above
 2. Install [Docker Desktop](https://docs.docker.com/desktop/windows/wsl/)
 3. Ensure WSL 2 support is enabled and virtualization (SVM etc.) is enabled in BIOS
 4. If you can start Docker Desktop and `wsl -l -v` command returns version 2 distro you should be fine
-5. Install dotnet ef tools in PowerShell etc. `dotnet tool install --global dotnet-ef`
-6. Build `shopping-bag.csproj` project by right clicking it in Visual Studio Solution Explorer and Build
-7. Select `docker-compose` from the top bar dropdown with green Play-button
-8. Click the button to start backend
-9. Swagger page should open in browser
+5. Build `shopping-bag.csproj` project by right clicking it in Visual Studio Solution Explorer and Build
+6. Select `docker-compose` from the top bar dropdown with green Play-button
+7. Click the button to start backend
+8. Swagger page should open in browser
 
 ## Structure
 
@@ -59,3 +59,8 @@ Currently the backend is structured as follows from top to bottom:
     - Contains application default configuration variables
       - Don't change, use appsettings.Development.json or user secrets instead
       - To set user secrets right-click `shopping-bag` in Solutions Explorer and click `Manage User Secrets`
+
+## Troubleshooting
+
+- If whichever `shopping-bag` or `docker-compose` is not available in the top bar dropdown with Green Play-button
+  - In Solution Explorer right click that project and `Set as Startup Project`
