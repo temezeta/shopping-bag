@@ -26,7 +26,13 @@ namespace shopping_bag.Controllers
                 return null;
             }
 
-            return await _userService.GetUserByEmail(email.Value);
+            var response = await _userService.GetUserByEmail(email.Value);
+
+            if (!response.IsSuccess)
+            {
+                return null;
+            }
+            return response.Data;
         }
     }
 }

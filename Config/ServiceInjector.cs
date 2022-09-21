@@ -1,5 +1,4 @@
 ﻿using shopping_bag.Services;
-using shopping_bag.Stores;
 
 namespace shopping_bag.Config
 {
@@ -8,10 +7,9 @@ namespace shopping_bag.Config
         public static void AddServices(this IServiceCollection services)
         {
             // Add services for dependency injection here
-            // Services
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IUserService, UserService>();
-            // Stores
-            services.AddScoped<IUserStore, UserStore>();
         }
     }
 }

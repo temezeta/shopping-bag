@@ -13,7 +13,7 @@ namespace shopping_bag.Controllers
 
         private readonly ILogger<WeatherForecastController> _logger;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger, IUserService userService) : base(userService)
+        public WeatherForecastController(IUserService userService, ILogger<WeatherForecastController> logger) : base(userService)
         {
             _logger = logger;
         }

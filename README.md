@@ -44,12 +44,8 @@ Currently the backend is structured as follows from top to bottom:
   - Passes & receives information from services
     - As such, contains some logic on what services to call
 - Service:
-  - Combines information from multiple stores
   - Contains logic on how to process data
-- Store:
-  - Interfaces directly with the database
-  - One store per one database table
-  - No functionality outside of database calls
+  - Modifies database context
 - Models
   - Internal classes which represents the objects fetched from database
   - <b>Never returned from a controller</b>

@@ -1,11 +1,10 @@
-﻿using shopping_bag.Models.User;
+﻿using shopping_bag.Models;
+using shopping_bag.Models.User;
 
 namespace shopping_bag.Services
 {
     public interface IUserService
     {
-        Task<bool> AddUser(NewUser user);
-        Task<User?> GetUserByEmail(string email);
-        Task<bool> SetRefreshToken(User user);
+        Task<ServiceResponse<User>> GetUserByEmail(string email);
     }
 }

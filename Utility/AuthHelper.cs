@@ -56,7 +56,7 @@ namespace shopping_bag.Utility
         
         public static bool ValidatePassword(string password, string repeatPassword)
         {
-            // TODO: Somekind of password validation here
+            // TODO: Somekind of password validation here, also validate email somewhere
             return true;
         }
         
@@ -100,6 +100,13 @@ namespace shopping_bag.Utility
             {
                 return null;
             }
+        }
+
+        public static string CreateHexToken()
+        {
+            var bytes = new byte[32];
+            RandomNumberGenerator.Create().GetBytes(bytes);
+            return Convert.ToHexString(bytes);
         }
     }
 }
