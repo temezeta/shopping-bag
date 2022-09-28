@@ -10,6 +10,7 @@ namespace shopping_bag.Config
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IOfficeService, OfficeService>();
         }
     }
 }
