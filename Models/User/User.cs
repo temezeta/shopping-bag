@@ -31,6 +31,8 @@ namespace shopping_bag.Models.User
         public DateTime? ResetTokenExpires { get; set; }
         // Navigation properties
         public List<UserRole> UserRoles { get; set; } = new List<UserRole>();
+        public long OfficeId { get; set; }
+        public Office HomeOffice { get; set; }
 
     }
 }
