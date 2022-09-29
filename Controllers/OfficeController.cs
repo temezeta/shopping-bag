@@ -13,13 +13,17 @@ namespace shopping_bag.Controllers {
         }
 
         [HttpGet]
+        [AllowAnonymous]
         [Route("get/all")]
         public async Task<ActionResult<IEnumerable<OfficeDto>>> GetAllOffices() {
             var result = await _officeService.GetOffices();
             if(!result.IsSuccess) {
                 return BadRequest(result.Error);
             }
-            return Ok(result.Data);
+            return Ok(result.Data.Select(o => new OfficeDto() {
+                Id = o.Id,
+                Name = o.Name
+            }).ToList());
         }
 
         [HttpPost]
@@ -32,7 +36,10 @@ namespace shopping_bag.Controllers {
             if(!result.IsSuccess) {
                 return BadRequest(result.Error);
             }
-            return Ok(result.Data);
+            return Ok(new OfficeDto() { 
+                Id = result.Data.Id,
+                Name = result.Data.Name
+            });
         }  
     }
 }
