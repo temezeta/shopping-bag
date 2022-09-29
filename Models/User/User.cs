@@ -14,7 +14,6 @@ namespace shopping_bag.Models.User
         public string LastName { get; set; }
         [Required]
         public string Email { get; set; }
-        public string? Office { get; set; }
         [Required]
         public byte[] PasswordHash { get; set; }
         [Required]

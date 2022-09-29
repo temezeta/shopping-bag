@@ -54,12 +54,6 @@ namespace shopping_bag.Utility
             }
         }
         
-        public static bool ValidatePassword(string password, string repeatPassword)
-        {
-            // TODO: Somekind of password validation here, also validate email somewhere
-            return true;
-        }
-        
         public static RefreshToken GenerateRefreshToken()
         {
             var bytes = new byte[64];
