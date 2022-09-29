@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using shopping_bag.Config;
 
@@ -11,9 +12,10 @@ using shopping_bag.Config;
 namespace shopping_bag.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220928194058_AddOfficesTable")]
+    partial class AddOfficesTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -65,9 +67,6 @@ namespace shopping_bag.Migrations
                     b.Property<string>("Office")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long>("OfficeId")
-                        .HasColumnType("bigint");
-
                     b.Property<byte[]>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
@@ -102,8 +101,6 @@ namespace shopping_bag.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.HasIndex("OfficeId");
-
                     b.ToTable("Users");
                 });
 
@@ -127,17 +124,6 @@ namespace shopping_bag.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("UserRoles");
-                });
-
-            modelBuilder.Entity("shopping_bag.Models.User.User", b =>
-                {
-                    b.HasOne("shopping_bag.Models.Office", "HomeOffice")
-                        .WithMany()
-                        .HasForeignKey("OfficeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("HomeOffice");
                 });
 
             modelBuilder.Entity("shopping_bag.Models.User.UserRole", b =>
