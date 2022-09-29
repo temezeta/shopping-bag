@@ -25,14 +25,15 @@ namespace shopping_bag.Services
                 return new ServiceResponse<string>(error: "User with email already exists");
             }
 
-
-            if (!AuthHelper.ValidatePassword(request.Password, request.RepeatPassword))
-            {
-                return new ServiceResponse<string>(error: "Password does not meet requirements");
-            }
-
             AuthHelper.CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
             var verificationToken = AuthHelper.CreateHexToken();
+
+            var officeExists = _context.Offices.Any(office => office.Id == request.OfficeId);
+    
+            if (!officeExists)
+            {
+                return new ServiceResponse<string>(error: "Office doesn't exist");
+            }
 
             try
             {
@@ -43,7 +44,7 @@ namespace shopping_bag.Services
                         FirstName = request.FirstName,
                         LastName = request.LastName,
                         Email = request.Email,
-                        Office = request.Office,
+                        OfficeId = request.OfficeId,
                         PasswordHash = passwordHash,
                         PasswordSalt = passwordSalt,
                         VerificationToken = verificationToken
@@ -136,11 +137,6 @@ namespace shopping_bag.Services
         
         public async Task<ServiceResponse<bool>> ResetPassword(ResetPasswordDto request)
         {
-            if (!AuthHelper.ValidatePassword(request.Password, request.RepeatPassword))
-            {
-                return new ServiceResponse<bool>(error: "Password does not meet requirements");
-            }
-
             var user = await _context.Users.FirstOrDefaultAsync(u => u.PasswordResetToken == request.ResetToken);
 
             if(user == null)
