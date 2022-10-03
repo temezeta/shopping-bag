@@ -27,6 +27,7 @@ namespace shopping_bag.Controllers {
 
         [HttpGet]
         [Route("{userId}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<UserDto>> GetUserById([FromRoute] long userId) {
             var result = await _userService.GetUserById(userId);
             if (!result.IsSuccess) {
@@ -35,6 +36,18 @@ namespace shopping_bag.Controllers {
 
             var user = MapUserToDto(result.Data);
             return user;
+        }
+
+        [HttpGet]
+        [Route("me")]
+        public async Task<ActionResult<UserDto>> GetLoggedInUser() {
+            var user = await GetCurrentUser();
+            if (user == null) {
+                return BadRequest();
+            }
+
+            var userDto = MapUserToDto(user);
+            return userDto;
         }
 
         // TODO: Create public mapping methods somewhere if same mappings are also used elsewhere.
