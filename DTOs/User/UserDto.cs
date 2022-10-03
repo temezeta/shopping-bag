@@ -10,7 +10,6 @@ namespace shopping_bag.DTOs.User {
         public string LastName { get; set; }
         public string Email { get; set; }
         public IEnumerable<UserRoleDto> UserRoles { get; set; } = new List<UserRoleDto>();
-        public long OfficeId { get; set; }
         public OfficeDto HomeOffice { get; set; }
     }
 }

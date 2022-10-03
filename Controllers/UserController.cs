@@ -59,7 +59,6 @@ namespace shopping_bag.Controllers {
                 LastName = user.LastName,
                 Email = user.Email,
                 HomeOffice = MapOfficeToDto(user.HomeOffice),
-                OfficeId = user.OfficeId,
                 UserRoles = user.UserRoles.Select(r => MapUserRoleToDto(r))
             };
         }
