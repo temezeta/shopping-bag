@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using shopping_bag.Models;
+using shopping_bag.Models.User;
 
 namespace shopping_bag.Config
 {
@@ -47,9 +48,21 @@ namespace shopping_bag.Config
                 Name = "Kotka"
             }};
 
+        private static readonly UserRole[] UserRoles = new UserRole[] {
+            new UserRole() {
+                RoleId = 1,
+                RoleName = "Admin"
+            },
+            new UserRole() {
+                RoleId = 2,
+                RoleName = "User"
+            }
+        };
+
         public static void Seed(this ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Office>().HasData(Offices);
+            modelBuilder.Entity<UserRole>().HasData(UserRoles);
         }
     }
 }
