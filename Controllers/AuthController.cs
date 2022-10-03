@@ -29,12 +29,19 @@ namespace shopping_bag.Controllers
                 return BadRequest();
             }
 
-            // TODO Make verification email more nice
+            // Generate verification url
+            var verificationUrl = Url.ActionLink("Verify", "Auth", new { verificationToken = response.Data });
+
+            if (string.IsNullOrWhiteSpace(verificationUrl))
+            {
+                return BadRequest();
+            }
+
             var emailResponse = _emailService.SendEmail(new Email
             {
                 To = request.Email,
                 Subject = "Email Verification",
-                Body = response.Data
+                Body = verificationUrl
             });
 
             if (!emailResponse.IsSuccess)
@@ -62,9 +69,9 @@ namespace shopping_bag.Controllers
             return Ok(new TokenResponseDto { Token = response.Data.LoginToken });
         }
 
-        [HttpPost, AllowAnonymous]
-        [Route("verify")]
-        public async Task<ActionResult> Verify([FromBody] string verificationToken)
+        [HttpGet, AllowAnonymous]
+        [Route("verify/{verificationToken}")]
+        public async Task<ActionResult> Verify([FromRoute] string verificationToken)
         {
             var response = await _authService.VerifyUserToken(verificationToken);
 
