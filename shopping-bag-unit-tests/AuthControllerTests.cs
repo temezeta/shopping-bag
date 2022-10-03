@@ -21,7 +21,7 @@ namespace shopping_bag_unit_tests
         }
 
         [Fact]
-        public async void Register_bad_response_from_authService()
+        public async void Register_bad_response_from_authService_Register()
         {
             var authServiceResponse = new ServiceResponse<string>(error: "User with email already exists");
             _authServiceMock.Setup(x => x.Register(It.IsAny<RegisterDto>())).ReturnsAsync(authServiceResponse);
