@@ -35,8 +35,7 @@ namespace shopping_bag.Services
                 return new ServiceResponse<string>(error: "Office doesn't exist");
             }
 
-            // TODO: Configure available roles somewhere to avoid having to type them in code.
-            var defaultRole = _context.UserRoles.FirstOrDefault(r => r.RoleName.Equals("User"));
+            var defaultRole = _context.UserRoles.FirstOrDefault(r => r.RoleName.Equals(Roles.DefaultRole));
             if (defaultRole == null) {
                 // TODO: Shouldn't happen ever because roles should always exist.
                 // Throw exception or something instead?
