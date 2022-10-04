@@ -3,8 +3,7 @@ using shopping_bag.Models.User;
 using shopping_bag.Models;
 using shopping_bag.Config;
 
-namespace shopping_bag.Services
-{
+namespace shopping_bag.Services {
     public class UserService : IUserService
     {
         private readonly AppDbContext _context;
@@ -15,7 +14,7 @@ namespace shopping_bag.Services
 
         public async Task<ServiceResponse<User>> GetUserByEmail(string email)
         {
-            var user = await _context.Users.Include(u => u.UserRoles).FirstOrDefaultAsync(u => u.Email == email);
+            var user = await _context.Users.Include(u => u.UserRoles).Include(u => u.HomeOffice).FirstOrDefaultAsync(u => u.Email == email);
 
             if (user == null)
             {
@@ -25,5 +24,19 @@ namespace shopping_bag.Services
             return new ServiceResponse<User>(data: user);
         }
 
+        public async Task<ServiceResponse<User>> GetUserById(long id) {
+            var user = await _context.Users.Include(u => u.UserRoles).Include(u => u.HomeOffice).FirstOrDefaultAsync(u => u.Id == id);
+
+            if (user == null) {
+                return new ServiceResponse<User>(error: "User not found");
+            }
+
+            return new ServiceResponse<User>(data: user);
+        }
+
+        public async Task<ServiceResponse<IEnumerable<User>>> GetUsers() {
+            var users = await _context.Users.Include(u => u.UserRoles).Include(u => u.HomeOffice).ToListAsync();
+            return new ServiceResponse<IEnumerable<User>>(users);
+        }
     }
 }

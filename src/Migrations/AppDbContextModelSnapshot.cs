@@ -148,24 +148,46 @@ namespace shopping_bag.Migrations
 
             modelBuilder.Entity("shopping_bag.Models.User.UserRole", b =>
                 {
-                    b.Property<long>("UserRoleId")
+                    b.Property<long>("RoleId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("UserRoleId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("RoleId"), 1L, 1);
 
-                    b.Property<string>("Role")
+                    b.Property<string>("RoleName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("UserRoleId");
-
-                    b.HasIndex("UserId");
+                    b.HasKey("RoleId");
 
                     b.ToTable("UserRoles");
+
+                    b.HasData(
+                        new
+                        {
+                            RoleId = 1L,
+                            RoleName = "Admin"
+                        },
+                        new
+                        {
+                            RoleId = 2L,
+                            RoleName = "User"
+                        });
+                });
+
+            modelBuilder.Entity("UserUserRole", b =>
+                {
+                    b.Property<long>("UserRolesRoleId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("UsersId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("UserRolesRoleId", "UsersId");
+
+                    b.HasIndex("UsersId");
+
+                    b.ToTable("UserUserRole");
                 });
 
             modelBuilder.Entity("shopping_bag.Models.User.User", b =>
@@ -179,20 +201,19 @@ namespace shopping_bag.Migrations
                     b.Navigation("HomeOffice");
                 });
 
-            modelBuilder.Entity("shopping_bag.Models.User.UserRole", b =>
+            modelBuilder.Entity("UserUserRole", b =>
                 {
-                    b.HasOne("shopping_bag.Models.User.User", "User")
-                        .WithMany("UserRoles")
-                        .HasForeignKey("UserId")
+                    b.HasOne("shopping_bag.Models.User.UserRole", null)
+                        .WithMany()
+                        .HasForeignKey("UserRolesRoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("shopping_bag.Models.User.User", b =>
-                {
-                    b.Navigation("UserRoles");
+                    b.HasOne("shopping_bag.Models.User.User", null)
+                        .WithMany()
+                        .HasForeignKey("UsersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

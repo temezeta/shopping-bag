@@ -1,8 +1,0 @@
-version: '3.4'
-
-services:
-  shopping-bag:
-    image: ${DOCKER_REGISTRY-}shoppingbag
-    build:
-      context: .
-      dockerfile: Dockerfile

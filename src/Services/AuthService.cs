@@ -35,6 +35,13 @@ namespace shopping_bag.Services
                 return new ServiceResponse<string>(error: "Office doesn't exist");
             }
 
+            var defaultRole = _context.UserRoles.FirstOrDefault(r => r.RoleName.Equals(Roles.DefaultRole));
+            if (defaultRole == null) {
+                // TODO: Shouldn't happen ever because roles should always exist.
+                // Throw exception or something instead?
+                return new ServiceResponse<string>(error: "User role doesn't exist in database.");
+            }
+
             try
             {
                 using (var transaction = _context.Database.BeginTransaction())
@@ -49,13 +56,8 @@ namespace shopping_bag.Services
                         PasswordSalt = passwordSalt,
                         VerificationToken = verificationToken
                     };
+                    user.UserRoles.Add(defaultRole);
                     _context.Users.Add(user);
-                    _context.SaveChanges();
-                    _context.UserRoles.Add(new UserRole
-                    {
-                        UserId = user.Id,
-                        Role = "User"
-                    });
                     _context.SaveChanges();
                     transaction.Commit();
                     return new ServiceResponse<string>(data: verificationToken);
