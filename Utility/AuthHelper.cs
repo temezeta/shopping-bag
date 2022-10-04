@@ -18,7 +18,7 @@ namespace shopping_bag.Utility
                 new Claim(ClaimTypes.Email, user.Email),
             };
 
-            user.UserRoles.ForEach(it => claims.Add(new Claim(ClaimTypes.Role, it.Role)));
+            user.UserRoles.ForEach(it => claims.Add(new Claim(ClaimTypes.Role, it.RoleName)));
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(StaticConfig.Token));
 
