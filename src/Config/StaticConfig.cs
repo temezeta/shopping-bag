@@ -9,6 +9,7 @@
         public static string Audience { get; private set; }
         public static string[] AllowedOrigins { get; private set; }
         public static string[] AllowedEmailDomain { get; private set; }
+        public static string VerificationEmailBodyText { get; private set; }
         public static void Setup(IConfiguration config)
         {
             RefreshTokenValidityDays = config.GetValue<int>("Jwt:RefreshTokenValidityDays");
@@ -18,6 +19,7 @@
             Audience = config.GetValue<string>("Jwt:Audience");
             AllowedOrigins = config.GetSection("AllowedOrigins").Get<string[]>();
             AllowedEmailDomain = config.GetSection("AllowedEmailDomain").Get<string[]>();
+            VerificationEmailBodyText = config.GetValue<string>("VerificationEmail:BodyText");
         }
     }
 }
