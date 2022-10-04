@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using shopping_bag.Config;
 using shopping_bag.DTOs.User;
 using shopping_bag.Models.Email;
 using shopping_bag.Models.User;
@@ -37,11 +38,14 @@ namespace shopping_bag.Controllers
                 return BadRequest();
             }
 
+            verificationUrl = "<a href=\"" + verificationUrl + "\">VERIFY ACCOUNT</a>.";
+            var verificationBodyText = string.Format(StaticConfig.VerificationEmailBodyText, verificationUrl);
+
             var emailResponse = _emailService.SendEmail(new Email
             {
                 To = request.Email,
-                Subject = "Email Verification",
-                Body = verificationUrl
+                Subject = "Huld Shopping Bag - Account Verification",
+                Body = verificationBodyText
             });
 
             if (!emailResponse.IsSuccess)
