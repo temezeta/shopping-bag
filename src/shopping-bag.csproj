@@ -12,6 +12,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="shopping-bag-unit-tests\**" />
+    <Content Remove="shopping-bag-unit-tests\**" />
+    <EmbeddedResource Remove="shopping-bag-unit-tests\**" />
+    <None Remove="shopping-bag-unit-tests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="MailKit" Version="3.4.1" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.9" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.8" />
