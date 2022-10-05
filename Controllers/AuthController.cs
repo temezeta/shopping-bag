@@ -50,10 +50,10 @@ namespace shopping_bag.Controllers
 
             if (!emailResponse.IsSuccess)
             {
-                return BadRequest("Unable to verify account.");
+                return BadRequest();
             }
 
-            return Ok("Your account was successfully verified.");
+            return Ok();
         }
 
         [HttpPost, AllowAnonymous]
@@ -81,10 +81,10 @@ namespace shopping_bag.Controllers
 
             if (!response.IsSuccess)
             {
-                return BadRequest();
+                return BadRequest("Unable to verify account.");
             }
 
-            return Ok();
+            return Ok("Your account was successfully verified.");
         }
 
         [HttpPost, AllowAnonymous]
