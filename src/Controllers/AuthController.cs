@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using shopping_bag.Config;
 using shopping_bag.DTOs.User;
 using shopping_bag.Models.Email;
 using shopping_bag.Models.User;
@@ -29,12 +30,22 @@ namespace shopping_bag.Controllers
                 return BadRequest();
             }
 
-            // TODO Make verification email more nice
+            // Generate verification url
+            var verificationUrl = Url.ActionLink("Verify", "Auth", new { verificationToken = response.Data });
+
+            if (string.IsNullOrWhiteSpace(verificationUrl))
+            {
+                return BadRequest();
+            }
+
+            verificationUrl = "<a href=\"" + verificationUrl + "\">VERIFY ACCOUNT</a>.";
+            var verificationBodyText = string.Format(StaticConfig.VerificationEmailBodyText, verificationUrl);
+
             var emailResponse = _emailService.SendEmail(new Email
             {
                 To = request.Email,
-                Subject = "Email Verification",
-                Body = response.Data
+                Subject = "Huld Shopping Bag - Account Verification",
+                Body = verificationBodyText
             });
 
             if (!emailResponse.IsSuccess)
@@ -62,18 +73,18 @@ namespace shopping_bag.Controllers
             return Ok(new TokenResponseDto { Token = response.Data.LoginToken });
         }
 
-        [HttpPost, AllowAnonymous]
-        [Route("verify")]
-        public async Task<ActionResult> Verify([FromBody] string verificationToken)
+        [HttpGet, AllowAnonymous]
+        [Route("verify/{verificationToken}")]
+        public async Task<ActionResult> Verify([FromRoute] string verificationToken)
         {
             var response = await _authService.VerifyUserToken(verificationToken);
 
             if (!response.IsSuccess)
             {
-                return BadRequest();
+                return BadRequest("Unable to verify account.");
             }
 
-            return Ok();
+            return Ok("Your account was successfully verified.");
         }
 
         [HttpPost, AllowAnonymous]
