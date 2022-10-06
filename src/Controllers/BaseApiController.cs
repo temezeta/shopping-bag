@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using shopping_bag.Filters;
 using shopping_bag.Models.User;
 using shopping_bag.Services;
 using System.Security.Claims;
@@ -9,7 +8,6 @@ namespace shopping_bag.Controllers
 {
     [ApiController]
     [Authorize]
-    [ValidateModel]
     [Route("api/[controller]")]
     public class BaseApiController : ControllerBase
     {
