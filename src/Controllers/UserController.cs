@@ -1,15 +1,15 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using shopping_bag.DTOs.Office;
 using shopping_bag.DTOs.User;
-using shopping_bag.Models;
-using shopping_bag.Models.User;
 using shopping_bag.Services;
 
 namespace shopping_bag.Controllers {
     public class UserController : BaseApiController {
 
-        public UserController(IUserService userService) : base(userService) {
+        private readonly IMapper _mapper;
+        public UserController(IUserService userService, IMapper mapper) : base(userService) {
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -21,8 +21,8 @@ namespace shopping_bag.Controllers {
                 return BadRequest(result.Error);
             }
 
-            var users = result.Data.Select(u => MapUserToDto(u)).ToList();
-            return users;
+            var users = _mapper.Map<IEnumerable<UserDto>>(result.Data);
+            return Ok(users);
         }
 
         [HttpGet]
@@ -34,7 +34,7 @@ namespace shopping_bag.Controllers {
                 return BadRequest(result.Error);
             }
 
-            var user = MapUserToDto(result.Data);
+            var user = _mapper.Map<UserDto>(result.Data);
             return user;
         }
 
@@ -46,33 +46,8 @@ namespace shopping_bag.Controllers {
                 return BadRequest();
             }
 
-            var userDto = MapUserToDto(user);
+            var userDto = _mapper.Map<UserDto>(user);
             return userDto;
-        }
-
-        // TODO: Create public mapping methods somewhere if same mappings are also used elsewhere.
-        // Maybe mapper classes for relevant model+dto pairs. Dependency injected like services are right now.
-        private UserDto MapUserToDto(User user) {
-            return new UserDto() {
-                Id = user.Id,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Email = user.Email,
-                HomeOffice = MapOfficeToDto(user.HomeOffice),
-                UserRoles = user.UserRoles.Select(r => MapUserRoleToDto(r))
-            };
-        }
-        private OfficeDto MapOfficeToDto(Office office) {
-            return new OfficeDto() { 
-                Id = office.Id, 
-                Name = office.Name 
-            };
-        }
-        private UserRoleDto MapUserRoleToDto(UserRole userRole) {
-            return new UserRoleDto() {
-                RoleId = userRole.RoleId,
-                RoleName = userRole.RoleName
-            };
         }
     }
 }
