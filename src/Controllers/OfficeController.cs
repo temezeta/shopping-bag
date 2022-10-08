@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using shopping_bag.DTOs.Office;
 using shopping_bag.Services;
@@ -8,8 +9,10 @@ namespace shopping_bag.Controllers {
     public class OfficeController : BaseApiController {
 
         private readonly IOfficeService _officeService;
-        public OfficeController(IUserService userService, IOfficeService officeService) : base(userService) {
+        private readonly IMapper _mapper;
+        public OfficeController(IUserService userService, IOfficeService officeService, IMapper mapper) : base(userService) {
             _officeService = officeService ?? throw new ArgumentNullException(nameof(officeService));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         [HttpGet]
@@ -20,10 +23,7 @@ namespace shopping_bag.Controllers {
             if(!result.IsSuccess) {
                 return BadRequest(result.Error);
             }
-            return Ok(result.Data.Select(o => new OfficeDto() {
-                Id = o.Id,
-                Name = o.Name
-            }).ToList());
+            return Ok(_mapper.Map<IEnumerable<OfficeDto>>(result.Data));
         }
 
         [HttpPost]
@@ -38,10 +38,7 @@ namespace shopping_bag.Controllers {
             if(!result.IsSuccess) {
                 return BadRequest(result.Error);
             }
-            return Ok(new OfficeDto() { 
-                Id = result.Data.Id,
-                Name = result.Data.Name
-            });
+            return _mapper.Map<OfficeDto>(result.Data);
         }  
     }
 }

@@ -11,6 +11,7 @@ namespace shopping_bag.Config
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IOfficeService, OfficeService>();
+            services.AddAutoMapper(typeof(Program).Assembly);
         }
     }
 }
