@@ -28,10 +28,12 @@
 2. Install [Docker Desktop](https://docs.docker.com/desktop/windows/wsl/)
 3. Ensure WSL 2 support is enabled and virtualization (SVM etc.) is enabled in BIOS
 4. If you can start Docker Desktop and `wsl -l -v` command returns version 2 distro you should be fine
-5. Build `shopping-bag.csproj` project by right clicking it in Visual Studio Solution Explorer and Build
-6. Select `docker-compose` from the top bar dropdown with green Play-button
-7. Click the button to start backend
-8. Swagger page should open in browser
+5. You need to have a cert at path `%USERPROFILE%\.aspnet\https\aspnetapp.pfx`. Use [this](https://learn.microsoft.com/en-us/aspnet/core/security/docker-compose-https?view=aspnetcore-6.0) guide to setup dev-cert.
+6. See the `docker-compose.yml` for the password to set up for the dev-cert.
+7. Build `shopping-bag.csproj` project by right clicking it in Visual Studio Solution Explorer and Build
+8. Select `docker-compose` from the top bar dropdown with green Play-button
+9. Click the button to start backend
+10. Swagger page should open in browser
 
 ## Structure
 
