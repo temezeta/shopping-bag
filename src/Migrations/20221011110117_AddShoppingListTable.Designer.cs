@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using shopping_bag.Config;
 
@@ -11,9 +12,10 @@ using shopping_bag.Config;
 namespace shopping_bag.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221011110117_AddShoppingListTable")]
+    partial class AddShoppingListTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -103,59 +105,11 @@ namespace shopping_bag.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
-
                     b.ToTable("ShoppingLists");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1L,
-                            Comment = "Weekly order",
-                            DeliveryDate = new DateTime(2022, 12, 20, 17, 0, 0, 0, DateTimeKind.Unspecified),
-                            DueDate = new DateTime(2022, 12, 18, 17, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Week 50 list"
-                        },
-                        new
-                        {
-                            Id = 2L,
-                            Comment = "List for office supplies",
-                            DeliveryDate = new DateTime(2023, 2, 15, 12, 0, 0, 0, DateTimeKind.Unspecified),
-                            DueDate = new DateTime(2023, 1, 15, 22, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Office supplies"
-                        },
-                        new
-                        {
-                            Id = 3L,
-                            Comment = "No due or delivery dates set",
-                            Name = "Tampere office list"
-                        },
-                        new
-                        {
-                            Id = 4L,
-                            Comment = "Order that is overdue but not delivered",
-                            DeliveryDate = new DateTime(2023, 1, 15, 12, 0, 0, 0, DateTimeKind.Unspecified),
-                            DueDate = new DateTime(2022, 10, 9, 17, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Week 40 list"
-                        },
-                        new
-                        {
-                            Id = 5L,
-                            Comment = "Order that is overdue and delivered",
-                            DeliveryDate = new DateTime(2022, 10, 3, 12, 0, 0, 0, DateTimeKind.Unspecified),
-                            DueDate = new DateTime(2022, 9, 30, 17, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Week 39 list"
-                        },
-                        new
-                        {
-                            Id = 6L,
-                            Name = "List with only a name"
-                        });
                 });
 
             modelBuilder.Entity("shopping_bag.Models.User.User", b =>
