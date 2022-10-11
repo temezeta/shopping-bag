@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using shopping_bag.Config;
 using shopping_bag.DTOs.User;
@@ -48,6 +50,36 @@ namespace shopping_bag_unit_tests
 
             // Assert
             Assert.True(loginResponse.IsSuccess, "Login failed");
+        }
+
+        [Fact]
+        public async void Logout_LogoutSuccessful_ReturnBoolean()
+        {
+            // Arrange
+            var email = "testemail@test.com";
+            var password = "testpassword";
+            byte[] passwordHash;
+            byte[] passwordSalt;
+
+            AuthHelper.CreatePasswordHash(password, out passwordHash, out passwordSalt);
+
+            var user = new User() { Email = email, FirstName = "testName", LastName = "testLastName", 
+                PasswordHash = passwordHash, PasswordSalt = passwordSalt, Id = 1 };
+
+            var options = new DbContextOptionsBuilder<AppDbContext>()
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
+     
+            var dataBaseContext = new AppDbContext(options);
+            dataBaseContext.Database.EnsureCreated();
+            dataBaseContext.Users.Add(user);
+            await dataBaseContext.SaveChangesAsync();
+            _authServiceMock = new AuthService(dataBaseContext, _iUserServiceMock.Object);
+
+            // Act
+            var logOutResponse = await _authServiceMock.Logout(user);
+
+            // Assert
+            Assert.True(logOutResponse.IsSuccess, "Logout failed");
         }
     }
 }
