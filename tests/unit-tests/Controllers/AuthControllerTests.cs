@@ -1,14 +1,10 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Controllers;
-using Microsoft.AspNetCore.Routing;
 using Moq;
 using shopping_bag.Controllers;
 using shopping_bag.DTOs.User;
 using shopping_bag.Models;
 using shopping_bag.Models.User;
 using shopping_bag.Services;
-using System.Security.Claims;
 using BadRequestResult = Microsoft.AspNetCore.Mvc.BadRequestResult;
 
 namespace shopping_bag_unit_tests
@@ -37,12 +33,8 @@ namespace shopping_bag_unit_tests
         }
 
         [Fact]
-        public async void Register_LoggedInUser_ReturnsOk() {
-            var claim = new Claim(ClaimTypes.Email, "test@mail");
-            var httpContext = new Mock<HttpContext>();
-            httpContext.Setup(x => x.User.FindFirst(ClaimTypes.Email)).Returns(claim);
-            var controllerContext = new ControllerContext(new ActionContext(httpContext.Object, new RouteData(), new ControllerActionDescriptor()));
-            _authControllerMock.ControllerContext = controllerContext;
+        public async void Logout_LoggedInUser_ReturnsOk() {
+            _authControllerMock.ControllerContext = UnitTestHelper.GetLoggedInControllerContext();
 
             var authServiceResponse = new ServiceResponse<bool>(data: true);
             _authServiceMock.Setup(x => x.Logout(It.IsAny<User>())).ReturnsAsync(authServiceResponse);
