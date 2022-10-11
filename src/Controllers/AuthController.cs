@@ -73,6 +73,27 @@ namespace shopping_bag.Controllers
             return Ok(new TokenResponseDto { Token = response.Data.LoginToken });
         }
 
+        [HttpPut]
+        [Route("logout")]
+        public async Task<ActionResult> Logout()
+        {
+            var user = await GetCurrentUser();
+
+            if (user == null)
+            {
+                return BadRequest("User not logged in.");
+            }
+
+            var response = await _authService.Logout(user);
+
+            if (!response.IsSuccess)
+            {
+                return BadRequest(response.Error);
+            }
+
+            return Ok("Your account was successfully logout");
+        }
+
         [HttpGet, AllowAnonymous]
         [Route("verify/{verificationToken}")]
         public async Task<ActionResult> Verify([FromRoute] string verificationToken)

@@ -27,9 +27,8 @@ namespace shopping_bag.Controllers {
         }
 
         [HttpPost]
-        [AllowAnonymous]
-        // TODO: Remove AllowAnonymous, now only for adding office as you can't register before that
         [Route("add")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<OfficeDto>> AddOffice([FromBody] AddOfficeDto office) {
             if (office == null || string.IsNullOrEmpty(office.Name)) {
                 return BadRequest("Office name is required");
