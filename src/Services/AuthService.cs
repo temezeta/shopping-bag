@@ -91,6 +91,23 @@ namespace shopping_bag.Services
             });
         }
 
+        public async Task<ServiceResponse<bool>> Logout(User user)
+        {
+            var found = await _context.Users.FindAsync(user.Id);
+
+            if (found == null)
+            {
+                return new ServiceResponse<bool>(error: "User not found");
+            }
+
+            found.RefreshToken = null;
+            found.TokenCreatedAt = null;
+            found.TokenExpiresAt = null;
+            await _context.SaveChangesAsync();
+
+            return new ServiceResponse<bool>(data: true);
+        }
+
         public async Task<ServiceResponse<bool>> SetRefreshToken(User user)
         {
             var found = await _context.Users.FindAsync(user.Id);
