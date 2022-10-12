@@ -71,7 +71,7 @@ namespace shopping_bag.Config
                 DueDate = new DateTime(2022, 12, 18, 17, 00, 00),
                 ExpectedDeliveryDate = new DateTime(2022, 12, 20, 17, 00, 00),
                 OfficeId = 1,
-                UserId = 0
+                UserId = null
             },
             new ShoppingList()
             {
@@ -83,7 +83,7 @@ namespace shopping_bag.Config
                 DueDate = new DateTime(2023, 1, 15, 22, 00, 00),
                 ExpectedDeliveryDate = new DateTime(2023, 2, 15, 12, 00, 00),
                 OfficeId = 1,
-                UserId = 0
+                UserId = null
     },
             new ShoppingList()
             {
@@ -93,7 +93,7 @@ namespace shopping_bag.Config
                 Ordered = false,
                 CreatedDate = new DateTime(2022, 10, 12, 12, 00, 00),
                 OfficeId = 5,
-                UserId = 0
+                UserId = null
             },
             new ShoppingList()
             {
@@ -105,7 +105,7 @@ namespace shopping_bag.Config
                 DueDate = new DateTime(2022, 10, 9, 17, 00, 00),
                 ExpectedDeliveryDate = new DateTime(2023, 1, 15, 12, 00, 00),
                 OfficeId = 1,
-                UserId = 0
+                UserId = null
             },
             new ShoppingList()
             {
@@ -117,7 +117,7 @@ namespace shopping_bag.Config
                 DueDate = new DateTime(2022, 9, 30, 17, 00, 00),
                 ExpectedDeliveryDate = new DateTime(2022, 10, 3, 12, 00, 00),
                 OfficeId = 1,
-                UserId = 0
+                UserId = null
             },
             new ShoppingList()
             {
@@ -126,7 +126,7 @@ namespace shopping_bag.Config
                 Ordered = false,
                 CreatedDate = new DateTime(2022, 10, 12, 12, 00, 00),
                 OfficeId = 1,
-                UserId = 0
+                UserId = null
             }
         };
 

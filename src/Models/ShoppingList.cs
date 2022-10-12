@@ -25,7 +25,9 @@ namespace shopping_bag.Models
         public DateTime? ExpectedDeliveryDate { get; set; }
 
         public long OfficeId { get; set; }
+        public Office ListDeliveryOffice { get; set; }
 
-        public long UserId { get; set; }
+        public long? UserId { get; set; }
+        public User.User? ListCreatorUser { get; set; }
     }
 }
