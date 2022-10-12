@@ -14,8 +14,18 @@ namespace shopping_bag.Models
 
         public string? Comment { get; set; }
 
-        public DateTime? DueDate { get; set; }
-        public DateTime? DeliveryDate { get; set; }
+        public Boolean Ordered { get; set; }
 
+        public DateTime CreatedDate { get; set; }
+
+        public DateTime? StartDate { get; set; }
+
+        public DateTime? DueDate { get; set; }
+
+        public DateTime? ExpectedDeliveryDate { get; set; }
+
+        public long OfficeId { get; set; }
+
+        public long UserId { get; set; }
     }
 }

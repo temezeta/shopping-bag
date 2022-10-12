@@ -3,11 +3,19 @@
     public class ShoppingListDto
     {
         public long Id { get; set; }
+
         public string Name { get; set; }
 
         public string Comment { get; set; }
-        public DateTime DueDate { get; set; }
-        public DateTime DeliveryDate { get; set; }
 
+        public Boolean Ordered { get; set; }
+
+        public DateTime CreatedDate { get; set; }
+
+        public DateTime StartDate { get; set; }
+
+        public DateTime DueDate { get; set; }
+
+        public DateTime ExpectedDeliveryDate { get; set; }
     }
 }

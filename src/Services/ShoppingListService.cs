@@ -1,11 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Asn1.Ocsp;
-using shopping_bag.Config;
-using shopping_bag.DTOs.Office;
+﻿using shopping_bag.Config;
 using shopping_bag.DTOs.ShoppingList;
 using shopping_bag.Models;
-using shopping_bag.Models.User;
 
 namespace shopping_bag.Services
 {
@@ -26,6 +21,13 @@ namespace shopping_bag.Services
                 return new ServiceResponse<ShoppingList>(error: "Shopping list with that name already exists.");
             }
 
+            var officeExists = _context.Offices.Any(office => office.Id == shoppingListData.OfficeId);
+
+            if (!officeExists)
+            {
+                return new ServiceResponse<ShoppingList>(error: "Office doesn't exist");
+            }
+
             try
             {
                 using (var transaction = _context.Database.BeginTransaction())
@@ -34,8 +36,13 @@ namespace shopping_bag.Services
                     {
                         Name = shoppingListData.Name,
                         Comment = shoppingListData.Comment,
+                        Ordered = false,
+                        CreatedDate = DateTime.Now,
+                        StartDate = shoppingListData.StartDate,
                         DueDate = shoppingListData.DueDate,
-                        DeliveryDate = shoppingListData.DeliveryDate,
+                        ExpectedDeliveryDate = shoppingListData.ExpectedDeliveryDate,
+                        OfficeId = shoppingListData.OfficeId,
+                        UserId = shoppingListData.UserId
                     };
                     _context.ShoppingLists.Add(shoppingList);
                     _context.SaveChanges();

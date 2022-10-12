@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using shopping_bag.DTOs.ShoppingList;
 using shopping_bag.Services;
@@ -8,16 +9,19 @@ namespace shopping_bag.Controllers
     public class ShoppingListController : BaseApiController
     {
         private readonly IShoppingListService _shoppingListService;
-        public ShoppingListController(IUserService userService, IShoppingListService shoppingListService) : base(userService)
+        private readonly IMapper _mapper;
+
+        public ShoppingListController(IUserService userService, IShoppingListService shoppingListService, IMapper mapper) : base(userService)
         {
-            _shoppingListService = shoppingListService;
+            _shoppingListService = shoppingListService ?? throw new ArgumentNullException(nameof(shoppingListService));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         [HttpPost]
         [AllowAnonymous]
         //[Authorize(Roles = "Admin")]
         [Route("add")]
-        public async Task<ActionResult> AddShoppingList([FromBody] AddShoppingListDto shoppingList)
+        public async Task<ActionResult<ShoppingListDto>> AddShoppingList([FromBody] AddShoppingListDto shoppingList)
         {
             var response = await _shoppingListService.AddShoppingList(shoppingList);
 
@@ -25,7 +29,7 @@ namespace shopping_bag.Controllers
             {
                 return BadRequest(response.Error);
             }
-            return Ok(response.Data);
+            return Ok(_mapper.Map<ShoppingListDto>(response.Data));
         }
     }
 }

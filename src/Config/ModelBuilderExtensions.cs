@@ -66,43 +66,67 @@ namespace shopping_bag.Config
                 Id = 1,
                 Name = "Week 50 list",
                 Comment = "Weekly order",
+                Ordered = false,
+                CreatedDate = new DateTime(2022, 10, 12, 12, 00, 00),
                 DueDate = new DateTime(2022, 12, 18, 17, 00, 00),
-                DeliveryDate = new DateTime(2022, 12, 20, 17, 00, 00)
+                ExpectedDeliveryDate = new DateTime(2022, 12, 20, 17, 00, 00),
+                OfficeId = 1,
+                UserId = 0
             },
             new ShoppingList()
             {
                 Id = 2,
                 Name = "Office supplies",
                 Comment = "List for office supplies",
+                Ordered = false,
+                CreatedDate = new DateTime(2022, 10, 12, 12, 00, 00),
                 DueDate = new DateTime(2023, 1, 15, 22, 00, 00),
-                DeliveryDate = new DateTime(2023, 2, 15, 12, 00, 00)
-            },
+                ExpectedDeliveryDate = new DateTime(2023, 2, 15, 12, 00, 00),
+                OfficeId = 1,
+                UserId = 0
+    },
             new ShoppingList()
             {
                 Id = 3,
                 Name = "Tampere office list",
-                Comment = "No due or delivery dates set"
+                Comment = "No due or delivery dates set",
+                Ordered = false,
+                CreatedDate = new DateTime(2022, 10, 12, 12, 00, 00),
+                OfficeId = 5,
+                UserId = 0
             },
             new ShoppingList()
             {
                 Id = 4,
                 Name = "Week 40 list",
                 Comment = "Order that is overdue but not delivered",
+                Ordered = true,
+                CreatedDate = new DateTime(2022, 10, 12, 12, 00, 00),
                 DueDate = new DateTime(2022, 10, 9, 17, 00, 00),
-                DeliveryDate = new DateTime(2023, 1, 15, 12, 00, 00)
+                ExpectedDeliveryDate = new DateTime(2023, 1, 15, 12, 00, 00),
+                OfficeId = 1,
+                UserId = 0
             },
             new ShoppingList()
             {
                 Id = 5,
                 Name = "Week 39 list",
                 Comment = "Order that is overdue and delivered",
+                Ordered = true,
+                CreatedDate = new DateTime(2022, 10, 12, 12, 00, 00),
                 DueDate = new DateTime(2022, 9, 30, 17, 00, 00),
-                DeliveryDate = new DateTime(2022, 10, 3, 12, 00, 00)
+                ExpectedDeliveryDate = new DateTime(2022, 10, 3, 12, 00, 00),
+                OfficeId = 1,
+                UserId = 0
             },
             new ShoppingList()
             {
                 Id = 6,
-                Name = "List with only a name"
+                Name = "List with only a name",
+                Ordered = false,
+                CreatedDate = new DateTime(2022, 10, 12, 12, 00, 00),
+                OfficeId = 1,
+                UserId = 0
             }
         };
 
