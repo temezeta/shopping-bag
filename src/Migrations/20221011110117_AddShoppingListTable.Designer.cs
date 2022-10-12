@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using shopping_bag.Config;
 
@@ -11,9 +12,10 @@ using shopping_bag.Config;
 namespace shopping_bag.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221011110117_AddShoppingListTable")]
+    partial class AddShoppingListTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -95,104 +97,19 @@ namespace shopping_bag.Migrations
                     b.Property<string>("Comment")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("CreatedDate")
+                    b.Property<DateTime?>("DeliveryDate")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("DueDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("ExpectedDeliveryDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<long>("OfficeId")
-                        .HasColumnType("bigint");
-
-                    b.Property<bool>("Ordered")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("StartDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long?>("UserId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.HasIndex("OfficeId");
-
-                    b.HasIndex("UserId");
-
                     b.ToTable("ShoppingLists");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1L,
-                            Comment = "Weekly order",
-                            CreatedDate = new DateTime(2022, 10, 12, 12, 0, 0, 0, DateTimeKind.Unspecified),
-                            DueDate = new DateTime(2022, 12, 18, 17, 0, 0, 0, DateTimeKind.Unspecified),
-                            ExpectedDeliveryDate = new DateTime(2022, 12, 20, 17, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Week 50 list",
-                            OfficeId = 1L,
-                            Ordered = false
-                        },
-                        new
-                        {
-                            Id = 2L,
-                            Comment = "List for office supplies",
-                            CreatedDate = new DateTime(2022, 10, 12, 12, 0, 0, 0, DateTimeKind.Unspecified),
-                            DueDate = new DateTime(2023, 1, 15, 22, 0, 0, 0, DateTimeKind.Unspecified),
-                            ExpectedDeliveryDate = new DateTime(2023, 2, 15, 12, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Office supplies",
-                            OfficeId = 1L,
-                            Ordered = false
-                        },
-                        new
-                        {
-                            Id = 3L,
-                            Comment = "No due or delivery dates set",
-                            CreatedDate = new DateTime(2022, 10, 12, 12, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Tampere office list",
-                            OfficeId = 5L,
-                            Ordered = false
-                        },
-                        new
-                        {
-                            Id = 4L,
-                            Comment = "Order that is overdue but not delivered",
-                            CreatedDate = new DateTime(2022, 10, 12, 12, 0, 0, 0, DateTimeKind.Unspecified),
-                            DueDate = new DateTime(2022, 10, 9, 17, 0, 0, 0, DateTimeKind.Unspecified),
-                            ExpectedDeliveryDate = new DateTime(2023, 1, 15, 12, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Week 40 list",
-                            OfficeId = 1L,
-                            Ordered = true
-                        },
-                        new
-                        {
-                            Id = 5L,
-                            Comment = "Order that is overdue and delivered",
-                            CreatedDate = new DateTime(2022, 10, 12, 12, 0, 0, 0, DateTimeKind.Unspecified),
-                            DueDate = new DateTime(2022, 9, 30, 17, 0, 0, 0, DateTimeKind.Unspecified),
-                            ExpectedDeliveryDate = new DateTime(2022, 10, 3, 12, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Week 39 list",
-                            OfficeId = 1L,
-                            Ordered = true
-                        },
-                        new
-                        {
-                            Id = 6L,
-                            CreatedDate = new DateTime(2022, 10, 12, 12, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "List with only a name",
-                            OfficeId = 1L,
-                            Ordered = false
-                        });
                 });
 
             modelBuilder.Entity("shopping_bag.Models.User.User", b =>
@@ -299,23 +216,6 @@ namespace shopping_bag.Migrations
                     b.HasIndex("UsersId");
 
                     b.ToTable("UserUserRole");
-                });
-
-            modelBuilder.Entity("shopping_bag.Models.ShoppingList", b =>
-                {
-                    b.HasOne("shopping_bag.Models.Office", "ListDeliveryOffice")
-                        .WithMany()
-                        .HasForeignKey("OfficeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("shopping_bag.Models.User.User", "ListCreatorUser")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("ListCreatorUser");
-
-                    b.Navigation("ListDeliveryOffice");
                 });
 
             modelBuilder.Entity("shopping_bag.Models.User.User", b =>
