@@ -23,6 +23,7 @@ namespace shopping_bag.Controllers
         [Route("add")]
         public async Task<ActionResult<ShoppingListDto>> AddShoppingList([FromBody] AddShoppingListDto shoppingList)
         {
+            shoppingList.UserId = (await GetCurrentUser()).Id;
             var response = await _shoppingListService.AddShoppingList(shoppingList);
 
             if(!response.IsSuccess)
