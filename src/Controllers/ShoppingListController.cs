@@ -18,8 +18,7 @@ namespace shopping_bag.Controllers
         }
 
         [HttpPost]
-        [AllowAnonymous]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [Route("add")]
         public async Task<ActionResult<ShoppingListDto>> AddShoppingList([FromBody] AddShoppingListDto shoppingList)
         {
