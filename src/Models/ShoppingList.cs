@@ -29,5 +29,7 @@ namespace shopping_bag.Models
 
         public long? UserId { get; set; }
         public User.User? ListCreatorUser { get; set; }
+
+        public List<Item> Items { get; set; } = new List<Item>();
     }
 }

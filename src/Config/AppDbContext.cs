@@ -23,5 +23,6 @@ namespace shopping_bag.Config
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<Office> Offices { get; set; }
         public DbSet<ShoppingList> ShoppingLists { get; set; }
+        public DbSet<Item> Items { get; set; }
     }
 }
