@@ -9,20 +9,20 @@ using shopping_bag.Services;
 using shopping_bag.Utility;
 
 namespace shopping_bag_unit_tests.Controllers {
-    public class ShoppingListControllerTests {
+    public class ItemControllerTests {
 
-        private readonly ShoppingListController _sut;
+        private readonly ItemController _sut;
         private readonly Mock<IUserService> _userService;
         private readonly Mock<IShoppingListService> _shoppingListService;
 
-        public ShoppingListControllerTests() {
+        public ItemControllerTests() {
             _userService = new Mock<IUserService>();
             _userService.Setup(x => x.GetUserByEmail(It.IsAny<string>())).ReturnsAsync(new ServiceResponse<User>(new User()));
             _shoppingListService = new Mock<IShoppingListService>();
             var profile = new MappingProfile();
             var configuration = new MapperConfiguration(cfg => cfg.AddProfile(profile));
             var mapper = new Mapper(configuration);
-            _sut = new ShoppingListController(_userService.Object, _shoppingListService.Object, mapper) {
+            _sut = new ItemController(_userService.Object, _shoppingListService.Object, mapper) {
                 ControllerContext = UnitTestHelper.GetLoggedInControllerContext()
             };
         }
