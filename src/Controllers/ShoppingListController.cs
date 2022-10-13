@@ -31,5 +31,19 @@ namespace shopping_bag.Controllers
             }
             return Ok(_mapper.Map<ShoppingListDto>(response.Data));
         }
+
+        [HttpPost]
+        [Route("{listId}/additem")]
+        public async Task<ActionResult<ItemDto>> AddItemToShoppingList([FromBody] AddItemDto itemToAdd, int listId) {
+            itemToAdd.UserId = (await GetCurrentUser()).Id;
+            itemToAdd.ShoppingListId = listId;
+
+            var response = await _shoppingListService.AddItemToShoppingList(itemToAdd);
+
+            if(!response.IsSuccess) {
+                return BadRequest(response.Error);
+            }
+            return Ok(_mapper.Map<ItemDto>(response.Data));
+        }
     }
 }
