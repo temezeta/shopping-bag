@@ -27,5 +27,34 @@ namespace shopping_bag.Controllers {
             }
             return Ok(_mapper.Map<ItemDto>(response.Data));
         }
+
+        [HttpDelete]
+        [Route("{itemId}")]
+        public async Task<ActionResult> RemoveItemFromShoppingList(int itemId) {
+            var user = await GetCurrentUser();
+
+            if (user == null) {
+                return BadRequest();
+            }
+
+            var response = await _shoppingListService.RemoveItemFromShoppingList(user, itemId);
+
+            if (!response.IsSuccess) {
+                return BadRequest(response.Error);
+            }
+            return Ok();
+        }
+
+        [HttpPut]
+        [Route("{itemId}")]
+        public async Task<ActionResult<ItemDto>> ModifyItem(/*[FromBody] ModifyItemDto itemToModify, */int itemId) {
+            throw new NotImplementedException();
+        }
+
+        [HttpGet]
+        [Route("{itemId}")]
+        public async Task<ActionResult<ItemDto>> GetItem(int itemId) {
+            throw new NotImplementedException();
+        }
     }
 }

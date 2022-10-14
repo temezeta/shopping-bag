@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using shopping_bag.Config;
 using shopping_bag.DTOs.ShoppingList;
 using shopping_bag.Models;
+using shopping_bag.Models.User;
 
 namespace shopping_bag.Services
 {
@@ -88,6 +89,23 @@ namespace shopping_bag.Services
             await _context.SaveChangesAsync();
 
             return new ServiceResponse<Item>(item);
+        }
+
+        public async Task<ServiceResponse<bool>> RemoveItemFromShoppingList(User user, long itemId) {
+            var item = await _context.Items.Include(i => i.ShoppingList).FirstOrDefaultAsync(i => i.Id == itemId);
+            if(item == null) {
+                return new ServiceResponse<bool>(error: "Item doesn't exist.");
+            }
+            var isAdmin = user.UserRoles.Any(r => r.RoleName.Equals(Roles.AdminRole));
+            if(!isAdmin && (item.ShoppingList.DueDate < DateTime.Now || item.ShoppingList.Ordered)) {
+                return new ServiceResponse<bool>(error: "Can't remove items from ordered lists");
+            }
+            if (!isAdmin && item.UserId != user.Id) {
+                return new ServiceResponse<bool>(error: "You can only remove items added by you");
+            }
+            _context.Items.Remove(item);
+            await _context.SaveChangesAsync();
+            return new ServiceResponse<bool>(true);
         }
     }
 }
