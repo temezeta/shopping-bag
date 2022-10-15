@@ -15,7 +15,7 @@ namespace shopping_bag_unit_tests.Services {
 
         private readonly User normalUser, adminUser;
         private readonly ShoppingList normalList, dueDatePassedList, notStartedList, orderedList;
-        private readonly Item ownItemInList, othersItemInList, itemInDueDatePassedList, itemInOrderedList;
+        private readonly Item ownItemInList, ownItem2InList, othersItemInList, itemInDueDatePassedList, itemInOrderedList;
 
         public ShoppingListServiceTests() {
             var options = new DbContextOptionsBuilder<AppDbContext>()
@@ -38,9 +38,10 @@ namespace shopping_bag_unit_tests.Services {
             orderedList = new ShoppingList() { Id = 4, Name = "Test list 2", DueDate = DateTime.Now.AddMinutes(-10), Ordered = true };
 
             ownItemInList = new Item() { Id = 1, Name = "Own item in list", UserId = 1, ShoppingListId = normalList.Id, ShoppingList = normalList };
-            othersItemInList = new Item() { Id = 2, Name = "Others item in list", UserId = null, ShoppingListId = normalList.Id, ShoppingList = normalList };
-            itemInDueDatePassedList = new Item() { Id = 3, Name = "Item in dueDatePassedList", UserId = 1, ShoppingListId = dueDatePassedList.Id, ShoppingList = dueDatePassedList };
-            itemInOrderedList = new Item() { Id = 4, Name = "Item in orderedList", UserId = 1, ShoppingListId = orderedList.Id, ShoppingList = orderedList };
+            ownItem2InList = new Item() { Id = 2, Name = "Own item in list 2", UserId = 1, ShoppingListId = normalList.Id, ShoppingList = normalList };
+            othersItemInList = new Item() { Id = 3, Name = "Others item in list", UserId = null, ShoppingListId = normalList.Id, ShoppingList = normalList };
+            itemInDueDatePassedList = new Item() { Id = 4, Name = "Item in dueDatePassedList", UserId = 1, ShoppingListId = dueDatePassedList.Id, ShoppingList = dueDatePassedList };
+            itemInOrderedList = new Item() { Id = 5, Name = "Item in orderedList", UserId = 1, ShoppingListId = orderedList.Id, ShoppingList = orderedList };
         }
 
         #region AddItemToShoppingList Tests
@@ -230,12 +231,180 @@ namespace shopping_bag_unit_tests.Services {
         }
         #endregion
 
+        #region ModifyItem Tests
+        [Fact]
+        public async Task ModifyItem_UserValidItem_ItemModified() {
+            SetupDb();
+
+            var result = await _sut.ModifyItem(normalUser, new ModifyItemDto() { Name = "Test item", Url = "New url" }, ownItemInList.Id);
+            Assert.True(result.IsSuccess);
+
+            var item = _context.Items.FirstOrDefault(i => i.Id == result.Data.Id);
+            Assert.NotNull(item);
+            Assert.Equal("Test item", item.Name);
+            Assert.Equal("New url", item.Url);
+        }
+        [Fact]
+        public async Task ModifyItem_AdminNotOwnItem_ItemModified() {
+            SetupDb();
+
+            var result = await _sut.ModifyItem(adminUser, new ModifyItemDto() { Name = "Test item", Url = "New url" }, othersItemInList.Id);
+            Assert.True(result.IsSuccess);
+
+            var item = _context.Items.FirstOrDefault(i => i.Id == result.Data.Id);
+            Assert.NotNull(item);
+            Assert.Equal("Test item", item.Name);
+            Assert.Equal("New url", item.Url);
+        }
+
+        [Fact]
+        public async Task ModifyItem_UserNotOwnItem_ItemNotModified() {
+            SetupDb();
+
+            var result = await _sut.ModifyItem(normalUser, new ModifyItemDto() { Name = "Test item", Url = "New url" }, othersItemInList.Id);
+            Assert.False(result.IsSuccess);
+            Assert.Equal("You can only modify items you have added", result.Error);
+        }
+
+        [Fact]
+        public async Task ModifyItem_InvalidItemId_ItemNotModified() {
+            SetupDb();
+
+            var result = await _sut.ModifyItem(normalUser, new ModifyItemDto() { Name = "Test item", Url = "New url" }, -1);
+            Assert.False(result.IsSuccess);
+            Assert.Equal("Item doesn't exist.", result.Error);
+        }
+
+        [Fact]
+        public async Task ModifyItem_UserOrderedList_ItemNotModified() {
+            SetupDb();
+
+            var result = await _sut.ModifyItem(normalUser, new ModifyItemDto() { Name = "Test item", Url = "New url" }, itemInOrderedList.Id);
+            Assert.False(result.IsSuccess);
+            Assert.Equal("Shopping list already ordered", result.Error);
+        }
+
+        [Fact]
+        public async Task ModifyItem_AdminOrderedList_ItemModified() {
+            SetupDb();
+
+            var result = await _sut.ModifyItem(adminUser, new ModifyItemDto() { Name = "Test item", Url = "New url" }, itemInOrderedList.Id);
+            Assert.True(result.IsSuccess);
+
+            var item = _context.Items.FirstOrDefault(i => i.Id == result.Data.Id);
+            Assert.NotNull(item);
+            Assert.Equal("Test item", item.Name);
+            Assert.Equal("New url", item.Url);
+        }
+
+        [Fact]
+        public async Task ModifyItem_UserDueDatePassedList_ItemNotModified() {
+            SetupDb();
+
+            var result = await _sut.ModifyItem(normalUser, new ModifyItemDto() { Name = "Test item", Url = "New url" }, itemInDueDatePassedList.Id);
+            Assert.False(result.IsSuccess);
+            Assert.Equal("Shopping list due date passed", result.Error);
+        }
+
+        [Fact]
+        public async Task ModifyItem_AdminDueDatePassedList_ItemModified() {
+            SetupDb();
+
+            var result = await _sut.ModifyItem(adminUser, new ModifyItemDto() { Name = "Test item", Url = "New url" }, itemInDueDatePassedList.Id);
+            Assert.True(result.IsSuccess);
+
+            var item = _context.Items.FirstOrDefault(i => i.Id == result.Data.Id);
+            Assert.NotNull(item);
+            Assert.Equal("Test item", item.Name);
+            Assert.Equal("New url", item.Url);
+        }
+
+        [Fact]
+        public async Task ModifyItem_DuplicateName_ItemNotModified() {
+            SetupDb();
+
+            var result = await _sut.ModifyItem(normalUser, new ModifyItemDto() { Name = "Test item"}, ownItemInList.Id);
+            Assert.True(result.IsSuccess);
+
+            result = await _sut.ModifyItem(normalUser, new ModifyItemDto() { Name = "Test item"}, ownItem2InList.Id);
+            Assert.False(result.IsSuccess);
+            Assert.Equal("Item with same name already in list", result.Error);
+        }
+
+        [Fact]
+        public async Task ModifyItem_DuplicateUrl_ItemNotModified() {
+            SetupDb();
+
+            var result = await _sut.ModifyItem(normalUser, new ModifyItemDto() { Url = "New url" }, ownItemInList.Id);
+            Assert.True(result.IsSuccess);
+
+            result = await _sut.ModifyItem(normalUser, new ModifyItemDto() { Url = "New url" }, ownItem2InList.Id);
+            Assert.False(result.IsSuccess);
+            Assert.Equal("Item with same url already in list", result.Error);
+        }
+
+        [Fact]
+        public async Task ModifyItem_NoNameOrUrl_ItemNotModified() {
+            SetupDb();
+
+            var result = await _sut.ModifyItem(normalUser, new ModifyItemDto() { Name = null, Url = null }, ownItemInList.Id);
+            Assert.False(result.IsSuccess);
+            Assert.Equal("Item must have a name or url", result.Error);
+        }
+
+        [Fact]
+        public async Task ModifyItem_UserModifyAmountOrdered_ItemNotModified() {
+            SetupDb();
+
+            var newAmountOrdered = ownItemInList.AmountOrdered + 1;
+            var result = await _sut.ModifyItem(normalUser, new ModifyItemDto() { Name = ownItemInList.Name, AmountOrdered = newAmountOrdered }, ownItemInList.Id);
+            Assert.False(result.IsSuccess);
+            Assert.Equal("You can't modify amount ordered", result.Error);
+        }
+
+        [Fact]
+        public async Task ModifyItem_UserModifyIsChecked_ItemNotModified() {
+            SetupDb();
+
+            var newIsChecked = !ownItemInList.IsChecked;
+            var result = await _sut.ModifyItem(normalUser, new ModifyItemDto() { Name = ownItemInList.Name, IsChecked = newIsChecked }, ownItemInList.Id);
+            Assert.False(result.IsSuccess);
+            Assert.Equal("You can't modify isChecked", result.Error);
+        }
+
+        [Fact]
+        public async Task ModifyItem_AdminModifyAmountOrdered_ItemModified() {
+            SetupDb();
+
+            var newAmountOrdered = ownItemInList.AmountOrdered + 1;
+            var result = await _sut.ModifyItem(adminUser, new ModifyItemDto() { Name = ownItemInList.Name, AmountOrdered = newAmountOrdered }, ownItemInList.Id);
+            Assert.True(result.IsSuccess);
+
+            var item = _context.Items.FirstOrDefault(i => i.Id == result.Data.Id);
+            Assert.NotNull(item);
+            Assert.Equal(newAmountOrdered, item.AmountOrdered);
+        }
+
+        [Fact]
+        public async Task ModifyItem_AdminModifyIsChecked_ItemModified() {
+            SetupDb();
+
+            var newIsChecked = !ownItemInList.IsChecked;
+            var result = await _sut.ModifyItem(adminUser, new ModifyItemDto() { Name = ownItemInList.Name, IsChecked = newIsChecked }, ownItemInList.Id);
+            Assert.True(result.IsSuccess);
+
+            var item = _context.Items.FirstOrDefault(i => i.Id == result.Data.Id);
+            Assert.NotNull(item);
+            Assert.Equal(newIsChecked, item.IsChecked);
+        }
+        #endregion
+
         private void SetupDb() {
             _context.RemoveRange(_context.ShoppingLists.ToList());
             _context.RemoveRange(_context.Items.ToList());
 
             _context.ShoppingLists.AddRange(normalList, dueDatePassedList, notStartedList, orderedList);
-            _context.Items.AddRange(ownItemInList, othersItemInList, itemInDueDatePassedList, itemInOrderedList);
+            _context.Items.AddRange(ownItemInList, ownItem2InList, othersItemInList, itemInDueDatePassedList, itemInOrderedList);
             _context.SaveChanges();
         }
         
