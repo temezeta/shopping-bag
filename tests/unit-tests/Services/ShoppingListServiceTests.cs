@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using shopping_bag.Config;
 using shopping_bag.DTOs.ShoppingList;
 using shopping_bag.Models;
+using shopping_bag.Models.User;
 using shopping_bag.Services;
 using shopping_bag.Utility;
 
@@ -11,6 +12,11 @@ namespace shopping_bag_unit_tests.Services {
 
         private readonly AppDbContext _context;
         private readonly ShoppingListService _sut;
+
+        private readonly User normalUser, adminUser;
+        private readonly ShoppingList normalList, dueDatePassedList, notStartedList, orderedList;
+        private readonly Item ownItemInList, othersItemInList, itemInDueDatePassedList, itemInOrderedList;
+
         public ShoppingListServiceTests() {
             var options = new DbContextOptionsBuilder<AppDbContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
@@ -22,37 +28,51 @@ namespace shopping_bag_unit_tests.Services {
             var configuration = new MapperConfiguration(cfg => cfg.AddProfile(profile));
             var mapper = new Mapper(configuration);
             _sut = new ShoppingListService(_context, mapper);
+
+            normalUser = new User() { Id = 1, UserRoles = new List<UserRole>() { new UserRole() { RoleId = 1, RoleName = "User" } } };
+            adminUser = new User() { Id = 1, UserRoles = new List<UserRole>() { new UserRole() { RoleId = 1, RoleName = "Admin" } } };
+
+            normalList = new ShoppingList() { Id = 1, Name = "Test list", DueDate = DateTime.Now.AddMinutes(10), Ordered = false };
+            dueDatePassedList = new ShoppingList() { Id = 2, Name = "Test list 2", DueDate = DateTime.Now.AddMinutes(-10), Ordered = false };
+            notStartedList = new ShoppingList() { Id = 3, Name = "Test list 3", StartDate = DateTime.Now.AddMinutes(10), Ordered = false };
+            orderedList = new ShoppingList() { Id = 4, Name = "Test list 2", DueDate = DateTime.Now.AddMinutes(-10), Ordered = true };
+
+            ownItemInList = new Item() { Id = 1, Name = "Own item in list", UserId = 1, ShoppingListId = normalList.Id, ShoppingList = normalList };
+            othersItemInList = new Item() { Id = 2, Name = "Others item in list", UserId = null, ShoppingListId = normalList.Id, ShoppingList = normalList };
+            itemInDueDatePassedList = new Item() { Id = 3, Name = "Item in dueDatePassedList", UserId = 1, ShoppingListId = dueDatePassedList.Id, ShoppingList = dueDatePassedList };
+            itemInOrderedList = new Item() { Id = 4, Name = "Item in orderedList", UserId = 1, ShoppingListId = orderedList.Id, ShoppingList = orderedList };
         }
 
         #region AddItemToShoppingList Tests
         [Fact]
-        public async Task AddItemToShoppingList_ValidItem_ItemAdded() {
+        public async Task AddItem_ValidItem_ItemAdded() {
             SetupDb();
 
             // Ensure service result success.
-            var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = 2, Name = "Test item" });
+            var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = normalList.Id, Name = "Test item" });
             Assert.True(result.IsSuccess);
-            Assert.Equal(2, result.Data.ShoppingListId);
+            Assert.Equal(normalList.Id, result.Data.ShoppingListId);
 
             // Ensure item added to list
             var list = _context.ShoppingLists.Include(s => s.Items).FirstOrDefault(s => s.Id == result.Data.ShoppingListId);
             Assert.NotNull(list);
             Assert.NotNull(list.Items);
-            Assert.Single(list.Items);
-            Assert.Equal("Test item", list.Items.First().Name);
+            Assert.Single(list.Items.Where(i => i.Id == result.Data.Id));
+            Assert.Equal("Test item", list.Items.FirstOrDefault(i => i.Id == result.Data.Id)?.Name);
         }
 
         [Fact]
-        public async Task AddItemToShoppingList_InvalidListId_ReturnsError() {
+        public async Task AddItem_InvalidListId_ReturnsError() {
             SetupDb();
 
             // Ensure service result error
-            var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = -1, Name = "Test item" });
+            var itemName = "Test item not added";
+            var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = -1, Name = itemName });
             Assert.False(result.IsSuccess);
             Assert.Equal("Invalid shoppingListId", result.Error);
 
             // Ensure no items added to lists.
-            var list = _context.ShoppingLists.Include(s => s.Items).FirstOrDefault(s => s.Items.Any());
+            var list = _context.ShoppingLists.Include(s => s.Items).FirstOrDefault(s => s.Items.Any(i => i.Name == itemName));
             Assert.Null(list);
         }
 
@@ -61,116 +81,163 @@ namespace shopping_bag_unit_tests.Services {
         [InlineData(null, null)]
         [InlineData("", null)]
         [InlineData(null, "")]
-        public async Task AddItemToShoppingList_MissingNameOrUrl_ReturnsError(string name, string url) {
+        public async Task AddItem_MissingNameOrUrl_ReturnsError(string name, string url) {
             SetupDb();
 
             // Ensure service result error
-            var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = 1, Name = name, Url = url });
+            var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = normalList.Id, Name = name, Url = url });
             Assert.False(result.IsSuccess);
             Assert.Equal("Item url or name must be given", result.Error);
 
             // Ensure no items added to lists.
-            var list = _context.ShoppingLists.Include(s => s.Items).FirstOrDefault(s => s.Items.Any());
+            var list = _context.ShoppingLists.Include(s => s.Items).FirstOrDefault(s => s.Items.Any(i => i.Name == name && i.Url == url));
             Assert.Null(list);
         }
 
         [Fact]
-        public async Task AddItemToShoppingList_Ordered_ReturnsError() {
+        public async Task AddItem_OrderedList_ReturnsError() {
             SetupDb();
 
-            _context.ShoppingLists.Add(new ShoppingList() { Id = 3, Name = "Test list 3", Ordered = true });
-            _context.SaveChanges();
-
             // Ensure service result error
-            var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = 3, Name = "Test item" });
+            var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = orderedList.Id, Name = "Test item" });
             Assert.False(result.IsSuccess);
             Assert.Equal("Shopping list already ordered", result.Error);
 
             // Ensure no items added to lists.
-            var list = _context.ShoppingLists.Include(s => s.Items).FirstOrDefault(s => s.Items.Any());
+            var list = _context.ShoppingLists.Include(s => s.Items).FirstOrDefault(s => s.Items.Any(i => i.Name == "Test item"));
             Assert.Null(list);
         }
 
         [Fact]
-        public async Task AddItemToShoppingList_DueDatePassed_ReturnsError() {
+        public async Task AddItem_DueDatePassedList_ReturnsError() {
             SetupDb();
 
-            _context.ShoppingLists.Add(new ShoppingList() { Id = 3, Name = "Test list 3", DueDate = DateTime.Now.AddMinutes(-10) });
-            _context.SaveChanges();
-
             // Ensure service result error
-            var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = 3, Name = "Test item" });
+            var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = dueDatePassedList.Id, Name = "Test item" });
             Assert.False(result.IsSuccess);
             Assert.Equal("Shopping list due date passed", result.Error);
 
             // Ensure no items added to lists.
-            var list = _context.ShoppingLists.Include(s => s.Items).FirstOrDefault(s => s.Items.Any());
+            var list = _context.ShoppingLists.Include(s => s.Items).FirstOrDefault(s => s.Items.Any(i => i.Name == "Test item"));
             Assert.Null(list);
         }
 
         [Fact]
-        public async Task AddItemToShoppingList_ListNotOpenYet_ReturnsError() {
+        public async Task AddItem_ListNotOpenYet_ReturnsError() {
             SetupDb();
 
-            _context.ShoppingLists.Add(new ShoppingList() { Id = 3, Name = "Test list 3", StartDate = DateTime.Now.AddMinutes(10) });
-            _context.SaveChanges();
-
             // Ensure service result error
-            var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = 3, Name = "Test item" });
+            var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = notStartedList.Id, Name = "Test item" });
             Assert.False(result.IsSuccess);
             Assert.Equal("Shopping list not open yet", result.Error);
 
             // Ensure no items added to lists.
-            var list = _context.ShoppingLists.Include(s => s.Items).FirstOrDefault(s => s.Items.Any());
+            var list = _context.ShoppingLists.Include(s => s.Items).FirstOrDefault(s => s.Items.Any(i => i.Name == "Test item"));
             Assert.Null(list);
         }
 
         [Fact]
-        public async Task AddItemToShoppingList_DuplicateName_ReturnsError() {
+        public async Task AddItem_DuplicateName_ReturnsError() {
             SetupDb();
 
             // Ensure service result ok
-            var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = 1, Name = "Test item" });
+            var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = normalList.Id, Name = "Test item" });
             Assert.True(result.IsSuccess);
 
             // Ensure service result error
-            result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = 1, Name = "Test item" });
+            result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = normalList.Id, Name = "Test item" });
             Assert.False(result.IsSuccess);
             Assert.Equal("Item with same name already in list", result.Error);
 
             // Ensure only first item added to list.
-            var list = _context.ShoppingLists.Include(s => s.Items).FirstOrDefault(s => s.Items.Count == 1);
+            var list = _context.ShoppingLists.Include(s => s.Items).FirstOrDefault(s => s.Items.Count(i => i.Name == "Test item") == 1);
             Assert.NotNull(list);
         }
 
         [Fact]
-        public async Task AddItemToShoppingList_DuplicateUrl_ReturnsError() {
+        public async Task AddItem_DuplicateUrl_ReturnsError() {
             SetupDb();
 
             // Ensure service result ok
-            var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = 1, Url = "http://example.com" });
+            var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = normalList.Id, Url = "http://example.com" });
             Assert.True(result.IsSuccess);
 
             // Ensure service result error
-            result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = 1, Url = "http://example.com" });
+            result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = normalList.Id, Url = "http://example.com" });
             Assert.False(result.IsSuccess);
             Assert.Equal("Item with same url already in list", result.Error);
 
             // Ensure only first item added to list.
-            var list = _context.ShoppingLists.Include(s => s.Items).FirstOrDefault(s => s.Items.Count == 1);
+            var list = _context.ShoppingLists.Include(s => s.Items).FirstOrDefault(s => s.Items.Count(i => i.Url == "http://example.com") == 1);
             Assert.NotNull(list);
         }
+        #endregion
+
+        #region RemoveItemFromShoppingList Tests
+        [Fact]
+        public async Task RemoveItem_UserValidListOwnItem_ItemRemoved() {
+            SetupDb();
+
+            var result = await _sut.RemoveItemFromShoppingList(normalUser, ownItemInList.Id);
+            Assert.True(result.IsSuccess);
+
+            var item = _context.Items.FirstOrDefault(i => i.Id == ownItemInList.Id);
+            Assert.Null(item);
+        }
+
+        [Fact]
+        public async Task RemoveItem_UserValidListNotOwnItem_ItemNotRemoved() {
+            SetupDb();
+
+            var result = await _sut.RemoveItemFromShoppingList(normalUser, othersItemInList.Id);
+            Assert.False(result.IsSuccess);
+
+            var item = _context.Items.FirstOrDefault(i => i.Id == othersItemInList.Id);
+            Assert.NotNull(item);
+        }
+
+        [Fact]
+        public async Task RemoveItem_AdminValidListNotOwnItem_ItemRemoved() {
+            SetupDb();
+
+            var result = await _sut.RemoveItemFromShoppingList(adminUser, othersItemInList.Id);
+            Assert.True(result.IsSuccess);
+
+            var item = _context.Items.FirstOrDefault(i => i.Id == othersItemInList.Id);
+            Assert.Null(item);
+        }
+
+        [Fact]
+        public async Task RemoveItem_UserDueDatePassedList_ItemNotRemoved() {
+            SetupDb();
+
+            var result = await _sut.RemoveItemFromShoppingList(normalUser, itemInDueDatePassedList.Id);
+            Assert.False(result.IsSuccess);
+
+            var item = _context.Items.FirstOrDefault(i => i.Id == itemInDueDatePassedList.Id);
+            Assert.NotNull(item);
+        }
+
+        [Fact]
+        public async Task RemoveItem_AdminDueDatePassedList_ItemRemoved() {
+            SetupDb();
+
+            var result = await _sut.RemoveItemFromShoppingList(adminUser, itemInDueDatePassedList.Id);
+            Assert.True(result.IsSuccess);
+
+            var item = _context.Items.FirstOrDefault(i => i.Id == itemInDueDatePassedList.Id);
+            Assert.Null(item);
+        }
+        #endregion
 
         private void SetupDb() {
             _context.RemoveRange(_context.ShoppingLists.ToList());
-            _context.SaveChanges();
-            Assert.Empty(_context.ShoppingLists.ToList());
+            _context.RemoveRange(_context.Items.ToList());
 
-            _context.ShoppingLists.Add(new ShoppingList() { Id = 1, Name = "Test list" });
-            _context.ShoppingLists.Add(new ShoppingList() { Id = 2, Name = "Test list 2" });
+            _context.ShoppingLists.AddRange(normalList, dueDatePassedList, notStartedList, orderedList);
+            _context.Items.AddRange(ownItemInList, othersItemInList, itemInDueDatePassedList, itemInOrderedList);
             _context.SaveChanges();
-            Assert.Equal(2, _context.ShoppingLists.ToList().Count);
         }
-        #endregion
+        
     }
 }

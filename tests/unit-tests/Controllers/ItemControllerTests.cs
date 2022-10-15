@@ -50,5 +50,26 @@ namespace shopping_bag_unit_tests.Controllers {
             Assert.Equal("Error", brResult.Value);
         }
         #endregion
+
+        #region RemoveItemFromShoppingList Tests
+        [Fact]
+        public async Task RemoveItemFromShoppingList_ServiceResponseOk_ReturnsOk() {
+            var serviceResponse = new ServiceResponse<bool>(true);
+            _shoppingListService.Setup(x => x.RemoveItemFromShoppingList(It.IsAny<User>(), It.IsAny<long>())).ReturnsAsync(serviceResponse);
+            var result = await _sut.RemoveItemFromShoppingList(0);
+            Assert.IsType<OkResult>(result);
+        }
+
+        [Fact]
+        public async Task RemoveItemFromShoppingList_ServiceResponseError_ReturnsBadRequest() {
+            var serviceResponse = new ServiceResponse<bool>(error: "Error");
+            _shoppingListService.Setup(x => x.RemoveItemFromShoppingList(It.IsAny<User>(), It.IsAny<long>())).ReturnsAsync(serviceResponse);
+            var result = await _sut.RemoveItemFromShoppingList(0);
+            var brResult = result as BadRequestObjectResult;
+            Assert.NotNull(brResult);
+            Assert.NotNull(brResult.Value);
+            Assert.Equal("Error", brResult.Value);
+        }
+        #endregion
     }
 }
