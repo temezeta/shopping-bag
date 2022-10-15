@@ -30,7 +30,7 @@ namespace shopping_bag.Controllers {
 
         [HttpDelete]
         [Route("{itemId}")]
-        public async Task<ActionResult> RemoveItemFromShoppingList(int itemId) {
+        public async Task<ActionResult> RemoveItemFromShoppingList(long itemId) {
             var user = await GetCurrentUser();
 
             if (user == null) {
