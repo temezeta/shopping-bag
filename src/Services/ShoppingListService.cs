@@ -61,6 +61,7 @@ namespace shopping_bag.Services
             }
         }
 
+        #region Items
         public async Task<ServiceResponse<Item>> AddItemToShoppingList(AddItemDto itemToAdd) {
             if (string.IsNullOrEmpty(itemToAdd.Url) && string.IsNullOrEmpty(itemToAdd.Name)) {
                 return new ServiceResponse<Item>(error: "Item url or name must be given");
@@ -107,5 +108,41 @@ namespace shopping_bag.Services
             await _context.SaveChangesAsync();
             return new ServiceResponse<bool>(true);
         }
+
+        public async Task<ServiceResponse<Item>> ModifyItem(User user, ModifyItemDto itemToModify, long itemId) {
+            var item = await _context.Items.Include(i => i.ShoppingList).FirstOrDefaultAsync(i => i.Id == itemId);
+            if (item == null) {
+                return new ServiceResponse<Item>(error: "Item doesn't exist.");
+            }
+            var isAdmin = user.UserRoles.Any(r => r.RoleName.Equals(Roles.AdminRole));
+            if(!isAdmin && user.Id != item.UserId) {
+                return new ServiceResponse<Item>(error: "You can only modify items you have added");
+            }
+            if (!isAdmin && item.ShoppingList.Ordered) {
+                return new ServiceResponse<Item>(error: "Shopping list already ordered");
+            }
+            if (!isAdmin && item.ShoppingList.DueDate != null && item.ShoppingList.DueDate < DateTime.Now) {
+                return new ServiceResponse<Item>(error: "Shopping list due date passed");
+            }
+            if(string.IsNullOrEmpty(itemToModify.Name) && string.IsNullOrEmpty(itemToModify.Url)) {
+                return new ServiceResponse<Item>(error: "Item must have a name or url");
+            }
+            if (!string.IsNullOrEmpty(itemToModify.Name) && item.ShoppingList.Items.Any(i => i.Id != item.Id && itemToModify.Name.ToLower().Equals(i.Name?.ToLower()))) {
+                return new ServiceResponse<Item>(error: "Item with same name already in list");
+            }
+            if (!string.IsNullOrEmpty(itemToModify.Url) && item.ShoppingList.Items.Any(i => i.Id != item.Id && itemToModify.Url.ToLower().Equals(i.Url?.ToLower()))) {
+                return new ServiceResponse<Item>(error: "Item with same url already in list");
+            }
+            if (!isAdmin && itemToModify.AmountOrdered != item.AmountOrdered) {
+                return new ServiceResponse<Item>(error: "You can't modify amount ordered");
+            }
+            if (!isAdmin && itemToModify.IsChecked != item.IsChecked) {
+                return new ServiceResponse<Item>(error: "You can't modify isChecked");
+            }
+            _mapper.Map(itemToModify, item);
+            await _context.SaveChangesAsync();
+            return new ServiceResponse<Item>(item);
+        }
+        #endregion
     }
 }
