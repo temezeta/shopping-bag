@@ -23,6 +23,12 @@ namespace shopping_bag.Utility {
                 .ForMember(dest => dest.AmountOrdered, opt => opt.Ignore())
                 .ForMember(dest => dest.ShoppingList, opt => opt.Ignore())
                 .ForMember(dest => dest.ItemAdder, opt => opt.Ignore());
+            CreateMap<ModifyItemDto, Item>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.ShoppingListId, opt => opt.Ignore())
+                .ForMember(dest => dest.ShoppingList, opt => opt.Ignore())
+                .ForMember(dest => dest.UserId, opt => opt.Ignore())
+                .ForMember(dest => dest.ItemAdder, opt => opt.Ignore());
         }
     }
 }

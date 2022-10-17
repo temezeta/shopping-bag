@@ -16,7 +16,7 @@ namespace shopping_bag.Controllers {
 
         [HttpPost]
         [Route("")]
-        public async Task<ActionResult<ItemDto>> AddItemToShoppingList([FromBody] AddItemDto itemToAdd, int listId) {
+        public async Task<ActionResult<ItemDto>> AddItemToShoppingList([FromBody] AddItemDto itemToAdd, long listId) {
             itemToAdd.UserId = (await GetCurrentUser()).Id;
             itemToAdd.ShoppingListId = listId;
 
@@ -47,13 +47,23 @@ namespace shopping_bag.Controllers {
 
         [HttpPut]
         [Route("{itemId}")]
-        public async Task<ActionResult<ItemDto>> ModifyItem(/*[FromBody] ModifyItemDto itemToModify, */int itemId) {
-            throw new NotImplementedException();
+        public async Task<ActionResult<ItemDto>> ModifyItem([FromBody] ModifyItemDto itemToModify, long itemId) {
+            var user = await GetCurrentUser();
+
+            if (user == null) {
+                return BadRequest();
+            }
+
+            var response = await _shoppingListService.ModifyItem(user, itemToModify, itemId);
+            if(!response.IsSuccess) {
+                return BadRequest(response.Error);
+            }
+            return Ok(_mapper.Map<ItemDto>(response.Data));
         }
 
         [HttpGet]
         [Route("{itemId}")]
-        public async Task<ActionResult<ItemDto>> GetItem(int itemId) {
+        public async Task<ActionResult<ItemDto>> GetItem(long itemId) {
             throw new NotImplementedException();
         }
     }
