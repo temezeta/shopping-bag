@@ -1,3 +1,5 @@
+[![.NET](https://github.com/temezeta/shopping-bag/actions/workflows/dotnet.yml/badge.svg)](https://github.com/temezeta/shopping-bag/actions/workflows/dotnet.yml)
+
 ## Requirements
 
 - [.NET 6 SDK](https://dotnet.microsoft.com/en-us/download/visual-studio-sdks)
