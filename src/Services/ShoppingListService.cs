@@ -70,7 +70,7 @@ namespace shopping_bag.Services
                 return new ServiceResponse<IEnumerable<ShoppingList>>(error: "Invalid officeId");
             }
 
-            var shoppingLists = await _context.ShoppingLists.Where(s => s.OfficeId == officeId).ToListAsync();
+            var shoppingLists = await _context.ShoppingLists.Include(s => s.Items).Where(s => s.OfficeId == officeId).ToListAsync();
             return new ServiceResponse<IEnumerable<ShoppingList>>(shoppingLists);
         }
 

@@ -17,5 +17,7 @@
         public DateTime DueDate { get; set; }
 
         public DateTime ExpectedDeliveryDate { get; set; }
+
+        public List<ItemDto> Items { get; set; }
     }
 }
