@@ -61,6 +61,19 @@ namespace shopping_bag.Services
             }
         }
 
+        public async Task<ServiceResponse<IEnumerable<ShoppingList>>> GetShoppingListsByOffice(long officeId)
+        {
+            var office = await _context.Offices.FirstOrDefaultAsync(o => o.Id == officeId);
+
+            if (office == null)
+            {
+                return new ServiceResponse<IEnumerable<ShoppingList>>(error: "Invalid officeId");
+            }
+
+            var shoppingLists = await _context.ShoppingLists.Where(s => s.OfficeId == officeId).ToListAsync();
+            return new ServiceResponse<IEnumerable<ShoppingList>>(shoppingLists);
+        }
+
         #region Items
         public async Task<ServiceResponse<Item>> AddItemToShoppingList(AddItemDto itemToAdd) {
             if (string.IsNullOrEmpty(itemToAdd.Url) && string.IsNullOrEmpty(itemToAdd.Name)) {
