@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using shopping_bag.Config;
 using shopping_bag.DTOs.ShoppingList;
 using shopping_bag.Models;
@@ -13,6 +14,7 @@ namespace shopping_bag_unit_tests.Services {
         private readonly AppDbContext _context;
         private readonly ShoppingListService _sut;
 
+        private readonly Office testOffice;
         private readonly User normalUser, adminUser;
         private readonly ShoppingList normalList, dueDatePassedList, notStartedList, orderedList;
         private readonly Item ownItemInList, ownItem2InList, othersItemInList, itemInDueDatePassedList, itemInOrderedList;
@@ -29,6 +31,8 @@ namespace shopping_bag_unit_tests.Services {
             var mapper = new Mapper(configuration);
             _sut = new ShoppingListService(_context, mapper);
 
+            testOffice = new Office() { Id = 1, Name = "Tampere" };
+
             normalUser = new User() { Id = 1, UserRoles = new List<UserRole>() { new UserRole() { RoleId = 1, RoleName = "User" } } };
             adminUser = new User() { Id = 1, UserRoles = new List<UserRole>() { new UserRole() { RoleId = 1, RoleName = "Admin" } } };
 
@@ -43,6 +47,38 @@ namespace shopping_bag_unit_tests.Services {
             itemInDueDatePassedList = new Item() { Id = 4, Name = "Item in dueDatePassedList", UserId = 1, ShoppingListId = dueDatePassedList.Id, ShoppingList = dueDatePassedList };
             itemInOrderedList = new Item() { Id = 5, Name = "Item in orderedList", UserId = 1, ShoppingListId = orderedList.Id, ShoppingList = orderedList };
         }
+
+        #region AddShoppingList tests
+        [Fact]
+        public async Task AddShoppingList_ListWithOnlyNameAndOffice_ShoppingListAdded()
+        {
+            SetupDb();
+            var result = await _sut.AddShoppingList(new AddShoppingListDto() { Name = "Office supplies", OfficeId = 1, UserId = 3});
+            Assert.True(result.IsSuccess);
+        }
+        #endregion
+
+        #region GetShoppingListsByOffice tests
+        [Fact]
+        public async Task GetShoppingListsByOffice_InvalidOfficeId_ErrorReturned()
+        {
+            SetupDb();
+            var result = await _sut.GetShoppingListsByOffice(14);
+            Assert.False(result.IsSuccess);
+            Assert.Equal("Invalid officeId", result.Error);
+        }
+
+        [Fact]
+        public async Task GetShoppingListsByOffice_ValidOfficeId_ListsReturned()
+        {
+            SetupDb();
+            var list = await _sut.AddShoppingList(new AddShoppingListDto() { Name = "Office supplies", OfficeId = 1, UserId = 3 });
+            var result = await _sut.GetShoppingListsByOffice(1);
+
+            Assert.True(result.IsSuccess);
+            Assert.Single(result.Data);
+        }
+        #endregion
 
         #region AddItemToShoppingList Tests
         [Fact]
@@ -402,7 +438,9 @@ namespace shopping_bag_unit_tests.Services {
         private void SetupDb() {
             _context.RemoveRange(_context.ShoppingLists.ToList());
             _context.RemoveRange(_context.Items.ToList());
+            _context.RemoveRange(_context.Offices.ToList());
 
+            _context.Offices.AddRange(testOffice);
             _context.ShoppingLists.AddRange(normalList, dueDatePassedList, notStartedList, orderedList);
             _context.Items.AddRange(ownItemInList, ownItem2InList, othersItemInList, itemInDueDatePassedList, itemInOrderedList);
             _context.SaveChanges();

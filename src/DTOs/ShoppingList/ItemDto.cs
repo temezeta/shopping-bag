@@ -9,7 +9,6 @@
         public string? Comment { get; set; }
         public bool IsChecked { get; set; }
         public int AmountOrdered { get; set; }
-        public ShoppingListDto ShoppingList { get; set; }
         public ItemAdderUserDto? ItemAdder { get; set; }
     }
 }

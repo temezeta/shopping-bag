@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using shopping_bag.DTOs.ShoppingList;
+using shopping_bag.Models;
 using shopping_bag.Services;
 
 namespace shopping_bag.Controllers
@@ -19,7 +20,7 @@ namespace shopping_bag.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        [Route("add")]
+        [Route("")]
         public async Task<ActionResult<ShoppingListDto>> AddShoppingList([FromBody] AddShoppingListDto shoppingList)
         {
             shoppingList.UserId = (await GetCurrentUser()).Id;
@@ -30,6 +31,20 @@ namespace shopping_bag.Controllers
                 return BadRequest(response.Error);
             }
             return Ok(_mapper.Map<ShoppingListDto>(response.Data));
+        }
+
+        [HttpGet]
+        [Route("")]
+        public async Task<ActionResult<IEnumerable<ShoppingListDto>>> GetShoppingListsByOffice(long officeId)
+        {
+            var response = await _shoppingListService.GetShoppingListsByOffice(officeId);
+
+            if (!response.IsSuccess)
+            {
+                return BadRequest(response.Error);
+            }
+
+            return Ok(_mapper.Map<IEnumerable<ShoppingListDto>>(response.Data));
         }
     }
 }
