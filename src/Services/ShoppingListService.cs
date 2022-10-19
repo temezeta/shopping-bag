@@ -35,7 +35,6 @@ namespace shopping_bag.Services
 
             try
             {
-                using (var transaction = _context.Database.BeginTransaction())
                 {
                     var shoppingList = new ShoppingList
                     {
@@ -51,7 +50,6 @@ namespace shopping_bag.Services
                     };
                     _context.ShoppingLists.Add(shoppingList);
                     _context.SaveChanges();
-                    transaction.Commit();
                     return new ServiceResponse<ShoppingList>(data: shoppingList);
                 }
             }
