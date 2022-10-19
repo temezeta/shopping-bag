@@ -29,7 +29,15 @@ namespace shopping_bag.Utility {
                 .ForMember(dest => dest.ShoppingList, opt => opt.Ignore())
                 .ForMember(dest => dest.UserId, opt => opt.Ignore())
                 .ForMember(dest => dest.ItemAdder, opt => opt.Ignore());
-            CreateMap<ModifyShoppingListDto, ShoppingList>();
+            CreateMap<ModifyShoppingListDto, ShoppingList>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedDate, opt => opt.Ignore())
+                .ForMember(dest => dest.StartDate, opt => opt.Ignore())
+                .ForMember(dest => dest.OfficeId, opt => opt.Ignore())
+                .ForMember(dest => dest.ListDeliveryOffice, opt => opt.Ignore())
+                .ForMember(dest => dest.UserId, opt => opt.Ignore())
+                .ForMember(dest => dest.ListCreatorUser, opt => opt.Ignore())
+                .ForMember(dest => dest.Items, opt => opt.Ignore());
         }
     }
 }
