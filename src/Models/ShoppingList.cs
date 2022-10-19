@@ -16,6 +16,8 @@ namespace shopping_bag.Models
 
         public Boolean Ordered { get; set; }
 
+        public Boolean Removed { get; set; }
+
         public DateTime CreatedDate { get; set; }
 
         public DateTime? StartDate { get; set; }

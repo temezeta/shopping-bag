@@ -29,6 +29,7 @@ namespace shopping_bag.Utility {
                 .ForMember(dest => dest.ShoppingList, opt => opt.Ignore())
                 .ForMember(dest => dest.UserId, opt => opt.Ignore())
                 .ForMember(dest => dest.ItemAdder, opt => opt.Ignore());
+            CreateMap<ModifyShoppingListDto, ShoppingList>();
         }
     }
 }

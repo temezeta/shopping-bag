@@ -41,6 +41,7 @@ namespace shopping_bag.Services
                         Name = shoppingListData.Name,
                         Comment = shoppingListData.Comment,
                         Ordered = false,
+                        Removed = false,
                         CreatedDate = DateTime.Now,
                         StartDate = shoppingListData.StartDate,
                         DueDate = shoppingListData.DueDate,
@@ -57,6 +58,25 @@ namespace shopping_bag.Services
             {
                 return new ServiceResponse<ShoppingList>(error: ex.Message);
             }
+        }
+
+        public async Task<ServiceResponse<ShoppingList>> ModifyShoppingList(ModifyShoppingListDto shoppingListData, long shoppingListId)
+        {
+            var shoppingList = await _context.ShoppingLists.Include(s => s.Items).FirstOrDefaultAsync(s => s.Id == shoppingListId);
+            if (shoppingList == null)
+            {
+                return new ServiceResponse<ShoppingList>(error: "Invalid shoppingListId");
+            }
+
+            if (_context.ShoppingLists.Any(s => s.Name == shoppingListData.Name))
+            {
+                return new ServiceResponse<ShoppingList>(error: "Shopping list with that name already exists.");
+            }
+
+            _mapper.Map(shoppingListData, shoppingList);
+            await _context.SaveChangesAsync();
+
+            return new ServiceResponse<ShoppingList>(shoppingList);
         }
 
         public async Task<ServiceResponse<IEnumerable<ShoppingList>>> GetShoppingListsByOffice(long officeId)
