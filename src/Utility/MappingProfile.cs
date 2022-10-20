@@ -37,7 +37,9 @@ namespace shopping_bag.Utility {
                 .ForMember(dest => dest.ListDeliveryOffice, opt => opt.Ignore())
                 .ForMember(dest => dest.UserId, opt => opt.Ignore())
                 .ForMember(dest => dest.ListCreatorUser, opt => opt.Ignore())
-                .ForMember(dest => dest.Items, opt => opt.Ignore());
+                .ForMember(dest => dest.Items, opt => opt.Ignore())
+                .ForMember(dest => dest.Removed, opt => opt.Ignore())
+                .ForMember(dest => dest.Ordered, opt => opt.Ignore());
         }
     }
 }

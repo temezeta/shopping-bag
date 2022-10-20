@@ -20,17 +20,16 @@ namespace shopping_bag.Services
 
         public async Task<ServiceResponse<ShoppingList>> AddShoppingList(AddShoppingListDto shoppingListData)
         {
-            // Maybe check if an active list exists with same name? 
-            if (_context.ShoppingLists.Any(s => s.Name == shoppingListData.Name))
-            {
-                return new ServiceResponse<ShoppingList>(error: "Shopping list with that name already exists.");
-            }
-
             var officeExists = _context.Offices.Any(office => office.Id == shoppingListData.OfficeId);
 
             if (!officeExists)
             {
                 return new ServiceResponse<ShoppingList>(error: "Office doesn't exist");
+            }
+            // Check that there are no active shopping lists with the same name under the office
+            if (_context.ShoppingLists.Where(s => s.OfficeId == shoppingListData.OfficeId && !s.Ordered && !s.Removed).Any(s => s.Name == shoppingListData.Name))
+            {
+                return new ServiceResponse<ShoppingList>(error: "Active shopping list with that name already exists.");
             }
 
             try
@@ -50,7 +49,7 @@ namespace shopping_bag.Services
                         UserId = shoppingListData.UserId
                     };
                     _context.ShoppingLists.Add(shoppingList);
-                    _context.SaveChanges();
+                    await _context.SaveChangesAsync();
                     return new ServiceResponse<ShoppingList>(data: shoppingList);
                 }
             }
@@ -63,14 +62,25 @@ namespace shopping_bag.Services
         public async Task<ServiceResponse<ShoppingList>> ModifyShoppingList(ModifyShoppingListDto shoppingListData, long shoppingListId)
         {
             var shoppingList = await _context.ShoppingLists.Include(s => s.Items).FirstOrDefaultAsync(s => s.Id == shoppingListId);
-            if (shoppingList == null)
+
+            if (shoppingList == null || shoppingList.Removed)
             {
                 return new ServiceResponse<ShoppingList>(error: "Invalid shoppingListId");
             }
-
-            if (_context.ShoppingLists.Any(s => s.Name == shoppingListData.Name))
+            if (shoppingListData.DueDate != null && shoppingListData.DueDate != shoppingList.DueDate &&
+                shoppingListData.DueDate < DateTime.Now)
             {
-                return new ServiceResponse<ShoppingList>(error: "Shopping list with that name already exists.");
+                return new ServiceResponse<ShoppingList>(error: "Shopping list due date passed");
+            }
+            if (shoppingListData.ExpectedDeliveryDate != null && shoppingListData.ExpectedDeliveryDate != shoppingList.ExpectedDeliveryDate &&
+                shoppingListData.ExpectedDeliveryDate < DateTime.Now)
+            {
+                return new ServiceResponse<ShoppingList>(error: "Shopping list expected delivery date passed");
+            }
+            if (shoppingListData.Name != null && shoppingListData.Name != shoppingList.Name && 
+                _context.ShoppingLists.Where(s => s.OfficeId == shoppingList.OfficeId && !s.Ordered).Any(s => s.Name == shoppingListData.Name))
+            {
+                return new ServiceResponse<ShoppingList>(error: "Active shopping list with that name already exists.");
             }
 
             _mapper.Map(shoppingListData, shoppingList);
@@ -88,7 +98,7 @@ namespace shopping_bag.Services
                 return new ServiceResponse<IEnumerable<ShoppingList>>(error: "Invalid officeId");
             }
 
-            var shoppingLists = await _context.ShoppingLists.Include(s => s.Items).Where(s => s.OfficeId == officeId).ToListAsync();
+            var shoppingLists = await _context.ShoppingLists.Include(s => s.Items).Where(s => s.OfficeId == officeId && !s.Removed).ToListAsync();
             return new ServiceResponse<IEnumerable<ShoppingList>>(shoppingLists);
         }
 
@@ -98,7 +108,7 @@ namespace shopping_bag.Services
                 return new ServiceResponse<Item>(error: "Item url or name must be given");
             }
             var shoppingList = await _context.ShoppingLists.Include(s => s.Items).FirstOrDefaultAsync(s => s.Id == itemToAdd.ShoppingListId);
-            if(shoppingList == null) {
+            if(shoppingList == null || shoppingList.Removed) {
                 return new ServiceResponse<Item>(error: "Invalid shoppingListId");
             }
             if (shoppingList.Ordered) {
@@ -125,7 +135,7 @@ namespace shopping_bag.Services
 
         public async Task<ServiceResponse<bool>> RemoveItemFromShoppingList(User user, long itemId) {
             var item = await _context.Items.Include(i => i.ShoppingList).FirstOrDefaultAsync(i => i.Id == itemId);
-            if(item == null) {
+            if(item == null || item.ShoppingList.Removed) {
                 return new ServiceResponse<bool>(error: "Item doesn't exist.");
             }
             var isAdmin = user.UserRoles.Any(r => r.RoleName.Equals(Roles.AdminRole));
@@ -142,7 +152,7 @@ namespace shopping_bag.Services
 
         public async Task<ServiceResponse<Item>> ModifyItem(User user, ModifyItemDto itemToModify, long itemId) {
             var item = await _context.Items.Include(i => i.ShoppingList).FirstOrDefaultAsync(i => i.Id == itemId);
-            if (item == null) {
+            if (item == null || item.ShoppingList.Removed) {
                 return new ServiceResponse<Item>(error: "Item doesn't exist.");
             }
             var isAdmin = user.UserRoles.Any(r => r.RoleName.Equals(Roles.AdminRole));
