@@ -10,6 +10,8 @@
         public static string[] AllowedOrigins { get; private set; }
         public static string[] AllowedEmailDomain { get; private set; }
         public static string VerificationEmailBodyText { get; private set; }
+        public static string DefaultAdminEmail { get; private set; }
+        public static string DefaultAdminPassword { get; private set; }
         public static void Setup(IConfiguration config)
         {
             RefreshTokenValidityDays = config.GetValue<int>("Jwt:RefreshTokenValidityDays");
@@ -20,6 +22,8 @@
             AllowedOrigins = config.GetSection("AllowedOrigins").Get<string[]>();
             AllowedEmailDomain = config.GetSection("AllowedEmailDomain").Get<string[]>();
             VerificationEmailBodyText = config.GetValue<string>("VerificationEmail:BodyText");
+            DefaultAdminEmail = config.GetValue<string>("DefaultAdmin:Email");
+            DefaultAdminPassword = config.GetValue<string>("DefaultAdmin:Password");
         }
     }
 }

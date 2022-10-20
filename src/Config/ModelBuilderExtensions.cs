@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using shopping_bag.Models;
 using shopping_bag.Models.User;
+using shopping_bag.Utility;
 
 namespace shopping_bag.Config
 {
@@ -135,6 +136,43 @@ namespace shopping_bag.Config
             modelBuilder.Entity<Office>().HasData(Offices);
             modelBuilder.Entity<UserRole>().HasData(UserRoles);
             modelBuilder.Entity<ShoppingList>().HasData(ShoppingLists);
+        }
+
+        public static void SeedDefaultAdmin(this AppDbContext context)
+        {
+            // If Admin user exists, don't seed
+            if (context.Users.Include(u => u.UserRoles).Any(it => it.UserRoles.Any(r => r.RoleName == Roles.AdminRole)))
+            {
+                Console.WriteLine("User with Admin role already exists");
+                return;
+            }
+
+            var adminRole = context.UserRoles.FirstOrDefault(it => it.RoleName == Roles.AdminRole);
+
+            if (adminRole == null)
+            {
+                Console.WriteLine("Admin role not found");
+                return;
+            }
+
+            AuthHelper.CreatePasswordHash(StaticConfig.DefaultAdminPassword, out byte[] passwordHash, out byte[] passwordSalt);
+            var verificationToken = AuthHelper.CreateHexToken();
+
+            var user = new User()
+            {
+                FirstName = "Admin",
+                LastName = "User",
+                Email = StaticConfig.DefaultAdminEmail,
+                OfficeId = Offices.First().Id,
+                PasswordHash = passwordHash,
+                PasswordSalt = passwordSalt,
+                VerificationToken = verificationToken,
+                VerifiedAt = DateTime.Now, // Don't require verification for default user
+            };
+            user.UserRoles.Add(adminRole);
+            context.Users.Add(user);
+            context.SaveChanges();
+            Console.WriteLine("Default Admin user added");
         }
     }
 }

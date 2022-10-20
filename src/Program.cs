@@ -86,6 +86,7 @@ namespace shopping_bag
             {
                 var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 context.Database.Migrate();
+                context.SeedDefaultAdmin();
             }
 
             app.Run();
