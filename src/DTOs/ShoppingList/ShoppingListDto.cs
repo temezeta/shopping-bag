@@ -16,8 +16,6 @@ namespace shopping_bag.DTOs.ShoppingList
 
         public DateTime CreatedDate { get; set; }
 
-        public DateTime? StartDate { get; set; }
-
         public DateTime? DueDate { get; set; }
 
         public DateTime? ExpectedDeliveryDate { get; set; }

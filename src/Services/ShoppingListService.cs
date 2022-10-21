@@ -42,7 +42,6 @@ namespace shopping_bag.Services
                         Ordered = false,
                         Removed = false,
                         CreatedDate = DateTime.Now,
-                        StartDate = shoppingListData.StartDate,
                         DueDate = shoppingListData.DueDate,
                         ExpectedDeliveryDate = shoppingListData.ExpectedDeliveryDate,
                         OfficeId = shoppingListData.OfficeId,
@@ -116,9 +115,6 @@ namespace shopping_bag.Services
             }
             if (shoppingList.DueDate != null && shoppingList.DueDate < DateTime.Now) {
                 return new ServiceResponse<Item>(error: "Shopping list due date passed");
-            }
-            if (shoppingList.StartDate != null && shoppingList.StartDate > DateTime.Now) {
-                return new ServiceResponse<Item>(error: "Shopping list not open yet");
             }
             if(!string.IsNullOrEmpty(itemToAdd.Name) && shoppingList.Items.Any(i => itemToAdd.Name.ToLower().Equals(i.Name?.ToLower()))) {
                 return new ServiceResponse<Item>(error: "Item with same name already in list");

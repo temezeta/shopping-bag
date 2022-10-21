@@ -20,8 +20,6 @@ namespace shopping_bag.Models
 
         public DateTime CreatedDate { get; set; }
 
-        public DateTime? StartDate { get; set; }
-
         public DateTime? DueDate { get; set; }
 
         public DateTime? ExpectedDeliveryDate { get; set; }

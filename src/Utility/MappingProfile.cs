@@ -32,7 +32,6 @@ namespace shopping_bag.Utility {
             CreateMap<ModifyShoppingListDto, ShoppingList>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.CreatedDate, opt => opt.Ignore())
-                .ForMember(dest => dest.StartDate, opt => opt.Ignore())
                 .ForMember(dest => dest.OfficeId, opt => opt.Ignore())
                 .ForMember(dest => dest.ListDeliveryOffice, opt => opt.Ignore())
                 .ForMember(dest => dest.UserId, opt => opt.Ignore())

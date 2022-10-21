@@ -38,7 +38,7 @@ namespace shopping_bag_unit_tests.Services {
 
             normalList = new ShoppingList() { Id = 1, Name = "Test list", DueDate = DateTime.Now.AddMinutes(10), Ordered = false };
             dueDatePassedList = new ShoppingList() { Id = 2, Name = "Test list 2", DueDate = DateTime.Now.AddMinutes(-10), Ordered = false };
-            notStartedList = new ShoppingList() { Id = 3, Name = "Test list 3", StartDate = DateTime.Now.AddMinutes(10), Ordered = false };
+            notStartedList = new ShoppingList() { Id = 3, Name = "Test list 3", Ordered = false };
             orderedList = new ShoppingList() { Id = 4, Name = "Test list 2", DueDate = DateTime.Now.AddMinutes(-10), Ordered = true };
 
             ownItemInList = new Item() { Id = 1, Name = "Own item in list", UserId = 1, ShoppingListId = normalList.Id, ShoppingList = normalList };
@@ -180,20 +180,6 @@ namespace shopping_bag_unit_tests.Services {
             var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = dueDatePassedList.Id, Name = "Test item" });
             Assert.False(result.IsSuccess);
             Assert.Equal("Shopping list due date passed", result.Error);
-
-            // Ensure no items added to lists.
-            var list = _context.ShoppingLists.Include(s => s.Items).FirstOrDefault(s => s.Items.Any(i => i.Name == "Test item"));
-            Assert.Null(list);
-        }
-
-        [Fact]
-        public async Task AddItem_ListNotOpenYet_ReturnsError() {
-            SetupDb();
-
-            // Ensure service result error
-            var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = notStartedList.Id, Name = "Test item" });
-            Assert.False(result.IsSuccess);
-            Assert.Equal("Shopping list not open yet", result.Error);
 
             // Ensure no items added to lists.
             var list = _context.ShoppingLists.Include(s => s.Items).FirstOrDefault(s => s.Items.Any(i => i.Name == "Test item"));
