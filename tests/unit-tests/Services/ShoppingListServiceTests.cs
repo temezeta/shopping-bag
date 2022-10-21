@@ -73,10 +73,37 @@ namespace shopping_bag_unit_tests.Services {
         {
             SetupDb();
             var list = await _sut.AddShoppingList(new AddShoppingListDto() { Name = "Office supplies", OfficeId = 1, UserId = 3 });
+            Assert.True(list.IsSuccess);
             var result = await _sut.GetShoppingListsByOffice(1);
 
             Assert.True(result.IsSuccess);
             Assert.Single(result.Data);
+        }
+        #endregion
+
+        #region ModifyShoppingList test
+        [Fact]
+        public async Task ModifyShoppingList_ValidOfficeId_ListModified()
+        {
+            SetupDb();
+            var list = await _sut.AddShoppingList(new AddShoppingListDto() { Name = "Office supplies", OfficeId = 1, UserId = 3 });
+            Assert.True(list.IsSuccess);
+
+            var result = await _sut.ModifyShoppingList(new ModifyShoppingListDto() { Name = "Office supplies 2"}, list.Data.Id);
+            Assert.True(result.IsSuccess);
+        }
+
+        [Fact]
+        public async Task ModifyShoppingList_ActiveListWithNameAlreadyExists_ListNotModified()
+        {
+            SetupDb();
+            var list = await _sut.AddShoppingList(new AddShoppingListDto() { Name = "Office supplies", OfficeId = 1, UserId = 3 });
+            var list2 = await _sut.AddShoppingList(new AddShoppingListDto() { Name = "Office supplies 2", OfficeId = 1, UserId = 3 });
+            Assert.True(list.IsSuccess && list2.IsSuccess);
+
+            var result = await _sut.ModifyShoppingList(new ModifyShoppingListDto() { Name = "Office supplies 2" }, list.Data.Id);
+            Assert.False(result.IsSuccess);
+            Assert.Equal("Active shopping list with that name already exists.", result.Error);
         }
         #endregion
 
