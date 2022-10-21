@@ -15,7 +15,6 @@ namespace shopping_bag.Config
 
             builder.Entity<User>().HasIndex(u => u.Email).IsUnique();
             builder.Entity<Office>().HasIndex(o => o.Name).IsUnique();
-            builder.Entity<ShoppingList>().HasIndex(s => s.Name).IsUnique();
             builder.Seed();
         }
 

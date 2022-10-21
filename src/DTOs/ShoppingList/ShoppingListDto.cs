@@ -12,9 +12,9 @@ namespace shopping_bag.DTOs.ShoppingList
 
         public Boolean Ordered { get; set; }
 
-        public DateTime CreatedDate { get; set; }
+        public Boolean Removed { get; set; }
 
-        public DateTime? StartDate { get; set; }
+        public DateTime CreatedDate { get; set; }
 
         public DateTime? DueDate { get; set; }
 

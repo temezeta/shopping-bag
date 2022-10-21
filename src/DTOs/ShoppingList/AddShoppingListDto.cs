@@ -9,7 +9,6 @@ namespace shopping_bag.DTOs.ShoppingList
         public string Name { get; set; }
 
         public string? Comment { get; set; }
-        public DateTime? StartDate { get; set; }
 
         public DateTime? DueDate { get; set; }
 

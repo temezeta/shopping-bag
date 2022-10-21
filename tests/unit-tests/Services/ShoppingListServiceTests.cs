@@ -38,7 +38,7 @@ namespace shopping_bag_unit_tests.Services {
 
             normalList = new ShoppingList() { Id = 1, Name = "Test list", DueDate = DateTime.Now.AddMinutes(10), Ordered = false };
             dueDatePassedList = new ShoppingList() { Id = 2, Name = "Test list 2", DueDate = DateTime.Now.AddMinutes(-10), Ordered = false };
-            notStartedList = new ShoppingList() { Id = 3, Name = "Test list 3", StartDate = DateTime.Now.AddMinutes(10), Ordered = false };
+            notStartedList = new ShoppingList() { Id = 3, Name = "Test list 3", Ordered = false };
             orderedList = new ShoppingList() { Id = 4, Name = "Test list 2", DueDate = DateTime.Now.AddMinutes(-10), Ordered = true };
 
             ownItemInList = new Item() { Id = 1, Name = "Own item in list", UserId = 1, ShoppingListId = normalList.Id, ShoppingList = normalList };
@@ -73,10 +73,37 @@ namespace shopping_bag_unit_tests.Services {
         {
             SetupDb();
             var list = await _sut.AddShoppingList(new AddShoppingListDto() { Name = "Office supplies", OfficeId = 1, UserId = 3 });
+            Assert.True(list.IsSuccess);
             var result = await _sut.GetShoppingListsByOffice(1);
 
             Assert.True(result.IsSuccess);
             Assert.Single(result.Data);
+        }
+        #endregion
+
+        #region ModifyShoppingList test
+        [Fact]
+        public async Task ModifyShoppingList_ValidOfficeId_ListModified()
+        {
+            SetupDb();
+            var list = await _sut.AddShoppingList(new AddShoppingListDto() { Name = "Office supplies", OfficeId = 1, UserId = 3 });
+            Assert.True(list.IsSuccess);
+
+            var result = await _sut.ModifyShoppingList(new ModifyShoppingListDto() { Name = "Office supplies 2"}, list.Data.Id);
+            Assert.True(result.IsSuccess);
+        }
+
+        [Fact]
+        public async Task ModifyShoppingList_ActiveListWithNameAlreadyExists_ListNotModified()
+        {
+            SetupDb();
+            var list = await _sut.AddShoppingList(new AddShoppingListDto() { Name = "Office supplies", OfficeId = 1, UserId = 3 });
+            var list2 = await _sut.AddShoppingList(new AddShoppingListDto() { Name = "Office supplies 2", OfficeId = 1, UserId = 3 });
+            Assert.True(list.IsSuccess && list2.IsSuccess);
+
+            var result = await _sut.ModifyShoppingList(new ModifyShoppingListDto() { Name = "Office supplies 2" }, list.Data.Id);
+            Assert.False(result.IsSuccess);
+            Assert.Equal("Active shopping list with that name already exists.", result.Error);
         }
         #endregion
 
@@ -153,20 +180,6 @@ namespace shopping_bag_unit_tests.Services {
             var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = dueDatePassedList.Id, Name = "Test item" });
             Assert.False(result.IsSuccess);
             Assert.Equal("Shopping list due date passed", result.Error);
-
-            // Ensure no items added to lists.
-            var list = _context.ShoppingLists.Include(s => s.Items).FirstOrDefault(s => s.Items.Any(i => i.Name == "Test item"));
-            Assert.Null(list);
-        }
-
-        [Fact]
-        public async Task AddItem_ListNotOpenYet_ReturnsError() {
-            SetupDb();
-
-            // Ensure service result error
-            var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = notStartedList.Id, Name = "Test item" });
-            Assert.False(result.IsSuccess);
-            Assert.Equal("Shopping list not open yet", result.Error);
 
             // Ensure no items added to lists.
             var list = _context.ShoppingLists.Include(s => s.Items).FirstOrDefault(s => s.Items.Any(i => i.Name == "Test item"));

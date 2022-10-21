@@ -33,6 +33,20 @@ namespace shopping_bag.Controllers
             return Ok(_mapper.Map<ShoppingListDto>(response.Data));
         }
 
+        [HttpPut]
+        [Authorize(Roles = "Admin")]
+        [Route("")]
+        public async Task<ActionResult<ShoppingListDto>> ModifyShoppingList([FromBody] ModifyShoppingListDto shoppingList, long shoppingListId)
+        {
+            var response = await _shoppingListService.ModifyShoppingList(shoppingList, shoppingListId);
+
+            if (!response.IsSuccess)
+            {
+                return BadRequest(response.Error);
+            }
+            return Ok(_mapper.Map<ShoppingListDto>(response.Data));
+        }
+
         [HttpGet]
         [Route("")]
         public async Task<ActionResult<IEnumerable<ShoppingListDto>>> GetShoppingListsByOffice(long officeId)
