@@ -147,11 +147,19 @@ namespace shopping_bag.Config
                 return;
             }
 
-            var adminRole = context.UserRoles.FirstOrDefault(it => it.RoleName == Roles.AdminRole);
+            var roles = context.UserRoles.Where(it => StaticConfig.DefaultAdminRoles.Contains(it.RoleName)).ToList();
 
-            if (adminRole == null)
+            if (roles == null || roles.Count == 0)
             {
-                Console.WriteLine("Admin role not found");
+                Console.WriteLine("No valid roles");
+                return;
+            }
+
+            var office = context.Offices.FirstOrDefault(it => it.Id == StaticConfig.DefaultAdminOfficeId);
+
+            if (office == null)
+            {
+                Console.WriteLine($"Office with id {StaticConfig.DefaultAdminOfficeId} not found");
                 return;
             }
 
@@ -163,13 +171,13 @@ namespace shopping_bag.Config
                 FirstName = "Admin",
                 LastName = "User",
                 Email = StaticConfig.DefaultAdminEmail,
-                OfficeId = Offices.First().Id,
+                OfficeId = office.Id,
                 PasswordHash = passwordHash,
                 PasswordSalt = passwordSalt,
                 VerificationToken = verificationToken,
                 VerifiedAt = DateTime.Now, // Don't require verification for default user
             };
-            user.UserRoles.Add(adminRole);
+            user.UserRoles.AddRange(roles);
             context.Users.Add(user);
             context.SaveChanges();
             Console.WriteLine("Default Admin user added");
