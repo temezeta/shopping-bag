@@ -47,6 +47,21 @@ namespace shopping_bag.Controllers
             return Ok(_mapper.Map<ShoppingListDto>(response.Data));
         }
 
+        [HttpDelete]
+        [Authorize(Roles = "Admin")]
+        [Route("")]
+        public async Task<ActionResult<bool>> RemoveShoppingList(long shoppingListId)
+        {
+            var response = await _shoppingListService.RemoveShoppingList(shoppingListId);
+
+            if (!response.IsSuccess)
+            {
+                return BadRequest(response.Error);
+            }
+
+            return Ok();
+        }
+
         [HttpGet]
         [Route("")]
         public async Task<ActionResult<IEnumerable<ShoppingListDto>>> GetShoppingListsByOffice(long officeId)

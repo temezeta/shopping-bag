@@ -107,6 +107,21 @@ namespace shopping_bag_unit_tests.Services {
         }
         #endregion
 
+        #region RemoveShoppingList Test
+        [Fact]
+        public async Task RemoveShoppingList_RemoveListAndTryRemoveAgain_ListRemoved()
+        {
+            SetupDb();
+            var remove = await _sut.RemoveShoppingList(normalList.Id);
+            Assert.True(remove.IsSuccess);
+
+            var removeAgain = await _sut.RemoveShoppingList(normalList.Id);
+            Assert.False(removeAgain.IsSuccess);
+            Assert.Equal("Invalid shoppingListId", removeAgain.Error);
+        }
+
+        #endregion
+
         #region AddItemToShoppingList Tests
         [Fact]
         public async Task AddItem_ValidItem_ItemAdded() {
