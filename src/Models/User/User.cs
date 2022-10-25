@@ -32,6 +32,7 @@ namespace shopping_bag.Models.User
         public List<UserRole> UserRoles { get; set; } = new List<UserRole>();
         public long OfficeId { get; set; }
         public Office HomeOffice { get; set; }
+        public List<Item> LikedItems { get; set; } = new List<Item>();
 
     }
 }

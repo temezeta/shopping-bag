@@ -60,5 +60,18 @@ namespace shopping_bag.Controllers {
             }
             return Ok(_mapper.Map<ItemDto>(response.Data));
         }
+
+        [HttpPost]
+        [Route("{itemId}/like")]
+        public async Task<ActionResult> LikeItem([FromRoute] long itemId, [FromQuery] bool unlike = false) {
+            var user = await GetCurrentUser();
+
+            var response = await _shoppingListService.UpdateLikeStatus(user, itemId, unlike);
+
+            if (!response.IsSuccess) {
+                return BadRequest(response.Error);
+            }
+            return Ok();
+        }
     }
 }

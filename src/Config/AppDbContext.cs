@@ -13,8 +13,18 @@ namespace shopping_bag.Config
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<User>().HasIndex(u => u.Email).IsUnique();
+            builder.Entity<User>(e => {
+                e.HasIndex(u => u.Email).IsUnique();
+
+                // Likes: many-to-many relationship
+                e.HasMany(u => u.LikedItems).WithMany(i => i.UsersWhoLiked).UsingEntity<Dictionary<string, object>>(
+                    "Likes",
+                    x => x.HasOne<Item>().WithMany().OnDelete(DeleteBehavior.Cascade),
+                    x => x.HasOne<User>().WithMany().OnDelete(DeleteBehavior.ClientCascade)
+                );
+            });
             builder.Entity<Office>().HasIndex(o => o.Name).IsUnique();
+            builder.Entity<Item>().HasOne(i => i.ItemAdder).WithMany();
             builder.Seed();
         }
 
