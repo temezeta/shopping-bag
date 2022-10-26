@@ -90,7 +90,7 @@ namespace shopping_bag.Services
 
         public async Task<ServiceResponse<bool>> RemoveShoppingList(long shoppingListId)
         {
-            var shoppingList = await _context.ShoppingLists.FirstAsync(s => s.Id == shoppingListId);
+            var shoppingList = await _context.ShoppingLists.FirstOrDefaultAsync(s => s.Id == shoppingListId);
 
             if (shoppingList == null || shoppingList.Removed)
             {
@@ -101,6 +101,18 @@ namespace shopping_bag.Services
             await _context.SaveChangesAsync();
 
             return new ServiceResponse<bool>(true);
+        }
+
+        public async Task<ServiceResponse<ShoppingList>> GetShoppingListById(long shoppingListId)
+        {
+            var shoppingList = await _context.ShoppingLists.FirstOrDefaultAsync(s => s.Id == shoppingListId);
+
+            if (shoppingList == null || shoppingList.Removed)
+            {
+                return new ServiceResponse<ShoppingList>(error: "Invalid shoppingListId");
+            }
+
+            return new ServiceResponse<ShoppingList>(shoppingList);
         }
 
         public async Task<ServiceResponse<IEnumerable<ShoppingList>>> GetShoppingListsByOffice(long officeId)

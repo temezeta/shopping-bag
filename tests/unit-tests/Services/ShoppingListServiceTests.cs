@@ -58,6 +58,25 @@ namespace shopping_bag_unit_tests.Services {
         }
         #endregion
 
+        #region GetShoppingListById tests 
+        [Fact]
+        public async Task GetShoppingListById_ValidId_ShoppingListReturned()
+        {
+            SetupDb();
+            var response = await _sut.GetShoppingListById(normalList.Id);
+            Assert.True(response.IsSuccess);
+        }
+
+        [Fact]
+        public async Task GetShoppingListById_InvalidId_ErrorReturned()
+        {
+            SetupDb();
+            var response = await _sut.GetShoppingListById(827);
+            Assert.False(response.IsSuccess);
+            Assert.Equal("Invalid shoppingListId", response.Error);
+        }
+        #endregion
+
         #region GetShoppingListsByOffice tests
         [Fact]
         public async Task GetShoppingListsByOffice_InvalidOfficeId_ErrorReturned()
