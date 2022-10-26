@@ -7,6 +7,7 @@
         public string? Url { get; set; }
         public string? ShopName { get; set; }
         public string? Comment { get; set; }
+        public DateTime CreatedDate { get; set; }
         public bool IsChecked { get; set; }
         public int AmountOrdered { get; set; }
         public ItemAdderUserDto? ItemAdder { get; set; }

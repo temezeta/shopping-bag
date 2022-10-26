@@ -138,6 +138,7 @@ namespace shopping_bag.Services
                 return new ServiceResponse<Item>(error: "Item with same url already in list");
             }
             var item = _mapper.Map<Item>(itemToAdd);
+            item.CreatedDate = DateTime.Now;
             shoppingList.Items.Add(item);
             await _context.SaveChangesAsync();
 
