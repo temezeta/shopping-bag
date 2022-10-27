@@ -105,7 +105,9 @@ namespace shopping_bag.Services
 
         public async Task<ServiceResponse<ShoppingList>> GetShoppingListById(long shoppingListId)
         {
-            var shoppingList = await _context.ShoppingLists.FirstOrDefaultAsync(s => s.Id == shoppingListId);
+            var shoppingList = await _context.ShoppingLists.Include(s => s.Items)
+                                                           .Include(s => s.ListDeliveryOffice)
+                                                           .FirstOrDefaultAsync(s => s.Id == shoppingListId);
 
             if (shoppingList == null || shoppingList.Removed)
             {
@@ -124,7 +126,10 @@ namespace shopping_bag.Services
                 return new ServiceResponse<IEnumerable<ShoppingList>>(error: "Invalid officeId");
             }
 
-            var shoppingLists = await _context.ShoppingLists.Include(s => s.Items).Where(s => s.OfficeId == officeId && !s.Removed).ToListAsync();
+            var shoppingLists = await _context.ShoppingLists.Include(s => s.Items)
+                                                            .Include(s => s.ListDeliveryOffice)
+                                                            .Where(s => s.OfficeId == officeId && !s.Removed)
+                                                            .ToListAsync();
             return new ServiceResponse<IEnumerable<ShoppingList>>(shoppingLists);
         }
 

@@ -63,7 +63,7 @@ namespace shopping_bag.Controllers
         }
 
         [HttpGet]
-        [Route("items")]
+        [Route("byid")]
         public async Task<ActionResult<ShoppingListDto>> GetShoppingListById(long shoppingListId)
         {
             var response = await _shoppingListService.GetShoppingListById(shoppingListId);

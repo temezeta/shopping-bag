@@ -58,14 +58,7 @@ namespace shopping_bag_unit_tests.Services {
         }
         #endregion
 
-        #region GetShoppingListById tests 
-        [Fact]
-        public async Task GetShoppingListById_ValidId_ShoppingListReturned()
-        {
-            SetupDb();
-            var response = await _sut.GetShoppingListById(normalList.Id);
-            Assert.True(response.IsSuccess);
-        }
+        #region GetShoppingListById test
 
         [Fact]
         public async Task GetShoppingListById_InvalidId_ErrorReturned()
