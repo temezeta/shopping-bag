@@ -14,7 +14,7 @@ namespace shopping_bag_unit_tests.Services {
         private readonly AppDbContext _context;
         private readonly ShoppingListService _sut;
 
-        private readonly Office testOffice;
+        private readonly Office testOffice, listOffice;
         private readonly User normalUser, adminUser;
         private readonly ShoppingList normalList, dueDatePassedList, notStartedList, orderedList;
         private readonly Item ownItemInList, ownItem2InList, othersItemInList, itemInDueDatePassedList, itemInOrderedList;
@@ -32,14 +32,15 @@ namespace shopping_bag_unit_tests.Services {
             _sut = new ShoppingListService(_context, mapper);
 
             testOffice = new Office() { Id = 1, Name = "Tampere" };
+            listOffice = new Office() { Id = 2, Name = "Helsinki" };
 
             normalUser = new User() { Id = 1, UserRoles = new List<UserRole>() { new UserRole() { RoleId = 1, RoleName = "User" } } };
             adminUser = new User() { Id = 1, UserRoles = new List<UserRole>() { new UserRole() { RoleId = 1, RoleName = "Admin" } } };
 
-            normalList = new ShoppingList() { Id = 1, Name = "Test list", DueDate = DateTime.Now.AddMinutes(10), Ordered = false };
-            dueDatePassedList = new ShoppingList() { Id = 2, Name = "Test list 2", DueDate = DateTime.Now.AddMinutes(-10), Ordered = false };
-            notStartedList = new ShoppingList() { Id = 3, Name = "Test list 3", Ordered = false };
-            orderedList = new ShoppingList() { Id = 4, Name = "Test list 2", DueDate = DateTime.Now.AddMinutes(-10), Ordered = true };
+            normalList = new ShoppingList() { Id = 1, Name = "Test list", DueDate = DateTime.Now.AddMinutes(10), Ordered = false, ListDeliveryOffice = listOffice };
+            dueDatePassedList = new ShoppingList() { Id = 2, Name = "Test list 2", DueDate = DateTime.Now.AddMinutes(-10), Ordered = false, ListDeliveryOffice = listOffice };
+            notStartedList = new ShoppingList() { Id = 3, Name = "Test list 3", Ordered = false, ListDeliveryOffice = listOffice };
+            orderedList = new ShoppingList() { Id = 4, Name = "Test list 2", DueDate = DateTime.Now.AddMinutes(-10), Ordered = true, ListDeliveryOffice = listOffice };
 
             ownItemInList = new Item() { Id = 1, Name = "Own item in list", UserId = 1, ShoppingListId = normalList.Id, ShoppingList = normalList };
             ownItem2InList = new Item() { Id = 2, Name = "Own item in list 2", UserId = 1, ShoppingListId = normalList.Id, ShoppingList = normalList };
@@ -59,6 +60,12 @@ namespace shopping_bag_unit_tests.Services {
         #endregion
 
         #region GetShoppingListById test
+        [Fact]
+        public async Task GetShoppingListById_ValidId_ShoppingListReturned() {
+            SetupDb();
+            var response = await _sut.GetShoppingListById(normalList.Id);
+            Assert.True(response.IsSuccess);
+        }
 
         [Fact]
         public async Task GetShoppingListById_InvalidId_ErrorReturned()
@@ -480,8 +487,10 @@ namespace shopping_bag_unit_tests.Services {
             _context.RemoveRange(_context.Items.ToList());
             _context.RemoveRange(_context.Offices.ToList());
 
-            _context.Offices.AddRange(testOffice);
+            _context.Offices.AddRange(testOffice, listOffice);
+            _context.SaveChanges();
             _context.ShoppingLists.AddRange(normalList, dueDatePassedList, notStartedList, orderedList);
+            _context.SaveChanges();
             _context.Items.AddRange(ownItemInList, ownItem2InList, othersItemInList, itemInDueDatePassedList, itemInOrderedList);
             _context.SaveChanges();
         }
