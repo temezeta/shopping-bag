@@ -63,6 +63,20 @@ namespace shopping_bag.Controllers
         }
 
         [HttpGet]
+        [Route("byid")]
+        public async Task<ActionResult<ShoppingListDto>> GetShoppingListById(long shoppingListId)
+        {
+            var response = await _shoppingListService.GetShoppingListById(shoppingListId);
+
+            if (!response.IsSuccess)
+            {
+                return BadRequest(response.Error);
+            }
+
+            return Ok(_mapper.Map<ShoppingListDto>(response.Data));
+        }
+
+        [HttpGet]
         [Route("")]
         public async Task<ActionResult<IEnumerable<ShoppingListDto>>> GetShoppingListsByOffice(long officeId)
         {

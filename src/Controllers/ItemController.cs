@@ -60,11 +60,5 @@ namespace shopping_bag.Controllers {
             }
             return Ok(_mapper.Map<ItemDto>(response.Data));
         }
-
-        [HttpGet]
-        [Route("{itemId}")]
-        public async Task<ActionResult<ItemDto>> GetItem(long itemId) {
-            throw new NotImplementedException();
-        }
     }
 }
