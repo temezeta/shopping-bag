@@ -18,6 +18,7 @@ namespace shopping_bag_unit_tests.Services {
         private readonly User normalUser, adminUser;
         private readonly ShoppingList normalList, dueDatePassedList, notStartedList, orderedList;
         private readonly Item ownItemInList, ownItem2InList, othersItemInList, itemInDueDatePassedList, itemInOrderedList;
+        private readonly UserRole normalRole, adminRole;
 
         public ShoppingListServiceTests() {
             var options = new DbContextOptionsBuilder<AppDbContext>()
@@ -34,8 +35,10 @@ namespace shopping_bag_unit_tests.Services {
             testOffice = new Office() { Id = 1, Name = "Tampere" };
             listOffice = new Office() { Id = 2, Name = "Helsinki" };
 
-            normalUser = new User() { Id = 1, UserRoles = new List<UserRole>() { new UserRole() { RoleId = 1, RoleName = "User" } } };
-            adminUser = new User() { Id = 1, UserRoles = new List<UserRole>() { new UserRole() { RoleId = 1, RoleName = "Admin" } } };
+            normalRole = new UserRole() { RoleId = 1, RoleName = "User" };
+            adminRole = new UserRole() { RoleId = 2, RoleName = "Admin" };
+            normalUser = new User() { Id = 1, UserRoles = new List<UserRole>() { normalRole }, Email = "", FirstName = "", LastName = "", PasswordHash = Array.Empty<byte>(), PasswordSalt = Array.Empty<byte>() };
+            adminUser = new User() { Id = 2, UserRoles = new List<UserRole>() { adminRole }, Email = "", FirstName = "", LastName = "", PasswordHash = Array.Empty<byte>(), PasswordSalt = Array.Empty<byte>() };
 
             normalList = new ShoppingList() { Id = 1, Name = "Test list", DueDate = DateTime.Now.AddMinutes(10), Ordered = false, ListDeliveryOffice = listOffice };
             dueDatePassedList = new ShoppingList() { Id = 2, Name = "Test list 2", DueDate = DateTime.Now.AddMinutes(-10), Ordered = false, ListDeliveryOffice = listOffice };
@@ -482,11 +485,56 @@ namespace shopping_bag_unit_tests.Services {
         }
         #endregion
 
+        #region UpdateLikeStatus Tests
+        [Fact]
+        public async Task UpdateLikeStatus_NotLikedListItem_ItemIsLiked() {
+            SetupDb();
+
+            var result = await _sut.UpdateLikeStatus(normalUser, ownItemInList.Id, false);
+            Assert.True(result.IsSuccess);
+
+            var item = _context.Items.Include(i => i.UsersWhoLiked).FirstOrDefault(i => i.Id == ownItemInList.Id);
+            Assert.NotNull(item);
+            Assert.Contains(normalUser, item.UsersWhoLiked);
+        }
+
+        [Fact]
+        public async Task UpdateLikeStatus_LikedListItem_ItemIsUnliked() {
+            SetupDb();
+
+            var result = await _sut.UpdateLikeStatus(normalUser, ownItemInList.Id, false);
+            Assert.True(result.IsSuccess);
+
+            result = await _sut.UpdateLikeStatus(normalUser, ownItemInList.Id, true);
+            Assert.True(result.IsSuccess);
+
+            var item = _context.Items.Include(i => i.UsersWhoLiked).FirstOrDefault(i => i.Id == ownItemInList.Id);
+            Assert.NotNull(item);
+            Assert.DoesNotContain(normalUser, item.UsersWhoLiked);
+        }
+
+        [Fact]
+        public async Task UpdateLikeStatus_InvalidItem_Error() {
+            SetupDb();
+
+            var result = await _sut.UpdateLikeStatus(normalUser, itemInOrderedList.Id, false);
+            Assert.False(result.IsSuccess);
+            Assert.Equal("You can only (un)like active list's items", result.Error);
+        }
+        #endregion
+
         private void SetupDb() {
             _context.RemoveRange(_context.ShoppingLists.ToList());
             _context.RemoveRange(_context.Items.ToList());
             _context.RemoveRange(_context.Offices.ToList());
+            _context.RemoveRange(_context.Users.ToList());
+            _context.RemoveRange(_context.UserRoles.ToList());
+            _context.SaveChanges();
 
+            _context.UserRoles.AddRange(normalRole, adminRole);
+            _context.SaveChanges();
+            _context.Users.AddRange(normalUser, adminUser);
+            _context.SaveChanges();
             _context.Offices.AddRange(testOffice, listOffice);
             _context.SaveChanges();
             _context.ShoppingLists.AddRange(normalList, dueDatePassedList, notStartedList, orderedList);

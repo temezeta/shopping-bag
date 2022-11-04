@@ -18,5 +18,6 @@ namespace shopping_bag.Models {
         public ShoppingList ShoppingList { get; set; }
         public long? UserId { get; set; }
         public User.User? ItemAdder { get; set; }
+        public List<User.User> UsersWhoLiked { get; set; } = new List<User.User>();
     }
 }

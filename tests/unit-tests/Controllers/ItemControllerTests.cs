@@ -95,5 +95,27 @@ namespace shopping_bag_unit_tests.Controllers {
             Assert.Equal("Error", brResult.Value);
         }
         #endregion
+
+        #region LikeItem Tests
+        [Fact]
+        public async Task LikeItem_ServiceResponseOk_ReturnsOk() {
+            var serviceResponse = new ServiceResponse<bool>(true);
+            _shoppingListService.Setup(x => x.UpdateLikeStatus(It.IsAny<User>(), It.IsAny<long>(), It.IsAny<bool>())).ReturnsAsync(serviceResponse);
+            var result = await _sut.LikeItem(1, false);
+            var okResult = result as OkResult;
+            Assert.NotNull(okResult);
+        }
+
+        [Fact]
+        public async Task LikeItem_ServiceResponseError_ReturnsBadRequest() {
+            var serviceResponse = new ServiceResponse<bool>(error: "Error");
+            _shoppingListService.Setup(x => x.UpdateLikeStatus(It.IsAny<User>(), It.IsAny<long>(), It.IsAny<bool>())).ReturnsAsync(serviceResponse);
+            var result = await _sut.LikeItem(1, false);
+            var brResult = result as BadRequestObjectResult;
+            Assert.NotNull(brResult);
+            Assert.NotNull(brResult.Value);
+            Assert.Equal("Error", brResult.Value);
+        }
+        #endregion
     }
 }

@@ -126,7 +126,7 @@ namespace shopping_bag.Services
                 return new ServiceResponse<IEnumerable<ShoppingList>>(error: "Invalid officeId");
             }
 
-            var shoppingLists = await _context.ShoppingLists.Include(s => s.Items)
+            var shoppingLists = await _context.ShoppingLists.Include(s => s.Items).ThenInclude(i => i.UsersWhoLiked)
                                                             .Include(s => s.ListDeliveryOffice)
                                                             .Where(s => s.OfficeId == officeId && !s.Removed)
                                                             .ToListAsync();
@@ -164,14 +164,14 @@ namespace shopping_bag.Services
 
         public async Task<ServiceResponse<bool>> RemoveItemFromShoppingList(User user, long itemId) {
             var item = await _context.Items.Include(i => i.ShoppingList).FirstOrDefaultAsync(i => i.Id == itemId);
-            if(item == null || item.ShoppingList.Removed) {
+            var result = CanUserInteractWithItem(user, item);
+            if(result == ItemStatus.NOT_FOUND || result == ItemStatus.LIST_REMOVED) {
                 return new ServiceResponse<bool>(error: "Item doesn't exist.");
             }
-            var isAdmin = user.UserRoles.Any(r => r.RoleName.Equals(Roles.AdminRole));
-            if(!isAdmin && (item.ShoppingList.DueDate < DateTime.Now || item.ShoppingList.Ordered)) {
+            if(result == ItemStatus.LIST_ALREADY_ORDERED || result == ItemStatus.LIST_DUE_DATE_PASSED) {
                 return new ServiceResponse<bool>(error: "Can't remove items from ordered lists");
             }
-            if (!isAdmin && item.UserId != user.Id) {
+            if (result == ItemStatus.NOT_OWN_ITEM) {
                 return new ServiceResponse<bool>(error: "You can only remove items added by you");
             }
             _context.Items.Remove(item);
@@ -181,17 +181,18 @@ namespace shopping_bag.Services
 
         public async Task<ServiceResponse<Item>> ModifyItem(User user, ModifyItemDto itemToModify, long itemId) {
             var item = await _context.Items.Include(i => i.ShoppingList).FirstOrDefaultAsync(i => i.Id == itemId);
-            if (item == null || item.ShoppingList.Removed) {
+            var result = CanUserInteractWithItem(user, item);
+            if (result == ItemStatus.NOT_FOUND || result == ItemStatus.LIST_REMOVED) {
                 return new ServiceResponse<Item>(error: "Item doesn't exist.");
             }
             var isAdmin = user.UserRoles.Any(r => r.RoleName.Equals(Roles.AdminRole));
-            if(!isAdmin && user.Id != item.UserId) {
+            if(result == ItemStatus.NOT_OWN_ITEM) {
                 return new ServiceResponse<Item>(error: "You can only modify items you have added");
             }
-            if (!isAdmin && item.ShoppingList.Ordered) {
+            if (result == ItemStatus.LIST_ALREADY_ORDERED) {
                 return new ServiceResponse<Item>(error: "Shopping list already ordered");
             }
-            if (!isAdmin && item.ShoppingList.DueDate != null && item.ShoppingList.DueDate < DateTime.Now) {
+            if (result == ItemStatus.LIST_DUE_DATE_PASSED) {
                 return new ServiceResponse<Item>(error: "Shopping list due date passed");
             }
             if(string.IsNullOrEmpty(itemToModify.Name) && string.IsNullOrEmpty(itemToModify.Url)) {
@@ -212,6 +213,54 @@ namespace shopping_bag.Services
             _mapper.Map(itemToModify, item);
             await _context.SaveChangesAsync();
             return new ServiceResponse<Item>(item);
+        }
+
+        public async Task<ServiceResponse<bool>> UpdateLikeStatus(User user, long itemId, bool unlike) {
+            var item = await _context.Items.Include(i => i.ShoppingList).Include(i => i.UsersWhoLiked).FirstOrDefaultAsync(i => i.Id == itemId);
+            var result = CanUserInteractWithItem(user, item);
+            if(result == ItemStatus.NOT_FOUND || result == ItemStatus.LIST_REMOVED) {
+                return new ServiceResponse<bool>(error: "Item doesn't exist.");
+            }
+            if(result == ItemStatus.LIST_DUE_DATE_PASSED || result == ItemStatus.LIST_ALREADY_ORDERED) {
+                return new ServiceResponse<bool>(error: "You can only (un)like active list's items");
+            }
+            var liked = item.UsersWhoLiked.Any(u => u.Id == user.Id);
+            if (!unlike) {
+                if (liked) {
+                    return new ServiceResponse<bool>(error: "Already liked");
+                }
+                item.UsersWhoLiked.Add(user);
+            }else if(unlike) {
+                if(!liked) {
+                    return new ServiceResponse<bool>(error: "Already unliked");
+                }
+                item.UsersWhoLiked.RemoveAll(u => u.Id == user.Id);
+            }
+            await _context.SaveChangesAsync();
+            return new ServiceResponse<bool>(true);
+        }
+
+        private ItemStatus CanUserInteractWithItem(User user, Item? item) {
+            if (item == null) {
+                return ItemStatus.NOT_FOUND;
+            }
+            if(item.ShoppingList.Removed) {
+                return ItemStatus.LIST_REMOVED;
+            }
+            var isAdmin = user.UserRoles.Any(r => r.RoleName.Equals(Roles.AdminRole));
+            if (!isAdmin && item.ShoppingList.Ordered) {
+                return ItemStatus.LIST_ALREADY_ORDERED;
+            }
+            if (!isAdmin && item.ShoppingList.DueDate != null && item.ShoppingList.DueDate < DateTime.Now) {
+                return ItemStatus.LIST_DUE_DATE_PASSED;
+            }
+            if (!isAdmin && item.UserId != user.Id) {
+                return ItemStatus.NOT_OWN_ITEM;
+            }
+            return ItemStatus.OK;
+        }
+        private enum ItemStatus {
+            OK, NOT_FOUND, LIST_REMOVED, NOT_OWN_ITEM, LIST_ALREADY_ORDERED, LIST_DUE_DATE_PASSED
         }
         #endregion
     }
