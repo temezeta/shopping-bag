@@ -148,9 +148,6 @@ namespace shopping_bag.Services
             if (shoppingList.DueDate != null && shoppingList.DueDate < DateTime.Now) {
                 return new ServiceResponse<Item>(error: "Shopping list due date passed");
             }
-            if(!string.IsNullOrEmpty(itemToAdd.Name) && shoppingList.Items.Any(i => itemToAdd.Name.ToLower().Equals(i.Name?.ToLower()))) {
-                return new ServiceResponse<Item>(error: "Item with same name already in list");
-            }
             if (!string.IsNullOrEmpty(itemToAdd.Url) && shoppingList.Items.Any(i => itemToAdd.Url.ToLower().Equals(i.Url?.ToLower()))) {
                 return new ServiceResponse<Item>(error: "Item with same url already in list");
             }
@@ -197,9 +194,6 @@ namespace shopping_bag.Services
             }
             if(string.IsNullOrEmpty(itemToModify.Name) && string.IsNullOrEmpty(itemToModify.Url)) {
                 return new ServiceResponse<Item>(error: "Item must have a name or url");
-            }
-            if (!string.IsNullOrEmpty(itemToModify.Name) && item.ShoppingList.Items.Any(i => i.Id != item.Id && itemToModify.Name.ToLower().Equals(i.Name?.ToLower()))) {
-                return new ServiceResponse<Item>(error: "Item with same name already in list");
             }
             if (!string.IsNullOrEmpty(itemToModify.Url) && item.ShoppingList.Items.Any(i => i.Id != item.Id && itemToModify.Url.ToLower().Equals(i.Url?.ToLower()))) {
                 return new ServiceResponse<Item>(error: "Item with same url already in list");
