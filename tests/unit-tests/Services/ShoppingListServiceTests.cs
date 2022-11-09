@@ -241,24 +241,6 @@ namespace shopping_bag_unit_tests.Services {
         }
 
         [Fact]
-        public async Task AddItem_DuplicateName_ReturnsError() {
-            SetupDb();
-
-            // Ensure service result ok
-            var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = normalList.Id, Name = "Test item" });
-            Assert.True(result.IsSuccess);
-
-            // Ensure service result error
-            result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = normalList.Id, Name = "Test item" });
-            Assert.False(result.IsSuccess);
-            Assert.Equal("Item with same name already in list", result.Error);
-
-            // Ensure only first item added to list.
-            var list = _context.ShoppingLists.Include(s => s.Items).FirstOrDefault(s => s.Items.Count(i => i.Name == "Test item") == 1);
-            Assert.NotNull(list);
-        }
-
-        [Fact]
         public async Task AddItem_DuplicateUrl_ReturnsError() {
             SetupDb();
 
@@ -420,18 +402,6 @@ namespace shopping_bag_unit_tests.Services {
             Assert.NotNull(item);
             Assert.Equal("Test item", item.Name);
             Assert.Equal("New url", item.Url);
-        }
-
-        [Fact]
-        public async Task ModifyItem_DuplicateName_ItemNotModified() {
-            SetupDb();
-
-            var result = await _sut.ModifyItem(normalUser, new ModifyItemDto() { Name = "Test item"}, ownItemInList.Id);
-            Assert.True(result.IsSuccess);
-
-            result = await _sut.ModifyItem(normalUser, new ModifyItemDto() { Name = "Test item"}, ownItem2InList.Id);
-            Assert.False(result.IsSuccess);
-            Assert.Equal("Item with same name already in list", result.Error);
         }
 
         [Fact]
