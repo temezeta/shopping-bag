@@ -177,7 +177,7 @@ namespace shopping_bag.Services
         }
 
         public async Task<ServiceResponse<Item>> ModifyItem(User user, ModifyItemDto itemToModify, long itemId) {
-            var item = await _context.Items.Include(i => i.ShoppingList).FirstOrDefaultAsync(i => i.Id == itemId);
+            var item = await _context.Items.Include(i => i.ShoppingList).ThenInclude(list => list.Items).FirstOrDefaultAsync(i => i.Id == itemId);
             var result = CanUserInteractWithItem(user, item);
             if (result == ItemStatus.NOT_FOUND || result == ItemStatus.LIST_REMOVED) {
                 return new ServiceResponse<Item>(error: "Item doesn't exist.");
