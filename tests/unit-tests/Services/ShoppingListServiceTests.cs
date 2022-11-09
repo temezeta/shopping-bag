@@ -52,7 +52,7 @@ namespace shopping_bag_unit_tests.Services {
             itemInOrderedList = new Item() { Id = 5, Name = "Item in orderedList", UserId = 1, ShoppingListId = orderedList.Id, ShoppingList = orderedList };
         }
 
-        #region AddShoppingList tests
+        #region AddShoppingList Tests
         [Fact]
         public async Task AddShoppingList_ListWithOnlyNameAndOffice_ShoppingListAdded()
         {
@@ -62,7 +62,7 @@ namespace shopping_bag_unit_tests.Services {
         }
         #endregion
 
-        #region GetShoppingListById test
+        #region GetShoppingListById Tests
         [Fact]
         public async Task GetShoppingListById_ValidId_ShoppingListReturned() {
             SetupDb();
@@ -80,7 +80,7 @@ namespace shopping_bag_unit_tests.Services {
         }
         #endregion
 
-        #region GetShoppingListsByOffice tests
+        #region GetShoppingListsByOffice Tests
         [Fact]
         public async Task GetShoppingListsByOffice_InvalidOfficeId_ErrorReturned()
         {
@@ -101,6 +101,21 @@ namespace shopping_bag_unit_tests.Services {
             Assert.True(result.IsSuccess);
             Assert.Single(result.Data);
         }
+        #endregion
+
+        #region OrderShoppingList Tests
+        [Fact]
+        public async Task OrderShoppingList_ValidShoppingList_ShoppingListOrderedOnlyOnce()
+        {
+            SetupDb();
+            var response = await _sut.OrderShoppingList(1);
+            Assert.True(response.IsSuccess);
+            // Order the same again
+            response = await _sut.OrderShoppingList(1);
+            Assert.False(response.IsSuccess);
+            Assert.Equal("Shoppinglist is already ordered", response.Error);
+        }
+
         #endregion
 
         #region ModifyShoppingList test
@@ -143,6 +158,8 @@ namespace shopping_bag_unit_tests.Services {
         }
 
         #endregion
+
+
 
         #region AddItemToShoppingList Tests
         [Fact]
