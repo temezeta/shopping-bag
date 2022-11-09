@@ -4,6 +4,7 @@ using shopping_bag.Config;
 using shopping_bag.DTOs.ShoppingList;
 using shopping_bag.Models;
 using shopping_bag.Models.User;
+using System.Runtime.ConstrainedExecution;
 
 namespace shopping_bag.Services
 {
@@ -35,8 +36,7 @@ namespace shopping_bag.Services
             try
             {
                 {
-                    var shoppingList = new ShoppingList
-                    {
+                    var shoppingList = new ShoppingList {
                         Name = shoppingListData.Name,
                         Comment = shoppingListData.Comment,
                         Ordered = false,
@@ -49,6 +49,24 @@ namespace shopping_bag.Services
                     };
                     _context.ShoppingLists.Add(shoppingList);
                     await _context.SaveChangesAsync();
+                    //_ = Task.Run(async () => {
+                    // Add reminders to all users in the list's office.
+                    var users = await _context.Users.Include(u => u.ReminderSettings).Where(u => u.OfficeId == shoppingListData.OfficeId).ToListAsync();
+                    foreach (var user in users) {
+                        var reminderSettings = user.ReminderSettings;
+                        if(reminderSettings == null || (reminderSettings.DueDateRemindersDisabled && reminderSettings.ExpectedRemindersDisabled)) {
+                            continue;
+                        }
+                        var reminder = new Reminder() {
+                            ShoppingListId = shoppingList.Id,
+                            UserId = user.Id,
+                            DueDaysBefore = reminderSettings.ReminderDaysBeforeDueDate,
+                            ExpectedDaysBefore = reminderSettings.ReminderDaysBeforeExpectedDate
+                        };
+                        reminderSettings.Reminders.Add(reminder);
+                        await _context.SaveChangesAsync();
+                    }
+                    //});
                     return new ServiceResponse<ShoppingList>(data: shoppingList);
                 }
             }
@@ -180,7 +198,7 @@ namespace shopping_bag.Services
         }
 
         public async Task<ServiceResponse<Item>> ModifyItem(User user, ModifyItemDto itemToModify, long itemId) {
-            var item = await _context.Items.Include(i => i.ShoppingList).FirstOrDefaultAsync(i => i.Id == itemId);
+            var item = await _context.Items.Include(i => i.ShoppingList).ThenInclude(l => l.Items).FirstOrDefaultAsync(i => i.Id == itemId);
             var result = CanUserInteractWithItem(user, item);
             if (result == ItemStatus.NOT_FOUND || result == ItemStatus.LIST_REMOVED) {
                 return new ServiceResponse<Item>(error: "Item doesn't exist.");

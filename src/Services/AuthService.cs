@@ -57,6 +57,14 @@ namespace shopping_bag.Services
                         VerificationToken = verificationToken
                     };
                     user.UserRoles.Add(defaultRole);
+                    var reminderSettings = new ReminderSettings() {
+                        ReminderDaysBeforeDueDate = new List<int>() { 2 },
+                        ReminderDaysBeforeExpectedDate = new List<int>(),
+                        DueDateRemindersDisabled = false,
+                        ExpectedRemindersDisabled = false,
+                        UserId = user.Id
+                    };
+                    user.ReminderSettings = reminderSettings;
                     _context.Users.Add(user);
                     _context.SaveChanges();
                     transaction.Commit();
