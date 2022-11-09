@@ -89,5 +89,21 @@ namespace shopping_bag.Controllers
 
             return Ok(_mapper.Map<IEnumerable<ShoppingListDto>>(response.Data));
         }
+
+        [HttpPut]
+        [Authorize(Roles = "Admin")]
+        [Route("order")]
+        public async Task<ActionResult<bool>> OrderShoppingList(long shoppingListId)
+        {
+            var response = await _shoppingListService.OrderShoppingList(shoppingListId);
+
+            if (!response.IsSuccess)
+            {
+                return BadRequest(response.Error);
+            }
+
+            return Ok();
+        }
+
     }
 }

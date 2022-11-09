@@ -133,6 +133,26 @@ namespace shopping_bag.Services
             return new ServiceResponse<IEnumerable<ShoppingList>>(shoppingLists);
         }
 
+        public async Task<ServiceResponse<bool>> OrderShoppingList(long shoppingListId)
+        {
+            var shoppingList = await _context.ShoppingLists.FirstOrDefaultAsync(s => s.Id == shoppingListId);
+
+            if (shoppingList == null || shoppingList.Removed)
+            {
+                return new ServiceResponse<bool>(error: "Invalid shoppingListId");
+            }
+
+            if (shoppingList.Ordered)
+            {
+                return new ServiceResponse<bool>(error: "Shoppinglist is already ordered");
+            }
+
+            shoppingList.Ordered = true;
+            await _context.SaveChangesAsync();
+
+            return new ServiceResponse<bool>(true);
+        }
+
         #region Items
         public async Task<ServiceResponse<Item>> AddItemToShoppingList(AddItemDto itemToAdd) {
             if (string.IsNullOrEmpty(itemToAdd.Url) && string.IsNullOrEmpty(itemToAdd.Name)) {
