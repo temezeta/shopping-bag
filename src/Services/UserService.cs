@@ -41,6 +41,28 @@ namespace shopping_bag.Services {
             return new ServiceResponse<IEnumerable<User>>(users);
         }
 
+        public async Task<ServiceResponse<bool>> RemoveUser(User user, long userId)
+        {
+            var removeUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (removeUser == null || removeUser.Removed)
+            {
+                return new ServiceResponse<bool>(error: "User not found");
+            }
+
+            var isAdmin = user.UserRoles.Any(r => r.RoleName.Equals(Roles.AdminRole));
+
+            if (!isAdmin && user.Id != userId)
+            {
+                return new ServiceResponse<bool>(error: "You can only remove your own account");
+            }
+
+            removeUser.Removed = true;
+            await _context.SaveChangesAsync();
+
+            return new ServiceResponse<bool>(true);
+        }
+
         public async Task<ServiceResponse<User>> ChangeUserPassword(long id, ChangePasswordDto request)
         {
             var user = await _context.Users.Include(u => u.UserRoles).Include(u => u.HomeOffice).FirstOrDefaultAsync(u => u.Id == id);

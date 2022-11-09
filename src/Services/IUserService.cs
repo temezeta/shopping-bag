@@ -9,6 +9,7 @@ namespace shopping_bag.Services
         Task<ServiceResponse<User>> GetUserByEmail(string email);
         Task<ServiceResponse<User>> GetUserById(long id);
         Task<ServiceResponse<IEnumerable<User>>> GetUsers();
+        Task<ServiceResponse<bool>> RemoveUser(User user, long userId);
         Task<ServiceResponse<User>> ChangeUserPassword(long id, ChangePasswordDto request);
     }
 }
