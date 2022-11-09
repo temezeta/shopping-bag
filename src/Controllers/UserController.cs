@@ -72,8 +72,8 @@ namespace shopping_bag.Controllers {
         }
 
         [HttpDelete]
-        [Route("remove")]
-        public async Task<ActionResult<bool>> RemoveUser(long userId)
+        [Route("")]
+        public async Task<ActionResult> RemoveUser(long userId)
         {
             var user = await GetCurrentUser();
 
