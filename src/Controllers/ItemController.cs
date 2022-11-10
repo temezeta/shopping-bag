@@ -71,7 +71,8 @@ namespace shopping_bag.Controllers {
             if (!response.IsSuccess) {
                 return BadRequest(response.Error);
             }
-            return Ok();
+
+            return Ok(_mapper.Map<ItemDto>(response.Data));
         }
     }
 }

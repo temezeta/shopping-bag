@@ -229,29 +229,29 @@ namespace shopping_bag.Services
             return new ServiceResponse<Item>(item);
         }
 
-        public async Task<ServiceResponse<bool>> UpdateLikeStatus(User user, long itemId, bool unlike) {
+        public async Task<ServiceResponse<Item>> UpdateLikeStatus(User user, long itemId, bool unlike) {
             var item = await _context.Items.Include(i => i.ShoppingList).Include(i => i.UsersWhoLiked).FirstOrDefaultAsync(i => i.Id == itemId);
             var result = CanUserInteractWithItem(user, item);
             if(result == ItemStatus.NOT_FOUND || result == ItemStatus.LIST_REMOVED) {
-                return new ServiceResponse<bool>(error: "Item doesn't exist.");
+                return new ServiceResponse<Item>(error: "Item doesn't exist.");
             }
             if(result == ItemStatus.LIST_DUE_DATE_PASSED || result == ItemStatus.LIST_ALREADY_ORDERED) {
-                return new ServiceResponse<bool>(error: "You can only (un)like active list's items");
+                return new ServiceResponse<Item>(error: "You can only (un)like active list's items");
             }
             var liked = item.UsersWhoLiked.Any(u => u.Id == user.Id);
             if (!unlike) {
                 if (liked) {
-                    return new ServiceResponse<bool>(error: "Already liked");
+                    return new ServiceResponse<Item>(error: "Already liked");
                 }
                 item.UsersWhoLiked.Add(user);
             }else if(unlike) {
                 if(!liked) {
-                    return new ServiceResponse<bool>(error: "Already unliked");
+                    return new ServiceResponse<Item>(error: "Already unliked");
                 }
                 item.UsersWhoLiked.RemoveAll(u => u.Id == user.Id);
             }
             await _context.SaveChangesAsync();
-            return new ServiceResponse<bool>(true);
+            return new ServiceResponse<Item>(item);
         }
 
         private ItemStatus CanUserInteractWithItem(User user, Item? item) {

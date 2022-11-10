@@ -13,7 +13,7 @@ namespace shopping_bag.Services
         Task<ServiceResponse<bool>> RemoveItemFromShoppingList(User user, long itemId);
         Task<ServiceResponse<Item>> ModifyItem(User user, ModifyItemDto itemToModify, long itemId);
         Task<ServiceResponse<ShoppingList>> GetShoppingListById(long shoppingListId);
-        Task<ServiceResponse<bool>> UpdateLikeStatus(User user, long itemId, bool unlike);
+        Task<ServiceResponse<Item>> UpdateLikeStatus(User user, long itemId, bool unlike);
         Task<ServiceResponse<IEnumerable<ShoppingList>>> GetShoppingListsByOffice(long officeId);
         Task<ServiceResponse<bool>> OrderShoppingList(long shoppingListId);
     }

@@ -10,6 +10,7 @@
         public DateTime CreatedDate { get; set; }
         public bool IsChecked { get; set; }
         public int AmountOrdered { get; set; }
+        public long ShoppingListId { get; set; }
         public RedactedUserDto? ItemAdder { get; set; }
         public IEnumerable<RedactedUserDto> UsersWhoLiked { get; set; } = new List<RedactedUserDto>();
     }
