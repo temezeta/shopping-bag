@@ -1,4 +1,5 @@
-﻿using shopping_bag.Models;
+﻿using shopping_bag.DTOs.User;
+using shopping_bag.Models;
 using shopping_bag.Models.User;
 
 namespace shopping_bag.Services
@@ -8,5 +9,6 @@ namespace shopping_bag.Services
         Task<ServiceResponse<User>> GetUserByEmail(string email);
         Task<ServiceResponse<User>> GetUserById(long id);
         Task<ServiceResponse<IEnumerable<User>>> GetUsers();
+        Task<ServiceResponse<User>> ChangeUserPassword(long id, ChangePasswordDto request);
     }
 }
