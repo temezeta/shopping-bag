@@ -49,5 +49,26 @@ namespace shopping_bag.Controllers {
             var userDto = _mapper.Map<UserDto>(user);
             return userDto;
         }
+
+        [HttpPut]
+        [Route("change-password")]
+        public async Task<ActionResult<UserDto>> ChangePassword([FromBody] ChangePasswordDto request)
+        {
+            var user = await GetCurrentUser();
+
+            if(user == null)
+            {
+                return BadRequest();
+            }
+
+            var response = await _userService.ChangeUserPassword(user.Id, request);
+
+            if (!response.IsSuccess)
+            {
+                return BadRequest();
+            }
+
+            return Ok(_mapper.Map<UserDto>(response.Data));
+        }
     }
 }

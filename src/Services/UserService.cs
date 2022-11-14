@@ -2,6 +2,8 @@
 using shopping_bag.Models.User;
 using shopping_bag.Models;
 using shopping_bag.Config;
+using shopping_bag.DTOs.User;
+using shopping_bag.Utility;
 
 namespace shopping_bag.Services {
     public class UserService : IUserService
@@ -37,6 +39,28 @@ namespace shopping_bag.Services {
         public async Task<ServiceResponse<IEnumerable<User>>> GetUsers() {
             var users = await _context.Users.Include(u => u.UserRoles).Include(u => u.HomeOffice).ToListAsync();
             return new ServiceResponse<IEnumerable<User>>(users);
+        }
+
+        public async Task<ServiceResponse<User>> ChangeUserPassword(long id, ChangePasswordDto request)
+        {
+            var user = await _context.Users.Include(u => u.UserRoles).Include(u => u.HomeOffice).FirstOrDefaultAsync(u => u.Id == id);
+
+            if(user == null)
+            {
+                return new ServiceResponse<User>(error: "User not found");
+            }
+            else if(!AuthHelper.VerifyPasswordHash(request.CurrentPassword, user.PasswordHash, user.PasswordSalt))
+            {
+                return new ServiceResponse<User>(error: "Invalid password");
+            }
+
+            AuthHelper.CreatePasswordHash(request.NewPassword, out byte[] passwordHash, out byte[] passwordSalt);
+
+            user.PasswordHash = passwordHash;
+            user.PasswordSalt = passwordSalt;
+            await _context.SaveChangesAsync();
+
+            return new ServiceResponse<User>(user);
         }
     }
 }
