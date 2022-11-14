@@ -28,7 +28,8 @@ namespace shopping_bag_unit_tests.Services
             });
 
             Assert.NotNull(res);
-            Assert.False(res.IsSuccess, "User not found");
+            Assert.False(res.IsSuccess);
+            Assert.Equal("User not found", res.Error);
         }
 
         [Fact]
@@ -49,7 +50,8 @@ namespace shopping_bag_unit_tests.Services
             var res = await _sut.ChangeUserPassword(1, changeDto);
 
             Assert.NotNull(res);
-            Assert.False(res.IsSuccess, "Invalid password");
+            Assert.False(res.IsSuccess);
+            Assert.Equal("Invalid password", res.Error);
         }
 
         [Fact]
