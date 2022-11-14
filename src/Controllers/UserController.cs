@@ -52,7 +52,7 @@ namespace shopping_bag.Controllers {
 
         [HttpPut]
         [Route("change-password")]
-        public async Task<ActionResult> ChangePassword([FromBody] ChangePasswordDto request)
+        public async Task<ActionResult<UserDto>> ChangePassword([FromBody] ChangePasswordDto request)
         {
             var user = await GetCurrentUser();
 
