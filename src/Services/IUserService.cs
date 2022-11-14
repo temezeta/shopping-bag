@@ -6,6 +6,7 @@ namespace shopping_bag.Services
 {
     public interface IUserService
     {
+        Task<ServiceResponse<User>> IsUserRemoved(string email);
         Task<ServiceResponse<User>> GetUserByEmail(string email);
         Task<ServiceResponse<User>> GetUserById(long id);
         Task<ServiceResponse<IEnumerable<User>>> GetUsers();

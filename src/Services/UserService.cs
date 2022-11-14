@@ -4,6 +4,7 @@ using shopping_bag.Models;
 using shopping_bag.Config;
 using shopping_bag.DTOs.User;
 using shopping_bag.Utility;
+using System.Security.Cryptography.Xml;
 
 namespace shopping_bag.Services {
     public class UserService : IUserService
@@ -14,11 +15,23 @@ namespace shopping_bag.Services {
             _context = context;
         }
 
+        public async Task<ServiceResponse<User>> IsUserRemoved(string email)
+        {
+            var user = await _context.Users.Include(u => u.UserRoles).Include(u => u.HomeOffice).FirstOrDefaultAsync(u => u.Email == email);
+
+            if (user != null && user.Removed)
+            {
+                return new ServiceResponse<User>(data: user);
+            }
+
+            return new ServiceResponse<User>(error: "User not found");
+        }
+
         public async Task<ServiceResponse<User>> GetUserByEmail(string email)
         {
             var user = await _context.Users.Include(u => u.UserRoles).Include(u => u.HomeOffice).FirstOrDefaultAsync(u => u.Email == email);
 
-            if (user == null)
+            if (user == null || user.Removed)
             {
                 return new ServiceResponse<User>(error: "User not found");
             }

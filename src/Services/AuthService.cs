@@ -1,7 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using shopping_bag.Config;
 using shopping_bag.DTOs.User;
 using shopping_bag.Models;
+using shopping_bag.Models.Email;
 using shopping_bag.Models.User;
 using shopping_bag.Utility;
 
@@ -25,6 +27,8 @@ namespace shopping_bag.Services
                 return new ServiceResponse<string>(error: "User with email already exists");
             }
 
+            var getUser = await _userService.IsUserRemoved(request.Email);
+
             AuthHelper.CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
             var verificationToken = AuthHelper.CreateHexToken();
 
@@ -42,30 +46,55 @@ namespace shopping_bag.Services
                 return new ServiceResponse<string>(error: "User role doesn't exist in database.");
             }
 
-            try
+            if (getUser.Data != null)
             {
-                using (var transaction = _context.Database.BeginTransaction())
+                var userData = getUser.Data;
+                userData.FirstName = request.FirstName;
+                userData.LastName = request.LastName;
+                userData.Email = userData.Email;
+                userData.OfficeId = request.OfficeId;
+                userData.PasswordHash = passwordHash;
+                userData.PasswordSalt = passwordSalt;
+                userData.VerificationToken = verificationToken;
+                userData.VerifiedAt = null;
+                userData.RefreshToken = null;
+                userData.TokenCreatedAt = null;
+                userData.TokenExpiresAt = null;
+                userData.PasswordResetToken = null;
+                userData.ResetTokenExpires = null;
+                userData.Removed = false;
+
+                await _context.SaveChangesAsync();
+            } 
+            else
+            {
+                try
                 {
-                    var user = new User
+                    using (var transaction = _context.Database.BeginTransaction())
                     {
-                        FirstName = request.FirstName,
-                        LastName = request.LastName,
-                        Email = request.Email,
-                        OfficeId = request.OfficeId,
-                        PasswordHash = passwordHash,
-                        PasswordSalt = passwordSalt,
-                        VerificationToken = verificationToken
-                    };
-                    user.UserRoles.Add(defaultRole);
-                    _context.Users.Add(user);
-                    _context.SaveChanges();
-                    transaction.Commit();
-                    return new ServiceResponse<string>(data: verificationToken);
+                        var user = new User
+                        {
+                            FirstName = request.FirstName,
+                            LastName = request.LastName,
+                            Email = request.Email,
+                            OfficeId = request.OfficeId,
+                            PasswordHash = passwordHash,
+                            PasswordSalt = passwordSalt,
+                            VerificationToken = verificationToken
+                        };
+                        user.UserRoles.Add(defaultRole);
+                        _context.Users.Add(user);
+                        _context.SaveChanges();
+                        transaction.Commit();
+                    }
                 }
-            } catch(Exception ex)
-            {
-                return new ServiceResponse<string>(error: ex.Message);
+                catch (Exception ex)
+                {
+                    return new ServiceResponse<string>(error: ex.Message);
+                }
             }
+
+            return new ServiceResponse<string>(data: verificationToken);
         }
 
         public async Task<ServiceResponse<LoginData>> Login(LoginDto request)
