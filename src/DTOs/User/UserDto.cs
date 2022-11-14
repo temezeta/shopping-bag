@@ -11,5 +11,6 @@ namespace shopping_bag.DTOs.User {
         public string Email { get; set; }
         public IEnumerable<UserRoleDto> UserRoles { get; set; } = new List<UserRoleDto>();
         public OfficeDto HomeOffice { get; set; }
+        public Boolean Removed { get; set; } = false;
     }
 }

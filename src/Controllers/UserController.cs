@@ -70,5 +70,26 @@ namespace shopping_bag.Controllers {
 
             return Ok(_mapper.Map<UserDto>(response.Data));
         }
+
+        [HttpDelete]
+        [Route("")]
+        public async Task<ActionResult> RemoveUser(long userId)
+        {
+            var user = await GetCurrentUser();
+
+            if (user == null)
+            {
+                return BadRequest();
+            }
+
+            var response = await _userService.RemoveUser(user, userId);
+
+            if (!response.IsSuccess)
+            {
+                return BadRequest(response.Error);
+            }
+
+            return Ok();
+        }
     }
 }
