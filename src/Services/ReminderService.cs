@@ -29,7 +29,20 @@ namespace shopping_bag.Services {
                 return new ServiceResponse<ReminderSettings>("Invalid expected delivery date reminder interval");
             }
             var user = resp.Data;
-            user.ReminderSettings = _mapper.Map<ReminderSettings>(settings);
+            if (user.ReminderSettings == null) {
+                user.ReminderSettings = new ReminderSettings() {
+                    UserId = userId,
+                    ReminderDaysBeforeDueDate = settings.ReminderDaysBeforeDueDate,
+                    ReminderDaysBeforeExpectedDate = settings.ReminderDaysBeforeExpectedDate,
+                    DueDateRemindersDisabled = settings.DueDateRemindersDisabled,
+                    ExpectedRemindersDisabled = settings.ExpectedRemindersDisabled
+                };
+            } else {
+                user.ReminderSettings.ReminderDaysBeforeDueDate = settings.ReminderDaysBeforeDueDate;
+                user.ReminderSettings.ReminderDaysBeforeExpectedDate = settings.ReminderDaysBeforeExpectedDate;
+                user.ReminderSettings.DueDateRemindersDisabled = settings.DueDateRemindersDisabled;
+                user.ReminderSettings.ExpectedRemindersDisabled = settings.ExpectedRemindersDisabled;
+            }
             await _context.SaveChangesAsync();
             return new ServiceResponse<ReminderSettings>(user.ReminderSettings);
         }

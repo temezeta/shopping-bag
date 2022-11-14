@@ -50,9 +50,7 @@ namespace shopping_bag.Services
                     };
                     _context.ShoppingLists.Add(shoppingList);
                     await _context.SaveChangesAsync();
-
-                    // Create reminders on background, no need to await the results
-                    _ = _reminderService.CreateRemindersForList(shoppingList.Id, shoppingListData.OfficeId);
+                    await _reminderService.CreateRemindersForList(shoppingList.Id, shoppingListData.OfficeId);
 
                     return new ServiceResponse<ShoppingList>(data: shoppingList);
                 }
