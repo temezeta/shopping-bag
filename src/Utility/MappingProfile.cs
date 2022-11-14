@@ -4,6 +4,7 @@ using shopping_bag.DTOs.User;
 using shopping_bag.Models.User;
 using shopping_bag.Models;
 using shopping_bag.DTOs.ShoppingList;
+using shopping_bag.DTOs.Reminder;
 
 namespace shopping_bag.Utility {
     public class MappingProfile : Profile {
@@ -43,6 +44,7 @@ namespace shopping_bag.Utility {
                 .ForMember(dest => dest.Items, opt => opt.Ignore())
                 .ForMember(dest => dest.Removed, opt => opt.Ignore())
                 .ForMember(dest => dest.Ordered, opt => opt.Ignore());
+            CreateMap<ReminderSettings, ReminderSettingsDto>();
         }
     }
 }
