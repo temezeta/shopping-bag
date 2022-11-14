@@ -108,7 +108,7 @@ namespace shopping_bag.Controllers
         [HttpPut]
         [Authorize(Roles = "Admin")]
         [Route("{listId}/order-amount")]
-        public async Task<ActionResult> SetOrderedAmount([FromRoute] long listId, [FromBody] OrderedAmountDto request)
+        public async Task<ActionResult<ShoppingListDto>> SetOrderedAmount([FromRoute] long listId, [FromBody] OrderedAmountDto request)
         {
             var response = await _shoppingListService.SetOrderedAmount(listId, request);
 
