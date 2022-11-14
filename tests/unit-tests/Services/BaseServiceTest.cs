@@ -36,7 +36,8 @@ namespace shopping_bag_unit_tests.Services
                 new ShoppingList() { Id = 1, Name = "Test list", DueDate = DateTime.Now.AddMinutes(10), Ordered = false, ListDeliveryOffice = Offices[1] },
                 new ShoppingList() { Id = 2, Name = "Test list 2", DueDate = DateTime.Now.AddMinutes(-10), Ordered = false, ListDeliveryOffice = Offices[1] },
                 new ShoppingList() { Id = 3, Name = "Test list 3", Ordered = false, ListDeliveryOffice = Offices[1] },
-                new ShoppingList() { Id = 4, Name = "Test list 2", DueDate = DateTime.Now.AddMinutes(-10), Ordered = true, ListDeliveryOffice = Offices[1] }
+                new ShoppingList() { Id = 4, Name = "Test list 2", DueDate = DateTime.Now.AddMinutes(-10), Ordered = true, ListDeliveryOffice = Offices[1] },
+                new ShoppingList() { Id = 5, Name = "Test list 5", DueDate = DateTime.Now.AddMinutes(-10), Ordered = true, ListDeliveryOffice = Offices[1], Removed = true}
             };
             Items = new List<Item>()
             {

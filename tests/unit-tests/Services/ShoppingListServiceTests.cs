@@ -1,12 +1,7 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
+﻿using Microsoft.EntityFrameworkCore;
 using shopping_bag.Config;
 using shopping_bag.DTOs.ShoppingList;
-using shopping_bag.Models;
-using shopping_bag.Models.User;
 using shopping_bag.Services;
-using shopping_bag.Utility;
 
 namespace shopping_bag_unit_tests.Services {
     public class ShoppingListServiceTests : BaseServiceTest {
@@ -410,6 +405,64 @@ namespace shopping_bag_unit_tests.Services {
             Assert.Equal("You can only (un)like active list's items", result.Error);
         }
         #endregion
-  
+
+        #region SetOrderedAmount
+        [Fact]
+        public async Task SetOrderedAmount_ListNotFound_ReturnsError()
+        {
+            var response = await _sut.SetOrderedAmount(100, new OrderedAmountDto
+            {
+                ItemId = 1,
+                AmountOrdered = 2
+            });
+
+            Assert.False(response.IsSuccess);
+            Assert.Equal("Invalid shopping list", response.Error);
+        }
+
+        [Fact]
+        public async Task SetOrderedAmount_ListRemoved_ReturnsError()
+        {
+            var response = await _sut.SetOrderedAmount(5, new OrderedAmountDto
+            {
+                ItemId = 1,
+                AmountOrdered = 2
+            });
+
+            Assert.False(response.IsSuccess);
+            Assert.Equal("Invalid shopping list", response.Error);
+        }
+
+        [Fact]
+        public async Task SetOrderedAmount_ItemNotOnList_ReturnsError()
+        {
+            var response = await _sut.SetOrderedAmount(1, new OrderedAmountDto
+            {
+                ItemId = 4,
+                AmountOrdered = 2
+            });
+
+            Assert.False(response.IsSuccess);
+            Assert.Equal("Item not on list", response.Error);
+        }
+
+        [Fact]
+        public async Task SetOrderedAmount_AmountSet_ReturnsShoppingList()
+        {
+            var response = await _sut.SetOrderedAmount(1, new OrderedAmountDto
+            {
+                ItemId = 1,
+                AmountOrdered = 2
+            });
+
+            Assert.True(response.IsSuccess);
+            var list = response.Data;
+            Assert.NotNull(list);
+            Assert.Equal(1, list.Id);
+            var item = list.Items.FirstOrDefault(it => it.Id == 1);
+            Assert.NotNull(item);
+            Assert.Equal(2, item.AmountOrdered);
+        }
+        #endregion
     }
 }

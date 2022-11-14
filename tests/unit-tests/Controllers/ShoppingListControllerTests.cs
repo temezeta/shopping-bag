@@ -16,7 +16,10 @@ namespace shopping_bag_unit_tests.Controllers
         public ShoppingListControllerTests()
         {
             _userService.Setup(x => x.GetUserByEmail(It.IsAny<string>())).ReturnsAsync(new ServiceResponse<User>(new User()));
-            _sut = new ShoppingListController(_userService.Object, _shoppingListService.Object, UnitTestHelper.GetMapper());
+            _sut = new ShoppingListController(_userService.Object, _shoppingListService.Object, UnitTestHelper.GetMapper())
+            {
+                ControllerContext = UnitTestHelper.GetLoggedInControllerContext()
+            };
         }
 
         [Fact]
