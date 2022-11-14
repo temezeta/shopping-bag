@@ -35,7 +35,7 @@ namespace shopping_bag_unit_tests.Controllers
                 RepeatNewPassword = "string1B?"
             });
 
-            Assert.IsType<BadRequestResult>(res);
+            Assert.IsType<BadRequestResult>(res.Result);
         }
 
         [Fact]
@@ -51,7 +51,7 @@ namespace shopping_bag_unit_tests.Controllers
                 RepeatNewPassword = "string1B?"
             });
 
-            Assert.IsType<BadRequestResult>(res);
+            Assert.IsType<BadRequestResult>(res.Result);
         }
 
         [Fact]
@@ -68,9 +68,7 @@ namespace shopping_bag_unit_tests.Controllers
             });
 
             Assert.NotNull(res);
-            var okResult = res as OkObjectResult;
-            Assert.NotNull(okResult);
-            Assert.IsType<UserDto>(okResult.Value);
+            Assert.IsType<OkObjectResult>(res.Result);
         }
         #endregion
     }
