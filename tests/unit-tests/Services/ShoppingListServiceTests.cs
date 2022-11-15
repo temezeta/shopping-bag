@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Moq;
 using shopping_bag.Config;
 using shopping_bag.DTOs.ShoppingList;
 using shopping_bag.Services;
@@ -11,7 +12,7 @@ namespace shopping_bag_unit_tests.Services {
         public ShoppingListServiceTests() : base() 
         {
             _context = GetDatabase();
-            _sut = new ShoppingListService(_context, UnitTestHelper.GetMapper());
+            _sut = new ShoppingListService(_context, UnitTestHelper.GetMapper(), new Mock<IReminderService>().Object);
         }
 
         #region AddShoppingList Tests

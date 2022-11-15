@@ -11,11 +11,13 @@ namespace shopping_bag.Services
     {
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
+        private readonly IReminderService _reminderService;
 
-        public ShoppingListService(AppDbContext context, IMapper mapper)
+        public ShoppingListService(AppDbContext context, IMapper mapper, IReminderService reminderService)
         {
             _context = context;
             _mapper = mapper;
+            _reminderService = reminderService;
         }
 
         public async Task<ServiceResponse<ShoppingList>> AddShoppingList(AddShoppingListDto shoppingListData)
@@ -35,8 +37,7 @@ namespace shopping_bag.Services
             try
             {
                 {
-                    var shoppingList = new ShoppingList
-                    {
+                    var shoppingList = new ShoppingList {
                         Name = shoppingListData.Name,
                         Comment = shoppingListData.Comment,
                         Ordered = false,
@@ -49,6 +50,8 @@ namespace shopping_bag.Services
                     };
                     _context.ShoppingLists.Add(shoppingList);
                     await _context.SaveChangesAsync();
+                    await _reminderService.CreateRemindersForList(shoppingList.Id, shoppingListData.OfficeId);
+
                     return new ServiceResponse<ShoppingList>(data: shoppingList);
                 }
             }

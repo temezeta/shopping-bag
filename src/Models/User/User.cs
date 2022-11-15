@@ -34,5 +34,8 @@ namespace shopping_bag.Models.User
         public Office HomeOffice { get; set; }
         public Boolean Removed { get; set; } = false;
         public List<Item> LikedItems { get; set; } = new List<Item>();
+        public ReminderSettings ReminderSettings { get; set; }
+        public List<Reminder> Reminders { get; set; } = new List<Reminder>();
+
     }
 }
