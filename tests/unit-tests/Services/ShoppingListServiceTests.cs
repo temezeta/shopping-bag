@@ -26,7 +26,7 @@ namespace shopping_bag_unit_tests.Services {
         #region GetShoppingListById Tests
         [Fact]
         public async Task GetShoppingListById_ValidId_ShoppingListReturned() {
-            var response = await _sut.GetShoppingListById(ShoppingLists[0].Id);
+            var response = await _sut.GetShoppingListById(NormalList.Id);
             Assert.True(response.IsSuccess);
         }
 
@@ -102,10 +102,10 @@ namespace shopping_bag_unit_tests.Services {
         [Fact]
         public async Task RemoveShoppingList_RemoveListAndTryRemoveAgain_ListRemoved()
         {
-            var remove = await _sut.RemoveShoppingList(ShoppingLists[0].Id);
+            var remove = await _sut.RemoveShoppingList(NormalList.Id);
             Assert.True(remove.IsSuccess);
 
-            var removeAgain = await _sut.RemoveShoppingList(ShoppingLists[0].Id);
+            var removeAgain = await _sut.RemoveShoppingList(NormalList.Id);
             Assert.False(removeAgain.IsSuccess);
             Assert.Equal("Invalid shoppingListId", removeAgain.Error);
         }
@@ -117,9 +117,9 @@ namespace shopping_bag_unit_tests.Services {
         [Fact]
         public async Task AddItem_ValidItem_ItemAdded() {
             // Ensure service result success.
-            var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = ShoppingLists[0].Id, Name = "Test item" });
+            var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = NormalList.Id, Name = "Test item" });
             Assert.True(result.IsSuccess);
-            Assert.Equal(ShoppingLists[0].Id, result.Data.ShoppingListId);
+            Assert.Equal(NormalList.Id, result.Data.ShoppingListId);
 
             // Ensure item added to list
             var list = _context.ShoppingLists.Include(s => s.Items).FirstOrDefault(s => s.Id == result.Data.ShoppingListId);
@@ -149,7 +149,7 @@ namespace shopping_bag_unit_tests.Services {
         [InlineData(null, "")]
         public async Task AddItem_MissingNameOrUrl_ReturnsError(string name, string url) {
             // Ensure service result error
-            var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = ShoppingLists[0].Id, Name = name, Url = url });
+            var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = NormalList.Id, Name = name, Url = url });
             Assert.False(result.IsSuccess);
             Assert.Equal("Item url or name must be given", result.Error);
 
@@ -161,7 +161,7 @@ namespace shopping_bag_unit_tests.Services {
         [Fact]
         public async Task AddItem_OrderedList_ReturnsError() {
             // Ensure service result error
-            var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = ShoppingLists[3].Id, Name = "Test item" });
+            var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = OrderedList.Id, Name = "Test item" });
             Assert.False(result.IsSuccess);
             Assert.Equal("Shopping list already ordered", result.Error);
 
@@ -173,7 +173,7 @@ namespace shopping_bag_unit_tests.Services {
         [Fact]
         public async Task AddItem_DueDatePassedList_ReturnsError() {
             // Ensure service result error
-            var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = ShoppingLists[1].Id, Name = "Test item" });
+            var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = DueDatePassedList.Id, Name = "Test item" });
             Assert.False(result.IsSuccess);
             Assert.Equal("Shopping list due date passed", result.Error);
 
@@ -185,11 +185,11 @@ namespace shopping_bag_unit_tests.Services {
         [Fact]
         public async Task AddItem_DuplicateUrl_ReturnsError() {
             // Ensure service result ok
-            var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = ShoppingLists[0].Id, Url = "http://example.com" });
+            var result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = NormalList.Id, Url = "http://example.com" });
             Assert.True(result.IsSuccess);
 
             // Ensure service result error
-            result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = ShoppingLists[0].Id, Url = "http://example.com" });
+            result = await _sut.AddItemToShoppingList(new AddItemDto() { ShoppingListId = NormalList.Id, Url = "http://example.com" });
             Assert.False(result.IsSuccess);
             Assert.Equal("Item with same url already in list", result.Error);
 
@@ -202,46 +202,46 @@ namespace shopping_bag_unit_tests.Services {
         #region RemoveItemFromShoppingList Tests
         [Fact]
         public async Task RemoveItem_UserValidListOwnItem_ItemRemoved() {
-            var result = await _sut.RemoveItemFromShoppingList(Users[0], Items[0].Id);
+            var result = await _sut.RemoveItemFromShoppingList(NormalUser, OwnItemInList.Id);
             Assert.True(result.IsSuccess);
 
-            var item = _context.Items.FirstOrDefault(i => i.Id == Items[0].Id);
+            var item = _context.Items.FirstOrDefault(i => i.Id == OwnItemInList.Id);
             Assert.Null(item);
         }
 
         [Fact]
         public async Task RemoveItem_UserValidListNotOwnItem_ItemNotRemoved() {
-            var result = await _sut.RemoveItemFromShoppingList(Users[0], Items[2].Id);
+            var result = await _sut.RemoveItemFromShoppingList(NormalUser, OthersItemInList.Id);
             Assert.False(result.IsSuccess);
 
-            var item = _context.Items.FirstOrDefault(i => i.Id == Items[2].Id);
+            var item = _context.Items.FirstOrDefault(i => i.Id == OthersItemInList.Id);
             Assert.NotNull(item);
         }
 
         [Fact]
         public async Task RemoveItem_AdminValidListNotOwnItem_ItemRemoved() {
-            var result = await _sut.RemoveItemFromShoppingList(Users[1], Items[2].Id);
+            var result = await _sut.RemoveItemFromShoppingList(AdminUser, OthersItemInList.Id);
             Assert.True(result.IsSuccess);
 
-            var item = _context.Items.FirstOrDefault(i => i.Id == Items[2].Id);
+            var item = _context.Items.FirstOrDefault(i => i.Id == OthersItemInList.Id);
             Assert.Null(item);
         }
 
         [Fact]
         public async Task RemoveItem_UserDueDatePassedList_ItemNotRemoved() {
-            var result = await _sut.RemoveItemFromShoppingList(Users[0], Items[3].Id);
+            var result = await _sut.RemoveItemFromShoppingList(NormalUser, ItemInDueDatePassedList.Id);
             Assert.False(result.IsSuccess);
 
-            var item = _context.Items.FirstOrDefault(i => i.Id == Items[3].Id);
+            var item = _context.Items.FirstOrDefault(i => i.Id == ItemInDueDatePassedList.Id);
             Assert.NotNull(item);
         }
 
         [Fact]
         public async Task RemoveItem_AdminDueDatePassedList_ItemRemoved() {
-            var result = await _sut.RemoveItemFromShoppingList(Users[1], Items[3].Id);
+            var result = await _sut.RemoveItemFromShoppingList(AdminUser, ItemInDueDatePassedList.Id);
             Assert.True(result.IsSuccess);
 
-            var item = _context.Items.FirstOrDefault(i => i.Id == Items[3].Id);
+            var item = _context.Items.FirstOrDefault(i => i.Id == ItemInDueDatePassedList.Id);
             Assert.Null(item);
         }
         #endregion
@@ -249,7 +249,7 @@ namespace shopping_bag_unit_tests.Services {
         #region ModifyItem Tests
         [Fact]
         public async Task ModifyItem_UserValidItem_ItemModified() {
-            var result = await _sut.ModifyItem(Users[0], new ModifyItemDto() { Name = "Test item", Url = "New url" }, Items[0].Id);
+            var result = await _sut.ModifyItem(NormalUser, new ModifyItemDto() { Name = "Test item", Url = "New url" }, OwnItemInList.Id);
             Assert.True(result.IsSuccess);
 
             var item = _context.Items.FirstOrDefault(i => i.Id == result.Data.Id);
@@ -259,7 +259,7 @@ namespace shopping_bag_unit_tests.Services {
         }
         [Fact]
         public async Task ModifyItem_AdminNotOwnItem_ItemModified() {
-            var result = await _sut.ModifyItem(Users[1], new ModifyItemDto() { Name = "Test item", Url = "New url" }, Items[2].Id);
+            var result = await _sut.ModifyItem(AdminUser, new ModifyItemDto() { Name = "Test item", Url = "New url" }, OthersItemInList.Id);
             Assert.True(result.IsSuccess);
 
             var item = _context.Items.FirstOrDefault(i => i.Id == result.Data.Id);
@@ -270,28 +270,28 @@ namespace shopping_bag_unit_tests.Services {
 
         [Fact]
         public async Task ModifyItem_UserNotOwnItem_ItemNotModified() {
-            var result = await _sut.ModifyItem(Users[0], new ModifyItemDto() { Name = "Test item", Url = "New url" }, Items[2].Id);
+            var result = await _sut.ModifyItem(NormalUser, new ModifyItemDto() { Name = "Test item", Url = "New url" }, OthersItemInList.Id);
             Assert.False(result.IsSuccess);
             Assert.Equal("You can only modify items you have added", result.Error);
         }
 
         [Fact]
         public async Task ModifyItem_InvalidItemId_ItemNotModified() {
-            var result = await _sut.ModifyItem(Users[0], new ModifyItemDto() { Name = "Test item", Url = "New url" }, -1);
+            var result = await _sut.ModifyItem(NormalUser, new ModifyItemDto() { Name = "Test item", Url = "New url" }, -1);
             Assert.False(result.IsSuccess);
             Assert.Equal("Item doesn't exist.", result.Error);
         }
 
         [Fact]
         public async Task ModifyItem_UserOrderedList_ItemNotModified() {
-            var result = await _sut.ModifyItem(Users[0], new ModifyItemDto() { Name = "Test item", Url = "New url" }, Items[4].Id);
+            var result = await _sut.ModifyItem(NormalUser, new ModifyItemDto() { Name = "Test item", Url = "New url" }, ItemInOrderedList.Id);
             Assert.False(result.IsSuccess);
             Assert.Equal("Shopping list already ordered", result.Error);
         }
 
         [Fact]
         public async Task ModifyItem_AdminOrderedList_ItemModified() {
-            var result = await _sut.ModifyItem(Users[1], new ModifyItemDto() { Name = "Test item", Url = "New url" }, Items[4].Id);
+            var result = await _sut.ModifyItem(AdminUser, new ModifyItemDto() { Name = "Test item", Url = "New url" }, ItemInOrderedList.Id);
             Assert.True(result.IsSuccess);
 
             var item = _context.Items.FirstOrDefault(i => i.Id == result.Data.Id);
@@ -302,14 +302,14 @@ namespace shopping_bag_unit_tests.Services {
 
         [Fact]
         public async Task ModifyItem_UserDueDatePassedList_ItemNotModified() {
-            var result = await _sut.ModifyItem(Users[0], new ModifyItemDto() { Name = "Test item", Url = "New url" }, Items[3].Id);
+            var result = await _sut.ModifyItem(NormalUser, new ModifyItemDto() { Name = "Test item", Url = "New url" }, ItemInDueDatePassedList.Id);
             Assert.False(result.IsSuccess);
             Assert.Equal("Shopping list due date passed", result.Error);
         }
 
         [Fact]
         public async Task ModifyItem_AdminDueDatePassedList_ItemModified() {
-            var result = await _sut.ModifyItem(Users[1], new ModifyItemDto() { Name = "Test item", Url = "New url" }, Items[3].Id);
+            var result = await _sut.ModifyItem(AdminUser, new ModifyItemDto() { Name = "Test item", Url = "New url" }, ItemInDueDatePassedList.Id);
             Assert.True(result.IsSuccess);
 
             var item = _context.Items.FirstOrDefault(i => i.Id == result.Data.Id);
@@ -320,41 +320,41 @@ namespace shopping_bag_unit_tests.Services {
 
         [Fact]
         public async Task ModifyItem_DuplicateUrl_ItemNotModified() {
-            var result = await _sut.ModifyItem(Users[0], new ModifyItemDto() { Url = "New url" }, Items[0].Id);
+            var result = await _sut.ModifyItem(NormalUser, new ModifyItemDto() { Url = "New url" }, OwnItemInList.Id);
             Assert.True(result.IsSuccess);
 
-            result = await _sut.ModifyItem(Users[0], new ModifyItemDto() { Url = "New url" }, Items[1].Id);
+            result = await _sut.ModifyItem(NormalUser, new ModifyItemDto() { Url = "New url" }, OwnItem2InList.Id);
             Assert.False(result.IsSuccess);
             Assert.Equal("Item with same url already in list", result.Error);
         }
 
         [Fact]
         public async Task ModifyItem_NoNameOrUrl_ItemNotModified() {
-            var result = await _sut.ModifyItem(Users[0], new ModifyItemDto() { Name = null, Url = null }, Items[0].Id);
+            var result = await _sut.ModifyItem(NormalUser, new ModifyItemDto() { Name = null, Url = null }, OwnItemInList.Id);
             Assert.False(result.IsSuccess);
             Assert.Equal("Item must have a name or url", result.Error);
         }
 
         [Fact]
         public async Task ModifyItem_UserModifyAmountOrdered_ItemNotModified() {
-            var newAmountOrdered = Items[0].AmountOrdered + 1;
-            var result = await _sut.ModifyItem(Users[0], new ModifyItemDto() { Name = Items[0].Name, AmountOrdered = newAmountOrdered }, Items[0].Id);
+            var newAmountOrdered = OwnItemInList.AmountOrdered + 1;
+            var result = await _sut.ModifyItem(NormalUser, new ModifyItemDto() { Name = OwnItemInList.Name, AmountOrdered = newAmountOrdered }, OwnItemInList.Id);
             Assert.False(result.IsSuccess);
             Assert.Equal("You can't modify amount ordered", result.Error);
         }
 
         [Fact]
         public async Task ModifyItem_UserModifyIsChecked_ItemNotModified() {
-            var newIsChecked = !Items[0].IsChecked;
-            var result = await _sut.ModifyItem(Users[0], new ModifyItemDto() { Name = Items[0].Name, IsChecked = newIsChecked }, Items[0].Id);
+            var newIsChecked = !OwnItemInList.IsChecked;
+            var result = await _sut.ModifyItem(NormalUser, new ModifyItemDto() { Name = OwnItemInList.Name, IsChecked = newIsChecked }, OwnItemInList.Id);
             Assert.False(result.IsSuccess);
             Assert.Equal("You can't modify isChecked", result.Error);
         }
 
         [Fact]
         public async Task ModifyItem_AdminModifyAmountOrdered_ItemModified() {
-            var newAmountOrdered = Items[0].AmountOrdered + 1;
-            var result = await _sut.ModifyItem(Users[1], new ModifyItemDto() { Name = Items[0].Name, AmountOrdered = newAmountOrdered }, Items[0].Id);
+            var newAmountOrdered = OwnItemInList.AmountOrdered + 1;
+            var result = await _sut.ModifyItem(AdminUser, new ModifyItemDto() { Name = OwnItemInList.Name, AmountOrdered = newAmountOrdered }, OwnItemInList.Id);
             Assert.True(result.IsSuccess);
 
             var item = _context.Items.FirstOrDefault(i => i.Id == result.Data.Id);
@@ -364,8 +364,8 @@ namespace shopping_bag_unit_tests.Services {
 
         [Fact]
         public async Task ModifyItem_AdminModifyIsChecked_ItemModified() {
-            var newIsChecked = !Items[0].IsChecked;
-            var result = await _sut.ModifyItem(Users[1], new ModifyItemDto() { Name = Items[0].Name, IsChecked = newIsChecked }, Items[0].Id);
+            var newIsChecked = !OwnItemInList.IsChecked;
+            var result = await _sut.ModifyItem(AdminUser, new ModifyItemDto() { Name = OwnItemInList.Name, IsChecked = newIsChecked }, OwnItemInList.Id);
             Assert.True(result.IsSuccess);
 
             var item = _context.Items.FirstOrDefault(i => i.Id == result.Data.Id);
@@ -377,30 +377,30 @@ namespace shopping_bag_unit_tests.Services {
         #region UpdateLikeStatus Tests
         [Fact]
         public async Task UpdateLikeStatus_NotLikedListItem_ItemIsLiked() {
-            var result = await _sut.UpdateLikeStatus(Users[0], Items[0].Id, false);
+            var result = await _sut.UpdateLikeStatus(NormalUser, OwnItemInList.Id, false);
             Assert.True(result.IsSuccess);
 
-            var item = _context.Items.Include(i => i.UsersWhoLiked).FirstOrDefault(i => i.Id == Items[0].Id);
+            var item = _context.Items.Include(i => i.UsersWhoLiked).FirstOrDefault(i => i.Id == OwnItemInList.Id);
             Assert.NotNull(item);
-            Assert.Contains(Users[0], item.UsersWhoLiked);
+            Assert.Contains(NormalUser, item.UsersWhoLiked);
         }
 
         [Fact]
         public async Task UpdateLikeStatus_LikedListItem_ItemIsUnliked() {
-            var result = await _sut.UpdateLikeStatus(Users[0], Items[0].Id, false);
+            var result = await _sut.UpdateLikeStatus(NormalUser, OwnItemInList.Id, false);
             Assert.True(result.IsSuccess);
 
-            result = await _sut.UpdateLikeStatus(Users[0], Items[0].Id, true);
+            result = await _sut.UpdateLikeStatus(NormalUser, OwnItemInList.Id, true);
             Assert.True(result.IsSuccess);
 
-            var item = _context.Items.Include(i => i.UsersWhoLiked).FirstOrDefault(i => i.Id == Items[0].Id);
+            var item = _context.Items.Include(i => i.UsersWhoLiked).FirstOrDefault(i => i.Id == OwnItemInList.Id);
             Assert.NotNull(item);
-            Assert.DoesNotContain(Users[0], item.UsersWhoLiked);
+            Assert.DoesNotContain(NormalUser, item.UsersWhoLiked);
         }
 
         [Fact]
         public async Task UpdateLikeStatus_InvalidItem_Error() {
-            var result = await _sut.UpdateLikeStatus(Users[0], Items[4].Id, false);
+            var result = await _sut.UpdateLikeStatus(NormalUser, ItemInOrderedList.Id, false);
             Assert.False(result.IsSuccess);
             Assert.Equal("You can only (un)like active list's items", result.Error);
         }

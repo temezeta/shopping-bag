@@ -69,11 +69,11 @@ namespace shopping_bag_unit_tests.Services
         public async Task RemoveUser_ValidUser_UserRemovedOnlyOnce()
         {
             // User is trying to remove themselves
-            var response = await _sut.RemoveUser(base.Users[0], 1);
+            var response = await _sut.RemoveUser(NormalUser, 1);
             Assert.True(response.IsSuccess);
 
             // Try remove again
-            response = await _sut.RemoveUser(base.Users[0], 1);
+            response = await _sut.RemoveUser(NormalUser, 1);
             Assert.False(response.IsSuccess);
             Assert.Equal("User not found", response.Error);
         }
@@ -81,7 +81,7 @@ namespace shopping_bag_unit_tests.Services
         [Fact]
         public async Task RemoveUser_UserHasNoPermission_UserNotRemoved()
         {
-            var response = await _sut.RemoveUser(base.Users[0], 2);
+            var response = await _sut.RemoveUser(NormalUser, 2);
             Assert.False(response.IsSuccess);
             Assert.Equal("You can only remove your own account", response.Error);
         }
