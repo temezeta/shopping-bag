@@ -12,7 +12,7 @@ using shopping_bag.Config;
 namespace shopping_bag.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20221114003126_AddReminders")]
+    [Migration("20221115105907_AddReminders")]
     partial class AddReminders
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -161,9 +161,6 @@ namespace shopping_bag.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long?>("ReminderSettingsUserId")
-                        .HasColumnType("bigint");
-
                     b.Property<long>("ShoppingListId")
                         .HasColumnType("bigint");
 
@@ -172,9 +169,9 @@ namespace shopping_bag.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ReminderSettingsUserId");
-
                     b.HasIndex("ShoppingListId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Reminders");
                 });
@@ -457,26 +454,32 @@ namespace shopping_bag.Migrations
 
             modelBuilder.Entity("shopping_bag.Models.Reminder", b =>
                 {
-                    b.HasOne("shopping_bag.Models.ReminderSettings", null)
-                        .WithMany("Reminders")
-                        .HasForeignKey("ReminderSettingsUserId");
-
                     b.HasOne("shopping_bag.Models.ShoppingList", "ShoppingList")
                         .WithMany()
                         .HasForeignKey("ShoppingListId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("shopping_bag.Models.User.User", "User")
+                        .WithMany("Reminders")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired();
+
                     b.Navigation("ShoppingList");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("shopping_bag.Models.ReminderSettings", b =>
                 {
-                    b.HasOne("shopping_bag.Models.User.User", null)
+                    b.HasOne("shopping_bag.Models.User.User", "User")
                         .WithOne("ReminderSettings")
                         .HasForeignKey("shopping_bag.Models.ReminderSettings", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("shopping_bag.Models.ShoppingList", b =>
@@ -522,11 +525,6 @@ namespace shopping_bag.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("shopping_bag.Models.ReminderSettings", b =>
-                {
-                    b.Navigation("Reminders");
-                });
-
             modelBuilder.Entity("shopping_bag.Models.ShoppingList", b =>
                 {
                     b.Navigation("Items");
@@ -536,6 +534,8 @@ namespace shopping_bag.Migrations
                 {
                     b.Navigation("ReminderSettings")
                         .IsRequired();
+
+                    b.Navigation("Reminders");
                 });
 #pragma warning restore 612, 618
         }

@@ -51,6 +51,7 @@ namespace shopping_bag.Config
                     v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
                     v => JsonSerializer.Deserialize<List<int>>(v, (JsonSerializerOptions)null),
                     intListValueComparer);
+                e.HasOne(r => r.User).WithMany(u => u.Reminders).OnDelete(DeleteBehavior.ClientCascade);
             });
             builder.Seed();
         }

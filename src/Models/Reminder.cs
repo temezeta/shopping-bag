@@ -10,6 +10,7 @@ namespace shopping_bag.Models {
         public List<int> DueDaysBefore { get; set; }
         public List<int> ExpectedDaysBefore { get; set; }
         public long UserId { get; set; }
+        public User.User User { get; set; }
         public long ShoppingListId { get; set; }
         public ShoppingList ShoppingList { get; set; }
     }

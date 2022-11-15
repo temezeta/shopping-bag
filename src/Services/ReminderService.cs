@@ -60,7 +60,7 @@ namespace shopping_bag.Services {
                     DueDaysBefore = reminderSettings.ReminderDaysBeforeDueDate,
                     ExpectedDaysBefore = reminderSettings.ReminderDaysBeforeExpectedDate
                 };
-                reminderSettings.Reminders.Add(reminder);
+                user.Reminders.Add(reminder);
             }
             await _context.SaveChangesAsync();
         }
