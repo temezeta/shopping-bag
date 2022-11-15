@@ -1,4 +1,5 @@
-﻿using shopping_bag.Models;
+﻿using shopping_bag.DTOs.Office;
+using shopping_bag.Models;
 
 namespace shopping_bag.DTOs.ShoppingList
 {
@@ -19,6 +20,8 @@ namespace shopping_bag.DTOs.ShoppingList
         public DateTime? DueDate { get; set; }
 
         public DateTime? ExpectedDeliveryDate { get; set; }
+
+        public OfficeDto ListDeliveryOffice { get; set; }
 
         public List<ItemDto> Items { get; set; } = new List<ItemDto>();
     }
