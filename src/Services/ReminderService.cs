@@ -54,6 +54,10 @@ namespace shopping_bag.Services {
                 if (reminderSettings == null || (reminderSettings.DueDateRemindersDisabled && reminderSettings.ExpectedRemindersDisabled)) {
                     continue;
                 }
+                if(user.Reminders.Any(r => r.ShoppingListId == listId)) {
+                    // Skip if user already has reminders created on this list.
+                    continue;
+                }
                 var reminder = new Reminder() {
                     ShoppingListId = listId,
                     UserId = user.Id,
@@ -63,6 +67,49 @@ namespace shopping_bag.Services {
                 user.Reminders.Add(reminder);
             }
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<ServiceResponse<Reminder>> SetListReminder(long userId, ReminderSettingsDto settings, long listId) {
+            var user = await _context.Users.Include(u => u.Reminders).Where(u => u.Id == userId && !u.Removed).FirstOrDefaultAsync();
+            if(user == null) {
+                return new ServiceResponse<Reminder>("Invalid user");
+            }
+            if (!(await _context.ShoppingLists.AnyAsync(l => l.Id == listId))) {
+                return new ServiceResponse<Reminder>("Invalid list");
+            }
+            var reminder = user.Reminders.FirstOrDefault(r => r.ShoppingListId == listId);
+
+            // If both reminders are disabled, or both are empty, then remove the reminder and return null.
+            if((settings.DueDateRemindersDisabled && settings.ExpectedRemindersDisabled) ||
+                (settings.ReminderDaysBeforeDueDate.Count == 0 && settings.ReminderDaysBeforeExpectedDate.Count == 0)) {
+                if (reminder != null) {
+                    user.Reminders.Remove(reminder);
+                    await _context.SaveChangesAsync();
+                }
+                return new ServiceResponse<Reminder>(data: null);
+            }
+
+            if (!IsValidReminderInterval(settings.ReminderDaysBeforeDueDate)) {
+                return new ServiceResponse<Reminder>("Invalid due date reminder interval");
+            }
+            if (!IsValidReminderInterval(settings.ReminderDaysBeforeExpectedDate)) {
+                return new ServiceResponse<Reminder>("Invalid expected delivery date reminder interval");
+            }
+
+            if (reminder != null) {
+                reminder.DueDaysBefore = settings.DueDateRemindersDisabled ? new List<int>() : settings.ReminderDaysBeforeDueDate;
+                reminder.ExpectedDaysBefore = settings.ExpectedRemindersDisabled ? new List<int>() : settings.ReminderDaysBeforeExpectedDate;
+            } else {
+                reminder = new Reminder() {
+                    ShoppingListId = listId,
+                    UserId = userId,
+                    DueDaysBefore = settings.DueDateRemindersDisabled ? new List<int>() : settings.ReminderDaysBeforeDueDate,
+                    ExpectedDaysBefore = settings.ExpectedRemindersDisabled ? new List<int>() : settings.ReminderDaysBeforeExpectedDate
+                };
+                user.Reminders.Add(reminder);
+            }
+            await _context.SaveChangesAsync();
+            return new ServiceResponse<Reminder>(reminder);
         }
 
         private bool IsValidReminderInterval(List<int> interval) {
