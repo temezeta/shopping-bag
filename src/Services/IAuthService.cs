@@ -6,7 +6,7 @@ namespace shopping_bag.Services
 {
     public interface IAuthService
     {
-        Task<ServiceResponse<string>> Register(RegisterDto request);
+        Task<ServiceResponse<bool>> Register(RegisterDto request, string hexToken, string verificationBodyText);
         Task<ServiceResponse<LoginData>> Login(LoginDto request);
         Task<ServiceResponse<bool>> Logout(User user);
         Task<ServiceResponse<bool>> SetRefreshToken(User user);

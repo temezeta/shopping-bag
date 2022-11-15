@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using shopping_bag.DTOs.User;
+using shopping_bag.Models.Email;
 using shopping_bag.Services;
+using shopping_bag.Utility;
 
 namespace shopping_bag.Controllers {
     public class UserController : BaseApiController {
@@ -66,6 +68,30 @@ namespace shopping_bag.Controllers {
             if (!response.IsSuccess)
             {
                 return BadRequest();
+            }
+
+            return Ok(_mapper.Map<UserDto>(response.Data));
+        }
+
+        [HttpPut]
+        [Route("modify")]
+        public async Task<ActionResult<UserDto>> ModifyUser([FromBody] ModifyUserDto request, long userId)
+        {
+            var user = await GetCurrentUser();
+
+            if (user == null)
+            {
+                return BadRequest();
+            }
+
+            var hexToken = AuthHelper.CreateHexToken();
+            var verificationBodyText = GetVerificationBodyText(hexToken);
+
+            var response = await _userService.ModifyUser(user, request, userId, hexToken,  verificationBodyText);
+
+            if (!response.IsSuccess)
+            {
+                return BadRequest(response.Error);
             }
 
             return Ok(_mapper.Map<UserDto>(response.Data));

@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using Moq;
 using shopping_bag.Config;
 using shopping_bag.DTOs.User;
 using shopping_bag.Services;
@@ -11,11 +13,12 @@ namespace shopping_bag_unit_tests.Services
 
         private readonly AppDbContext _context;
         private readonly UserService _sut;
+        private readonly Mock<IEmailService> _emailServiceMock = new Mock<IEmailService>();
 
         public UserServiceTests() : base()
         {
             _context = GetDatabase();
-            _sut = new UserService(_context);
+            _sut = new UserService(_context, _emailServiceMock.Object);
         }
 
         #region GetUserByEmail Tests

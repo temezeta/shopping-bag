@@ -4,14 +4,21 @@ using shopping_bag.Models;
 using shopping_bag.Config;
 using shopping_bag.DTOs.User;
 using shopping_bag.Utility;
+using AutoMapper;
+using Org.BouncyCastle.Asn1.Ocsp;
+using shopping_bag.Models.Email;
+using Microsoft.AspNetCore.Identity;
 
 namespace shopping_bag.Services {
     public class UserService : IUserService
     {
         private readonly AppDbContext _context;
-        public UserService(AppDbContext context)
+        private readonly IEmailService _emailService;
+
+        public UserService(AppDbContext context, IEmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
         }
 
         public async Task<ServiceResponse<User>> GetUserByEmail(string email)
@@ -61,6 +68,77 @@ namespace shopping_bag.Services {
             await _context.SaveChangesAsync();
 
             return new ServiceResponse<bool>(true);
+        }
+
+        public async Task<ServiceResponse<User>> ModifyUser(User user, ModifyUserDto modifyData, long userId, string hexToken, string verificationBodyText)
+        {
+            try
+            {
+                using (var transaction = _context.Database.BeginTransaction())
+                {
+                    var modifyUser = await _context.Users.Include(u => u.UserRoles).Include(u => u.HomeOffice).FirstOrDefaultAsync(u => u.Id == userId);
+
+                    if (modifyUser == null || modifyUser.Removed)
+                    {
+                        return new ServiceResponse<User>(error: "User not found");
+                    }
+
+                    var isAdmin = user.UserRoles.Any(r => r.RoleName.Equals(Roles.AdminRole));
+
+                    if (isAdmin && modifyData.RoleIds != null)
+                    {
+                        var roles = _context.UserRoles.Where(r => modifyData.RoleIds.Contains(r.RoleId)).ToList();
+
+                        if (!roles.Any())
+                        {
+                            return new ServiceResponse<User>(error: "Roles not found");
+                        }
+
+                        modifyUser.UserRoles = roles;
+                    }
+
+                    if (!isAdmin && modifyUser.Id != userId)
+                    {
+                        return new ServiceResponse<User>(error: "You can only modify your own account");
+                    }
+
+                    var homeoffice = _context.Offices.FirstOrDefault(o => o.Id == modifyData.OfficeId);
+
+                    if (homeoffice == null)
+                    {
+                        return new ServiceResponse<User>(error: "Invalid office id");
+                    }
+                    modifyUser.FirstName = modifyData.FirstName;
+                    modifyUser.LastName = modifyData.LastName;
+                    modifyUser.OfficeId = modifyData.OfficeId;
+                    modifyUser.HomeOffice = homeoffice;
+
+                    if (modifyData.Email != modifyUser.Email)
+                    {
+                        modifyUser.Email = modifyData.Email;
+                        modifyUser.VerificationToken = hexToken;
+                        modifyUser.VerifiedAt = null;
+                        var emailResponse = _emailService.SendEmail(new Email
+                        {
+                            To = modifyData.Email,
+                            Subject = "Huld Shopping Bag - Account Verification",
+                            Body = verificationBodyText
+                        });
+
+                        if (!emailResponse.IsSuccess)
+                        {
+                            return new ServiceResponse<User>(error: "Failed to send verification email");
+                        }
+                    }
+                    _context.SaveChanges();
+                    transaction.Commit();
+                    return new ServiceResponse<User>(data: modifyUser);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new ServiceResponse<User>(error: ex.Message);
+            }
         }
 
         public async Task<ServiceResponse<User>> ChangeUserPassword(long id, ChangePasswordDto request)

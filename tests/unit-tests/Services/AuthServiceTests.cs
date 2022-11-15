@@ -17,9 +17,11 @@ namespace shopping_bag_unit_tests
         private AuthService _authServiceMock;
         private readonly Mock<AppDbContext> _appDbContextMock = new Mock<AppDbContext>();
         private readonly Mock<IUserService> _iUserServiceMock = new Mock<IUserService>();
+        private readonly Mock<IEmailService> _emailServiceMock = new Mock<IEmailService>();
+
         public AuthServiceTests()
         {
-            _authServiceMock = new AuthService(_appDbContextMock.Object, _iUserServiceMock.Object);
+            _authServiceMock = new AuthService(_appDbContextMock.Object, _iUserServiceMock.Object, _emailServiceMock.Object);
         }
 
         [Fact]
@@ -73,7 +75,7 @@ namespace shopping_bag_unit_tests
             dataBaseContext.Database.EnsureCreated();
             dataBaseContext.Users.Add(user);
             await dataBaseContext.SaveChangesAsync();
-            _authServiceMock = new AuthService(dataBaseContext, _iUserServiceMock.Object);
+            _authServiceMock = new AuthService(dataBaseContext, _iUserServiceMock.Object, _emailServiceMock.Object);
 
             // Act
             var logOutResponse = await _authServiceMock.Logout(user);

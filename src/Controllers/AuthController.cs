@@ -12,43 +12,20 @@ namespace shopping_bag.Controllers
     public class AuthController : BaseApiController
     {
         private readonly IAuthService _authService;
-        private readonly IEmailService _emailService;
-        public AuthController(IUserService userService, IAuthService authService, IEmailService emailService) : base(userService)
+        public AuthController(IUserService userService, IAuthService authService) : base(userService)
         {
             _authService = authService;
-            _emailService = emailService;
         }
 
         [HttpPost, AllowAnonymous]
         [Route("register")]
         public async Task<ActionResult> Register([FromBody]RegisterDto request)
         {
-            var response = await _authService.Register(request);
+            var hexToken = AuthHelper.CreateHexToken();
+            var verificationBodyText = GetVerificationBodyText(hexToken);
+            var response = await _authService.Register(request, hexToken, verificationBodyText);
 
             if (!response.IsSuccess)
-            {
-                return BadRequest();
-            }
-
-            // Generate verification url
-            var verificationUrl = Url.ActionLink("Verify", "Auth", new { verificationToken = response.Data });
-
-            if (string.IsNullOrWhiteSpace(verificationUrl))
-            {
-                return BadRequest();
-            }
-
-            verificationUrl = "<a href=\"" + verificationUrl + "\">VERIFY ACCOUNT</a>.";
-            var verificationBodyText = string.Format(StaticConfig.VerificationEmailBodyText, verificationUrl);
-
-            var emailResponse = _emailService.SendEmail(new Email
-            {
-                To = request.Email,
-                Subject = "Huld Shopping Bag - Account Verification",
-                Body = verificationBodyText
-            });
-
-            if (!emailResponse.IsSuccess)
             {
                 return BadRequest();
             }
@@ -145,19 +122,6 @@ namespace shopping_bag.Controllers
             var response = await _authService.SetPasswordResetToken(email);
 
             if (!response.IsSuccess)
-            {
-                return BadRequest();
-            }
-
-            // TODO Make password email more nice
-            var emailResponse = _emailService.SendEmail(new Email
-            {
-                To = email,
-                Subject = "Password Reset",
-                Body = response.Data
-            });
-
-            if (!emailResponse.IsSuccess)
             {
                 return BadRequest();
             }

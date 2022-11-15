@@ -9,7 +9,7 @@ namespace shopping_bag.Utility {
     public class MappingProfile : Profile {
 
         public MappingProfile() {
-            CreateMap<User, UserDto>();
+            CreateMap<User, UserDto>(); 
             CreateMap<Office, OfficeDto>();
             CreateMap<UserRole, UserRoleDto>();
             CreateMap<ShoppingList, ShoppingListDto>();

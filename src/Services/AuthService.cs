@@ -2,6 +2,7 @@
 using shopping_bag.Config;
 using shopping_bag.DTOs.User;
 using shopping_bag.Models;
+using shopping_bag.Models.Email;
 using shopping_bag.Models.User;
 using shopping_bag.Utility;
 
@@ -11,41 +12,44 @@ namespace shopping_bag.Services
     {
         private readonly AppDbContext _context;
         private readonly IUserService _userService;
-        public AuthService(AppDbContext context, IUserService userService)
+        private readonly IEmailService _emailService;
+
+        public AuthService(AppDbContext context, IUserService userService, IEmailService emailService)
         {
             _context = context;
             _userService = userService;
+            _emailService = emailService;
         }
 
-        public async Task<ServiceResponse<string>> Register(RegisterDto request)
+        public async Task<ServiceResponse<bool>> Register(RegisterDto request, string hexToken, string verificationBodyText)
         {
-            var response = await _userService.GetUserByEmail(request.Email);
-            if (response.IsSuccess)
-            {
-                return new ServiceResponse<string>(error: "User with email already exists");
-            }
-
-            AuthHelper.CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
-            var verificationToken = AuthHelper.CreateHexToken();
-
-            var officeExists = _context.Offices.Any(office => office.Id == request.OfficeId);
-    
-            if (!officeExists)
-            {
-                return new ServiceResponse<string>(error: "Office doesn't exist");
-            }
-
-            var defaultRole = _context.UserRoles.FirstOrDefault(r => r.RoleName.Equals(Roles.DefaultRole));
-            if (defaultRole == null) {
-                // TODO: Shouldn't happen ever because roles should always exist.
-                // Throw exception or something instead?
-                return new ServiceResponse<string>(error: "User role doesn't exist in database.");
-            }
-
             try
             {
                 using (var transaction = _context.Database.BeginTransaction())
                 {
+                    var response = await _userService.GetUserByEmail(request.Email);
+                    if (response.IsSuccess)
+                    {
+                        return new ServiceResponse<bool>(error: "User with email already exists");
+                    }
+
+                    AuthHelper.CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
+
+                    var officeExists = _context.Offices.Any(office => office.Id == request.OfficeId);
+
+                    if (!officeExists)
+                    {
+                        return new ServiceResponse<bool>(error: "Office doesn't exist");
+                    }
+
+                    var defaultRole = _context.UserRoles.FirstOrDefault(r => r.RoleName.Equals(Roles.DefaultRole));
+                    if (defaultRole == null)
+                    {
+                        // TODO: Shouldn't happen ever because roles should always exist.
+                        // Throw exception or something instead?
+                        return new ServiceResponse<bool>(error: "User role doesn't exist in database.");
+                    }
+
                     var user = new User
                     {
                         FirstName = request.FirstName,
@@ -54,17 +58,30 @@ namespace shopping_bag.Services
                         OfficeId = request.OfficeId,
                         PasswordHash = passwordHash,
                         PasswordSalt = passwordSalt,
-                        VerificationToken = verificationToken
+                        VerificationToken = hexToken
                     };
                     user.UserRoles.Add(defaultRole);
                     _context.Users.Add(user);
+
+                    var emailResponse = _emailService.SendEmail(new Email
+                    {
+                        To = request.Email,
+                        Subject = "Huld Shopping Bag - Account Verification",
+                        Body = verificationBodyText
+                    });
+
+                    if (!emailResponse.IsSuccess)
+                    {
+                        return new ServiceResponse<bool>(error: "Failed to send verification email");
+                    }
                     _context.SaveChanges();
                     transaction.Commit();
-                    return new ServiceResponse<string>(data: verificationToken);
+
+                    return new ServiceResponse<bool>(true);
                 }
             } catch(Exception ex)
             {
-                return new ServiceResponse<string>(error: ex.Message);
+                return new ServiceResponse<bool>(error: ex.Message);
             }
         }
 
@@ -148,9 +165,23 @@ namespace shopping_bag.Services
                 return new ServiceResponse<string>(error: response.Error);
             }
 
+            // TODO Make password email more nice
+            var emailResponse = _emailService.SendEmail(new Email
+            {
+                To = email,
+                Subject = "Password Reset",
+                Body = resetToken
+            });
+
+            if (!emailResponse.IsSuccess)
+            {
+                return new ServiceResponse<string>(error: "Failed to send verification email");
+            }
+
             response.Data.PasswordResetToken = resetToken;
             response.Data.ResetTokenExpires = DateTime.Now.AddHours(2);
             await _context.SaveChangesAsync();
+
             return new ServiceResponse<string>(data: resetToken);
         }
         
