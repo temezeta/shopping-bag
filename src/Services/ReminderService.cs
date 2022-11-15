@@ -48,7 +48,7 @@ namespace shopping_bag.Services {
         }
 
         public async Task CreateRemindersForList(long listId, long officeId) {
-            var users = await _context.Users.Include(u => u.ReminderSettings).Where(u => u.OfficeId == officeId).ToListAsync();
+            var users = await _context.Users.Include(u => u.ReminderSettings).Include(u => u.Reminders).Where(u => u.OfficeId == officeId && !u.Removed).ToListAsync();
             foreach (var user in users) {
                 var reminderSettings = user.ReminderSettings;
                 if (reminderSettings == null || (reminderSettings.DueDateRemindersDisabled && reminderSettings.ExpectedRemindersDisabled)) {
