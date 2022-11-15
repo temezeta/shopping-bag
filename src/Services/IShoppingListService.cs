@@ -16,5 +16,6 @@ namespace shopping_bag.Services
         Task<ServiceResponse<Item>> UpdateLikeStatus(User user, long itemId, bool unlike);
         Task<ServiceResponse<IEnumerable<ShoppingList>>> GetShoppingListsByOffice(long officeId);
         Task<ServiceResponse<bool>> OrderShoppingList(long shoppingListId);
+        Task<ServiceResponse<ShoppingList>> SetOrderedAmount(long shoppingListId, OrderedAmountDto amount);
     }
 }

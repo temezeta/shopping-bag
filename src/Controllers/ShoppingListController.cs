@@ -105,5 +105,20 @@ namespace shopping_bag.Controllers
             return Ok();
         }
 
+        [HttpPut]
+        [Authorize(Roles = "Admin")]
+        [Route("{listId}/order-amount")]
+        public async Task<ActionResult<ShoppingListDto>> SetOrderedAmount([FromRoute] long listId, [FromBody] OrderedAmountDto request)
+        {
+            var response = await _shoppingListService.SetOrderedAmount(listId, request);
+
+            if (!response.IsSuccess)
+            {
+                return BadRequest(response.Error);
+            }
+
+            return Ok(_mapper.Map<ShoppingListDto>(response.Data));
+        }
+
     }
 }

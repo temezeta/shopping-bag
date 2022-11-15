@@ -153,6 +153,29 @@ namespace shopping_bag.Services
             return new ServiceResponse<bool>(true);
         }
 
+        public async Task<ServiceResponse<ShoppingList>> SetOrderedAmount(long shoppingListId, OrderedAmountDto amount)
+        {
+            var shoppingList = await _context.ShoppingLists.Include(it => it.Items).FirstOrDefaultAsync(s => s.Id == shoppingListId);
+
+            if (shoppingList == null || shoppingList.Removed)
+            {
+                return new ServiceResponse<ShoppingList>(error: "Invalid shopping list");
+            }
+
+            var item = shoppingList.Items.FirstOrDefault(i => i.Id == amount.ItemId);
+
+            if (item == null)
+            {
+                return new ServiceResponse<ShoppingList>(error: "Item not on list");
+            }
+
+            item.AmountOrdered = amount.AmountOrdered;
+
+            await _context.SaveChangesAsync();
+
+            return new ServiceResponse<ShoppingList>(shoppingList);
+        }
+
         #region Items
         public async Task<ServiceResponse<Item>> AddItemToShoppingList(AddItemDto itemToAdd) {
             if (string.IsNullOrEmpty(itemToAdd.Url) && string.IsNullOrEmpty(itemToAdd.Name)) {
