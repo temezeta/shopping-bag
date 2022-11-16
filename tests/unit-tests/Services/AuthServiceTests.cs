@@ -27,15 +27,7 @@ namespace shopping_bag_unit_tests
         [Fact]
         public async void Login_LoginSuccessful_ReturnToken()
         {
-            // Arrange
-            var testConfiguration = new Dictionary<string, string>
-            {
-                {"Jwt:Token", "superlongssecretwritesomethinghere"},
-            };
-
-            var configuration = new ConfigurationBuilder().AddInMemoryCollection(testConfiguration).Build();
-            StaticConfig.Setup(configuration);
-
+            UnitTestHelper.SetupStaticConfig();
             var email = "testemail@test.com";
             var password = "testpassword";
             byte[] passwordHash;

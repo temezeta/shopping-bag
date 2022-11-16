@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using shopping_bag.Config;
 using shopping_bag.Controllers;
@@ -17,20 +18,21 @@ namespace shopping_bag_unit_tests
         private AuthController _authControllerMock;
         private readonly Mock<IAuthService> _authServiceMock = new Mock<IAuthService>();
         private readonly Mock<IUserService> _userServiceMock = new Mock<IUserService>();
-        private readonly Mock<IUrlHelper> _urlHelperMock = new Mock<IUrlHelper>();
 
         public AuthControllerTests()
         {
-            _authControllerMock = new AuthController(_userServiceMock.Object, _authServiceMock.Object);
+            _authControllerMock = new AuthController(_userServiceMock.Object, _authServiceMock.Object)
+            {
+                Url = UnitTestHelper.GetUrlHelper()
+            };
         }
 
-        // [Fact]
+        [Fact]
         public async void Register_EmailAlreadyExists_ReturnsBadRequestResult()
         {
+            UnitTestHelper.SetupStaticConfig();
             var authServiceResponse = new ServiceResponse<bool>(error: "User with email already exists");
-            var hexToken = AuthHelper.CreateHexToken();
-            var verificationBodyText = "url::here";
-            _authServiceMock.Setup(x => x.Register(It.IsAny<RegisterDto>(), hexToken, verificationBodyText)).ReturnsAsync(authServiceResponse);
+            _authServiceMock.Setup(x => x.Register(It.IsAny<RegisterDto>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(authServiceResponse);
 
             var registerResponse = await _authControllerMock.Register(It.IsAny<RegisterDto>());
 

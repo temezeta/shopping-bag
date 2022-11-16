@@ -62,6 +62,7 @@ namespace shopping_bag.Services
                     };
                     user.UserRoles.Add(defaultRole);
                     _context.Users.Add(user);
+                    _context.SaveChanges();
 
                     var emailResponse = _emailService.SendEmail(new Email
                     {
@@ -73,10 +74,9 @@ namespace shopping_bag.Services
                     if (!emailResponse.IsSuccess)
                     {
                         return new ServiceResponse<bool>(error: "Failed to send verification email");
-                    }
-                    _context.SaveChanges();
-                    transaction.Commit();
+                    }                    
 
+                    transaction.Commit();
                     return new ServiceResponse<bool>(true);
                 }
             } catch(Exception ex)
@@ -157,32 +157,43 @@ namespace shopping_bag.Services
 
         public async Task<ServiceResponse<string>> SetPasswordResetToken(string email)
         {
-            var resetToken = AuthHelper.CreateHexToken();
-            var response = await _userService.GetUserByEmail(email);
-
-            if (!response.IsSuccess)
+            try
             {
-                return new ServiceResponse<string>(error: response.Error);
+                using (var transaction = _context.Database.BeginTransaction())
+                {
+                    var resetToken = AuthHelper.CreateHexToken();
+                    var response = await _userService.GetUserByEmail(email);
+
+                    if (!response.IsSuccess)
+                    {
+                        return new ServiceResponse<string>(error: response.Error);
+                    }
+
+                    response.Data.PasswordResetToken = resetToken;
+                    response.Data.ResetTokenExpires = DateTime.Now.AddHours(2);
+                    _context.SaveChanges();
+
+                    // TODO Make password email more nice
+                    var emailResponse = _emailService.SendEmail(new Email
+                    {
+                        To = email,
+                        Subject = "Password Reset",
+                        Body = resetToken
+                    });
+
+                    if (!emailResponse.IsSuccess)
+                    {
+                        return new ServiceResponse<string>(error: "Failed to send verification email");
+                    }
+
+                    transaction.Commit();
+                    return new ServiceResponse<string>(data: resetToken);
+                }
             }
-
-            // TODO Make password email more nice
-            var emailResponse = _emailService.SendEmail(new Email
+            catch (Exception ex)
             {
-                To = email,
-                Subject = "Password Reset",
-                Body = resetToken
-            });
-
-            if (!emailResponse.IsSuccess)
-            {
-                return new ServiceResponse<string>(error: "Failed to send verification email");
+                return new ServiceResponse<string>(error: ex.Message);
             }
-
-            response.Data.PasswordResetToken = resetToken;
-            response.Data.ResetTokenExpires = DateTime.Now.AddHours(2);
-            await _context.SaveChangesAsync();
-
-            return new ServiceResponse<string>(data: resetToken);
         }
         
         public async Task<ServiceResponse<bool>> ResetPassword(ResetPasswordDto request)

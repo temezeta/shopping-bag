@@ -97,7 +97,7 @@ namespace shopping_bag.Services {
                         modifyUser.UserRoles = roles;
                     }
 
-                    if (!isAdmin && modifyUser.Id != userId)
+                    if (!isAdmin && modifyUser.Id != user.Id)
                     {
                         return new ServiceResponse<User>(error: "You can only modify your own account");
                     }
@@ -118,6 +118,11 @@ namespace shopping_bag.Services {
                         modifyUser.Email = modifyData.Email;
                         modifyUser.VerificationToken = hexToken;
                         modifyUser.VerifiedAt = null;
+                    }
+                    _context.SaveChanges();
+
+                    if (modifyUser.VerifiedAt == null)
+                    {
                         var emailResponse = _emailService.SendEmail(new Email
                         {
                             To = modifyData.Email,
@@ -130,14 +135,14 @@ namespace shopping_bag.Services {
                             return new ServiceResponse<User>(error: "Failed to send verification email");
                         }
                     }
-                    _context.SaveChanges();
+
                     transaction.Commit();
                     return new ServiceResponse<User>(data: modifyUser);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return new ServiceResponse<User>(error: ex.Message);
+                return new ServiceResponse<User>(error: "Error in saving changes to database");
             }
         }
 
