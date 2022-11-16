@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Moq;
 using shopping_bag.Config;
 using shopping_bag.DTOs.User;
+using shopping_bag.Models;
+using shopping_bag.Models.Email;
 using shopping_bag.Services;
 using shopping_bag.Utility;
 
@@ -87,6 +89,104 @@ namespace shopping_bag_unit_tests.Services
             var response = await _sut.RemoveUser(NormalUser, 2);
             Assert.False(response.IsSuccess);
             Assert.Equal("You can only remove your own account", response.Error);
+        }
+
+        #endregion
+
+        #region ModifyUser Tests
+
+        [Fact]
+        public async Task ModifyUser_UserNotFound_UserNotModified()
+        {
+            UnitTestHelper.SetupStaticConfig();
+            var hexToken = AuthHelper.CreateHexToken();
+            var bodyText = "Something sensible";
+
+            var response = await _sut.ModifyUser(NormalUser, new ModifyUserDto(), 2182, hexToken, bodyText);
+            Assert.False(response.IsSuccess);
+            Assert.Equal("User not found", response.Error);
+        }
+
+        [Fact]
+        public async Task ModifyUser_ValidUser_UserModified()
+        {
+            UnitTestHelper.SetupStaticConfig();
+            var hexToken = AuthHelper.CreateHexToken();
+            var bodyText = "Something sensible";
+
+            var modifyData = new ModifyUserDto()
+            {
+                FirstName = "FirstName",
+                LastName = "LastName",
+                Email = "regular@huld.io",
+                OfficeId = NormalUser.OfficeId
+            };
+
+            var response = await _sut.ModifyUser(NormalUser, modifyData, NormalUser.Id, hexToken, bodyText);
+            Assert.True(response.IsSuccess);
+            Assert.NotNull(response.Data);
+        }
+
+        [Fact]
+        public async Task ModifyUser_UserHasNoPermission_UserNotModified()
+        {
+            UnitTestHelper.SetupStaticConfig();
+            var hexToken = AuthHelper.CreateHexToken();
+            var bodyText = "Something sensible";
+
+            var modifyData = new ModifyUserDto()
+            {
+                FirstName = "FirstName",
+                LastName = "LastName",
+                Email = NormalUser.Email,
+                OfficeId = NormalUser.OfficeId
+            };
+
+            var response = await _sut.ModifyUser(NormalUser, modifyData, AdminUser.Id, hexToken, bodyText);
+            Assert.False(response.IsSuccess);
+            Assert.Equal("You can only modify your own account", response.Error);
+        }
+
+        [Fact]
+        public async Task ModifyUser_AdminModifyAndRoleChange_UserModified()
+        {
+            UnitTestHelper.SetupStaticConfig();
+            var hexToken = AuthHelper.CreateHexToken();
+            var bodyText = "Something sensible";
+
+            var modifyData = new ModifyUserDto()
+            {
+                FirstName = NormalUser.FirstName,
+                LastName = NormalUser.LastName,
+                Email = NormalUser.Email,
+                OfficeId = ListOffice.Id,
+                RoleIds = new List<long>() { 2 }
+            };
+
+            var response = await _sut.ModifyUser(AdminUser, modifyData, NormalUser.Id, hexToken, bodyText);
+            Assert.True(response.IsSuccess);
+            Assert.NotNull(response.Data);
+        }
+
+        [Fact]
+        public async Task ModifyUser_EmailChanged_UserModified()
+        {
+            _emailServiceMock.Setup(x => x.SendEmail(It.IsAny<Email>())).Returns(new ServiceResponse<bool>(true));
+            UnitTestHelper.SetupStaticConfig();
+            var hexToken = AuthHelper.CreateHexToken();
+            var bodyText = "Something sensible";
+
+            var modifyData = new ModifyUserDto()
+            {
+                FirstName = NormalUser.FirstName,
+                LastName = NormalUser.LastName,
+                Email = "mynewemail@something.com",
+                OfficeId = ListOffice.Id,
+            };
+
+            var response = await _sut.ModifyUser(NormalUser, modifyData, NormalUser.Id, hexToken, bodyText);
+            Assert.True(response.IsSuccess);
+            Assert.Equal(modifyData.Email, NormalUser.Email);
         }
 
         #endregion

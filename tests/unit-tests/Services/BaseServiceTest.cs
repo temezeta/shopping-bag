@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using shopping_bag.Config;
 
 namespace shopping_bag_unit_tests.Services
@@ -10,7 +11,9 @@ namespace shopping_bag_unit_tests.Services
         protected AppDbContext GetDatabase()
         {
             var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+            .Options;
 
             var context = new AppDbContext(options);
             context.Database.EnsureCreated();
