@@ -98,7 +98,6 @@ namespace shopping_bag_unit_tests.Services
         [Fact]
         public async Task ModifyUser_UserNotFound_UserNotModified()
         {
-            UnitTestHelper.SetupStaticConfig();
             var hexToken = AuthHelper.CreateHexToken();
             var bodyText = "Something sensible";
 
@@ -110,7 +109,6 @@ namespace shopping_bag_unit_tests.Services
         [Fact]
         public async Task ModifyUser_ValidUser_UserModified()
         {
-            UnitTestHelper.SetupStaticConfig();
             var hexToken = AuthHelper.CreateHexToken();
             var bodyText = "Something sensible";
 
@@ -130,7 +128,6 @@ namespace shopping_bag_unit_tests.Services
         [Fact]
         public async Task ModifyUser_UserHasNoPermission_UserNotModified()
         {
-            UnitTestHelper.SetupStaticConfig();
             var hexToken = AuthHelper.CreateHexToken();
             var bodyText = "Something sensible";
 
@@ -150,7 +147,6 @@ namespace shopping_bag_unit_tests.Services
         [Fact]
         public async Task ModifyUser_AdminModifyAndRoleChange_UserModified()
         {
-            UnitTestHelper.SetupStaticConfig();
             var hexToken = AuthHelper.CreateHexToken();
             var bodyText = "Something sensible";
 
@@ -172,7 +168,6 @@ namespace shopping_bag_unit_tests.Services
         public async Task ModifyUser_EmailChanged_UserModified()
         {
             _emailServiceMock.Setup(x => x.SendEmail(It.IsAny<Email>())).Returns(new ServiceResponse<bool>(true));
-            UnitTestHelper.SetupStaticConfig();
             var hexToken = AuthHelper.CreateHexToken();
             var bodyText = "Something sensible";
 

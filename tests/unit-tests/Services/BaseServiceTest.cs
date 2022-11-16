@@ -6,7 +6,9 @@ namespace shopping_bag_unit_tests.Services
 {
     public class BaseServiceTest : TestDataProvider
     {
-        public BaseServiceTest() : base() { }
+        public BaseServiceTest() : base() {
+            UnitTestHelper.SetupStaticConfig();
+        }
 
         protected AppDbContext GetDatabase()
         {

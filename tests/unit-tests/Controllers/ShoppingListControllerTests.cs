@@ -8,17 +8,17 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace shopping_bag_unit_tests.Controllers
 {
-    public class ShoppingListControllerTests
+    public class ShoppingListControllerTests : BaseControllerTest
     {
         private readonly ShoppingListController _sut;
         private readonly Mock<IUserService> _userService = new Mock<IUserService>();
         private readonly Mock<IShoppingListService> _shoppingListService = new Mock<IShoppingListService>();
-        public ShoppingListControllerTests()
+        public ShoppingListControllerTests() : base()
         {
             _userService.Setup(x => x.GetUserByEmail(It.IsAny<string>())).ReturnsAsync(new ServiceResponse<User>(new User()));
             _sut = new ShoppingListController(_userService.Object, _shoppingListService.Object, UnitTestHelper.GetMapper())
             {
-                ControllerContext = UnitTestHelper.GetLoggedInControllerContext()
+                ControllerContext = GetLoggedInControllerContext()
             };
         }
 

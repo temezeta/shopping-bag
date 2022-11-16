@@ -8,29 +8,29 @@ using shopping_bag.Models;
 using shopping_bag.Models.User;
 using shopping_bag.Services;
 using shopping_bag.Utility;
+using shopping_bag_unit_tests.Controllers;
 using System;
 using BadRequestResult = Microsoft.AspNetCore.Mvc.BadRequestResult;
 
 namespace shopping_bag_unit_tests
 {
-    public class AuthControllerTests
+    public class AuthControllerTests : BaseControllerTest
     {
         private AuthController _authControllerMock;
         private readonly Mock<IAuthService> _authServiceMock = new Mock<IAuthService>();
         private readonly Mock<IUserService> _userServiceMock = new Mock<IUserService>();
 
-        public AuthControllerTests()
+        public AuthControllerTests() : base()
         {
             _authControllerMock = new AuthController(_userServiceMock.Object, _authServiceMock.Object)
             {
-                Url = UnitTestHelper.GetUrlHelper()
+                Url = GetUrlHelper()
             };
         }
 
         [Fact]
         public async void Register_EmailAlreadyExists_ReturnsBadRequestResult()
         {
-            UnitTestHelper.SetupStaticConfig();
             var authServiceResponse = new ServiceResponse<bool>(error: "User with email already exists");
             _authServiceMock.Setup(x => x.Register(It.IsAny<RegisterDto>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(authServiceResponse);
 
@@ -41,7 +41,7 @@ namespace shopping_bag_unit_tests
 
         [Fact]
         public async void Logout_LoggedInUser_ReturnsOk() {
-            _authControllerMock.ControllerContext = UnitTestHelper.GetLoggedInControllerContext();
+            _authControllerMock.ControllerContext = GetLoggedInControllerContext();
 
             var authServiceResponse = new ServiceResponse<bool>(data: true);
             _authServiceMock.Setup(x => x.Logout(It.IsAny<User>())).ReturnsAsync(authServiceResponse);

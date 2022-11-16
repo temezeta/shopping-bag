@@ -8,18 +8,18 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace shopping_bag_unit_tests.Controllers
 {
-    public class UserControllerTests
+    public class UserControllerTests : BaseControllerTest
     {
         private readonly UserController _sut;
         private readonly Mock<IUserService> _userService = new Mock<IUserService>();
 
-        public UserControllerTests()
+        public UserControllerTests() : base()
         {
             _userService.Setup(x => x.GetUserByEmail(It.IsAny<string>())).ReturnsAsync(new ServiceResponse<User>(new User()));
             _sut = new UserController(_userService.Object, UnitTestHelper.GetMapper())
             {
-                ControllerContext = UnitTestHelper.GetLoggedInControllerContext(),
-                Url = UnitTestHelper.GetUrlHelper()
+                ControllerContext = GetLoggedInControllerContext(),
+                Url = GetUrlHelper()
             };
         }
 
@@ -43,7 +43,6 @@ namespace shopping_bag_unit_tests.Controllers
         [Fact]
         public async Task ModifyUser_ModifyFailed_ReturnsBadRequest()
         {
-            UnitTestHelper.SetupStaticConfig();
             _userService.Setup(it => it.ModifyUser(It.IsAny<User>(), It.IsAny<ModifyUserDto>(),It.IsAny<long>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(new ServiceResponse<User>(error: "Modify failed"));
 
@@ -63,7 +62,6 @@ namespace shopping_bag_unit_tests.Controllers
         [Fact]
         public async Task ModifyUser_ModifySuccessful_ReturnsUser()
         {
-            UnitTestHelper.SetupStaticConfig();
             _userService.Setup(it => it.ModifyUser(It.IsAny<User>(), It.IsAny<ModifyUserDto>(), It.IsAny<long>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(new ServiceResponse<User>(new User()));
 

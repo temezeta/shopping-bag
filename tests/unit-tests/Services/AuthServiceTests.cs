@@ -8,18 +8,18 @@ using shopping_bag.Models;
 using shopping_bag.Models.User;
 using shopping_bag.Services;
 using shopping_bag.Utility;
-
+using shopping_bag_unit_tests.Services;
 
 namespace shopping_bag_unit_tests
 {
-    public class AuthServiceTests
+    public class AuthServiceTests : BaseServiceTest
     {
         private AuthService _authServiceMock;
         private readonly Mock<AppDbContext> _appDbContextMock = new Mock<AppDbContext>();
         private readonly Mock<IUserService> _iUserServiceMock = new Mock<IUserService>();
         private readonly Mock<IEmailService> _emailServiceMock = new Mock<IEmailService>();
 
-        public AuthServiceTests()
+        public AuthServiceTests() :base()
         {
             _authServiceMock = new AuthService(_appDbContextMock.Object, _iUserServiceMock.Object, _emailServiceMock.Object);
         }
@@ -27,7 +27,6 @@ namespace shopping_bag_unit_tests
         [Fact]
         public async void Login_LoginSuccessful_ReturnToken()
         {
-            UnitTestHelper.SetupStaticConfig();
             var email = "testemail@test.com";
             var password = "testpassword";
             byte[] passwordHash;
