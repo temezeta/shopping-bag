@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Org.BouncyCastle.Asn1.Ocsp;
+using shopping_bag.Config;
+using shopping_bag.Models.Email;
 using shopping_bag.Models.User;
 using shopping_bag.Services;
 using System.Security.Claims;
@@ -33,6 +36,17 @@ namespace shopping_bag.Controllers
                 return null;
             }
             return response.Data;
+        }
+
+        protected string GetVerificationBodyText(string verificationToken)
+        {
+            // Generate verification url
+            var verificationUrl = Url.ActionLink("Verify", "Auth", new { verificationToken = verificationToken });
+            
+            verificationUrl = "<a href=\"" + verificationUrl + "\">VERIFY ACCOUNT</a>.";
+            var verificationBodyText = string.Format(StaticConfig.VerificationEmailBodyText, verificationUrl);
+
+            return verificationBodyText;
         }
     }
 }

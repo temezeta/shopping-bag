@@ -1,16 +1,21 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using shopping_bag.Config;
 
 namespace shopping_bag_unit_tests.Services
 {
     public class BaseServiceTest : TestDataProvider
     {
-        public BaseServiceTest() : base() { }
+        public BaseServiceTest() : base() {
+            UnitTestHelper.SetupStaticConfig();
+        }
 
         protected AppDbContext GetDatabase()
         {
             var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+            .Options;
 
             var context = new AppDbContext(options);
             context.Database.EnsureCreated();

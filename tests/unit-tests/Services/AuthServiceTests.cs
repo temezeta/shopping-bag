@@ -8,32 +8,25 @@ using shopping_bag.Models;
 using shopping_bag.Models.User;
 using shopping_bag.Services;
 using shopping_bag.Utility;
-
+using shopping_bag_unit_tests.Services;
 
 namespace shopping_bag_unit_tests
 {
-    public class AuthServiceTests
+    public class AuthServiceTests : BaseServiceTest
     {
         private AuthService _authServiceMock;
         private readonly Mock<AppDbContext> _appDbContextMock = new Mock<AppDbContext>();
         private readonly Mock<IUserService> _iUserServiceMock = new Mock<IUserService>();
-        public AuthServiceTests()
+        private readonly Mock<IEmailService> _emailServiceMock = new Mock<IEmailService>();
+
+        public AuthServiceTests() :base()
         {
-            _authServiceMock = new AuthService(_appDbContextMock.Object, _iUserServiceMock.Object);
+            _authServiceMock = new AuthService(_appDbContextMock.Object, _iUserServiceMock.Object, _emailServiceMock.Object);
         }
 
         [Fact]
         public async void Login_LoginSuccessful_ReturnToken()
         {
-            // Arrange
-            var testConfiguration = new Dictionary<string, string>
-            {
-                {"Jwt:Token", "superlongssecretwritesomethinghere"},
-            };
-
-            var configuration = new ConfigurationBuilder().AddInMemoryCollection(testConfiguration).Build();
-            StaticConfig.Setup(configuration);
-
             var email = "testemail@test.com";
             var password = "testpassword";
             byte[] passwordHash;
@@ -73,7 +66,7 @@ namespace shopping_bag_unit_tests
             dataBaseContext.Database.EnsureCreated();
             dataBaseContext.Users.Add(user);
             await dataBaseContext.SaveChangesAsync();
-            _authServiceMock = new AuthService(dataBaseContext, _iUserServiceMock.Object);
+            _authServiceMock = new AuthService(dataBaseContext, _iUserServiceMock.Object, _emailServiceMock.Object);
 
             // Act
             var logOutResponse = await _authServiceMock.Logout(user);
