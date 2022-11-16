@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using shopping_bag.DTOs.Reminder;
-using shopping_bag.Models;
 using shopping_bag.Services;
 
 namespace shopping_bag.Controllers {
@@ -31,7 +30,7 @@ namespace shopping_bag.Controllers {
 
         [HttpPost]
         [Route("list")]
-        public async Task<ActionResult<ReminderSettingsDto>> SetListReminder([FromBody] ReminderSettingsDto settings, [FromRoute] long listId) {
+        public async Task<ActionResult<ReminderSettingsDto>> SetListReminder([FromBody] ReminderSettingsDto settings, [FromQuery] long listId) {
             var currentUser = await GetCurrentUser();
 
             if(currentUser == null) {
