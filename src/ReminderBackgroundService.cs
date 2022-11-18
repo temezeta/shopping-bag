@@ -14,7 +14,7 @@ namespace shopping_bag {
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken) {
-            while(!stoppingToken.IsCancellationRequested) {
+            while (!stoppingToken.IsCancellationRequested) {
 
                 // Wait until mid-night before running.
                 var delay = new TimeSpan(24, 0, 0) - DateTime.Now.TimeOfDay;
@@ -23,6 +23,7 @@ namespace shopping_bag {
                 using var scope = _scopeFactory.CreateAsyncScope();
                 var _reminderService = scope.ServiceProvider.GetRequiredService<IReminderService>();
                 await _reminderService.SendReminders(stoppingToken);
+            }
         }
     }
 }
