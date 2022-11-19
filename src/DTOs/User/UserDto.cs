@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using shopping_bag.DTOs.Office;
+using shopping_bag.DTOs.Reminder;
 
 namespace shopping_bag.DTOs.User {
     public class UserDto {
@@ -12,5 +13,7 @@ namespace shopping_bag.DTOs.User {
         public IEnumerable<UserRoleDto> UserRoles { get; set; } = new List<UserRoleDto>();
         public OfficeDto HomeOffice { get; set; }
         public Boolean Removed { get; set; } = false;
+        public ReminderSettingsDto ReminderSettings { get; set; }
+        public IEnumerable<ReminderDto> Reminders { get; set; }
     }
 }
