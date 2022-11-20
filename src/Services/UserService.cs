@@ -76,7 +76,7 @@ namespace shopping_bag.Services {
             {
                 using (var transaction = _context.Database.BeginTransaction())
                 {
-                    var modifyUser = await _context.Users.Include(u => u.UserRoles).Include(u => u.HomeOffice).FirstOrDefaultAsync(u => u.Id == userId);
+                    var modifyUser = (await GetUserById(userId)).Data;
 
                     if (modifyUser == null || modifyUser.Removed)
                     {
@@ -148,7 +148,7 @@ namespace shopping_bag.Services {
 
         public async Task<ServiceResponse<User>> ChangeUserPassword(long id, ChangePasswordDto request)
         {
-            var user = await _context.Users.Include(u => u.UserRoles).Include(u => u.HomeOffice).FirstOrDefaultAsync(u => u.Id == id);
+            var user = (await GetUserById(id)).Data;
 
             if(user == null || user.Removed)
             {

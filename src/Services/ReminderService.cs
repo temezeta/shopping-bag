@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using shopping_bag.Config;
 using shopping_bag.DTOs.Reminder;
 using shopping_bag.Models;
+using shopping_bag.Models.User;
 
 namespace shopping_bag.Services {
     public class ReminderService : IReminderService {
@@ -69,13 +70,14 @@ namespace shopping_bag.Services {
             await _context.SaveChangesAsync();
         }
 
-        public async Task<ServiceResponse<Reminder?>> SetListReminder(long userId, ReminderSettingsDto settings, long listId) {
-            var user = await _context.Users.Include(u => u.Reminders).Where(u => u.Id == userId && !u.Removed).FirstOrDefaultAsync();
-            if(user == null) {
-                return new ServiceResponse<Reminder?>("Invalid user");
+        public async Task<ServiceResponse<User>> SetListReminder(long userId, ReminderSettingsDto settings, long listId) {
+            var resp = await _userService.GetUserById(userId);
+            if(!resp.IsSuccess || resp.Data == null || resp.Data.Removed) {
+                return new ServiceResponse<User>("Invalid user");
             }
+            var user = resp.Data;
             if (!(await _context.ShoppingLists.AnyAsync(l => l.Id == listId && !l.Removed))) {
-                return new ServiceResponse<Reminder?>("Invalid list");
+                return new ServiceResponse<User>("Invalid list");
             }
             var reminder = user.Reminders.FirstOrDefault(r => r.ShoppingListId == listId);
 
@@ -86,14 +88,14 @@ namespace shopping_bag.Services {
                     user.Reminders.Remove(reminder);
                     await _context.SaveChangesAsync();
                 }
-                return new ServiceResponse<Reminder?>(data: null);
+                return new ServiceResponse<User>(user);
             }
 
             if (!IsValidReminderInterval(settings.ReminderDaysBeforeDueDate)) {
-                return new ServiceResponse<Reminder?>("Invalid due date reminder interval");
+                return new ServiceResponse<User>("Invalid due date reminder interval");
             }
             if (!IsValidReminderInterval(settings.ReminderDaysBeforeExpectedDate)) {
-                return new ServiceResponse<Reminder?>("Invalid expected delivery date reminder interval");
+                return new ServiceResponse<User>("Invalid expected delivery date reminder interval");
             }
 
             if (reminder != null) {
@@ -109,7 +111,7 @@ namespace shopping_bag.Services {
                 user.Reminders.Add(reminder);
             }
             await _context.SaveChangesAsync();
-            return new ServiceResponse<Reminder?>(reminder);
+            return new ServiceResponse<User>(user);
         }
 
         private bool IsValidReminderInterval(List<int> interval) {
