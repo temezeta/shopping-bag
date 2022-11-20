@@ -23,7 +23,7 @@ namespace shopping_bag.Services {
 
         public async Task<ServiceResponse<User>> GetUserByEmail(string email)
         {
-            var user = await _context.Users.Include(u => u.UserRoles).Include(u => u.HomeOffice).Include(u => u.ReminderSettings).FirstOrDefaultAsync(u => u.Email == email);
+            var user = await _context.Users.Include(u => u.UserRoles).Include(u => u.HomeOffice).Include(u => u.ReminderSettings).Include(u => u.Reminders).FirstOrDefaultAsync(u => u.Email == email);
 
             if (user == null)
             {
@@ -34,7 +34,7 @@ namespace shopping_bag.Services {
         }
 
         public async Task<ServiceResponse<User>> GetUserById(long id) {
-            var user = await _context.Users.Include(u => u.UserRoles).Include(u => u.HomeOffice).Include(u => u.ReminderSettings).FirstOrDefaultAsync(u => u.Id == id);
+            var user = await _context.Users.Include(u => u.UserRoles).Include(u => u.HomeOffice).Include(u => u.ReminderSettings).Include(u => u.Reminders).FirstOrDefaultAsync(u => u.Id == id);
 
             if (user == null || user.Removed) {
                 return new ServiceResponse<User>(error: "User not found");
@@ -76,7 +76,7 @@ namespace shopping_bag.Services {
             {
                 using (var transaction = _context.Database.BeginTransaction())
                 {
-                    var modifyUser = await _context.Users.Include(u => u.UserRoles).Include(u => u.HomeOffice).FirstOrDefaultAsync(u => u.Id == userId);
+                    var modifyUser = (await GetUserById(userId)).Data;
 
                     if (modifyUser == null || modifyUser.Removed)
                     {
@@ -148,7 +148,7 @@ namespace shopping_bag.Services {
 
         public async Task<ServiceResponse<User>> ChangeUserPassword(long id, ChangePasswordDto request)
         {
-            var user = await _context.Users.Include(u => u.UserRoles).Include(u => u.HomeOffice).FirstOrDefaultAsync(u => u.Id == id);
+            var user = (await GetUserById(id)).Data;
 
             if(user == null || user.Removed)
             {

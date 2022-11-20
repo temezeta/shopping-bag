@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using shopping_bag.DTOs.Reminder;
+using shopping_bag.DTOs.User;
 using shopping_bag.Services;
 
 namespace shopping_bag.Controllers {
@@ -16,7 +17,7 @@ namespace shopping_bag.Controllers {
         }
 
         [HttpPost]
-        public async Task<ActionResult<ReminderSettingsDto>> SetGlobalReminderSettings([FromBody] ReminderSettingsDto settings) {
+        public async Task<ActionResult<UserDto>> SetGlobalReminderSettings([FromBody] ReminderSettingsDto settings) {
             var currentUser = await GetCurrentUser();
             if (currentUser == null) {
                 return BadRequest();
@@ -25,12 +26,12 @@ namespace shopping_bag.Controllers {
             if(!resp.IsSuccess) {
                 return BadRequest(resp.Error);
             }
-            return _mapper.Map<ReminderSettingsDto>(resp.Data);
+            return _mapper.Map<UserDto>(resp.Data.User);
         }
 
         [HttpPost]
         [Route("list")]
-        public async Task<ActionResult<ReminderSettingsDto>> SetListReminder([FromBody] ReminderSettingsDto settings, [FromQuery] long listId) {
+        public async Task<ActionResult<UserDto>> SetListReminder([FromBody] ReminderSettingsDto settings, [FromQuery] long listId) {
             var currentUser = await GetCurrentUser();
 
             if(currentUser == null) {
@@ -42,14 +43,7 @@ namespace shopping_bag.Controllers {
                 return BadRequest(resp.Error);
             }
 
-            // SetListReminder returns null if reminder was removed due to disabling both reminders for the list.
-            // In that case construct settings with disabled=true and empty dates.
-            return new ReminderSettingsDto() {
-                DueDateRemindersDisabled = !resp.Data?.DueDaysBefore.Any() ?? true,
-                ExpectedRemindersDisabled = !resp.Data?.ExpectedDaysBefore.Any() ?? true,
-                ReminderDaysBeforeDueDate = resp.Data?.DueDaysBefore ?? new List<int>(),
-                ReminderDaysBeforeExpectedDate = resp.Data?.ExpectedDaysBefore ?? new List<int>()
-            };
+            return _mapper.Map<UserDto>(resp.Data);
         }
     }
 }
