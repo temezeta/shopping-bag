@@ -131,7 +131,9 @@ namespace shopping_bag.Services
                 return new ServiceResponse<IEnumerable<ShoppingList>>(error: "Invalid officeId");
             }
 
-            var shoppingLists = await _context.ShoppingLists.Include(s => s.Items).ThenInclude(i => i.UsersWhoLiked)
+            var shoppingLists = await _context.ShoppingLists.Include(s => s.Items)
+                                                            .ThenInclude(i => i.UsersWhoLiked)
+                                                            .ThenInclude(u => u.HomeOffice)
                                                             .Include(s => s.ListDeliveryOffice)
                                                             .Where(s => s.OfficeId == officeId && !s.Removed)
                                                             .ToListAsync();
