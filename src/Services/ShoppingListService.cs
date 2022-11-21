@@ -109,6 +109,8 @@ namespace shopping_bag.Services
         public async Task<ServiceResponse<ShoppingList>> GetShoppingListById(long shoppingListId)
         {
             var shoppingList = await _context.ShoppingLists.Include(s => s.Items)
+                                                           .ThenInclude(s => s.UsersWhoLiked)
+                                                           .ThenInclude(s => s.HomeOffice)
                                                            .Include(s => s.ListDeliveryOffice)
                                                            .FirstOrDefaultAsync(s => s.Id == shoppingListId);
 
