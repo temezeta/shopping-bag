@@ -59,5 +59,20 @@ namespace shopping_bag.Controllers {
 
             return _mapper.Map<OfficeDto>(response.Data);
         }
+
+        [HttpDelete]
+        [Route("")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult> RemoveOffice(long officeId)
+        {
+            var response = await _officeService.RemoveOffice(officeId);
+
+            if (!response.IsSuccess)
+            {
+                return BadRequest(response.Error);
+            }
+
+            return Ok();
+        }
     }
 }
