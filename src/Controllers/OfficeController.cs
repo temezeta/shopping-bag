@@ -38,6 +38,26 @@ namespace shopping_bag.Controllers {
                 return BadRequest(result.Error);
             }
             return _mapper.Map<OfficeDto>(result.Data);
-        }  
+        }
+
+        [HttpPut]
+        [Route("")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<OfficeDto>> ModifyOffice([FromBody] AddOfficeDto office, long officeId)
+        {
+            if (office == null || string.IsNullOrEmpty(office.Name))
+            {
+                return BadRequest("Office name is required");
+            }
+
+            var response = await _officeService.ModifyOffice(office, officeId);
+
+            if (!response.IsSuccess)
+            {
+                return BadRequest(response.Error);
+            }
+
+            return _mapper.Map<OfficeDto>(response.Data);
+        }
     }
 }

@@ -6,5 +6,9 @@ namespace shopping_bag.Services {
 
         Task<ServiceResponse<IEnumerable<Office>>> GetOffices();
         Task<ServiceResponse<Office>> AddOffice(AddOfficeDto office);
+
+        Task<ServiceResponse<Office>> ModifyOffice(AddOfficeDto office, long officeId);
+
+        Task<ServiceResponse<bool>> RemoveOffice(long officeId);
     }
 }
