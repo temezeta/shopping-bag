@@ -17,5 +17,6 @@ namespace shopping_bag.Services
         Task<ServiceResponse<IEnumerable<ShoppingList>>> GetShoppingListsByOffice(long officeId);
         Task<ServiceResponse<bool>> OrderShoppingList(long shoppingListId);
         Task<ServiceResponse<ShoppingList>> SetOrderedAmount(long shoppingListId, OrderedAmountDto amount);
+        Task<ServiceResponse<ShoppingList>> SetItemCheckedStatus(long shoppingListId, CheckedItemDto itemData);
     }
 }

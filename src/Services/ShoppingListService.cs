@@ -111,6 +111,8 @@ namespace shopping_bag.Services
             var shoppingList = await _context.ShoppingLists.Include(s => s.Items)
                                                            .ThenInclude(s => s.UsersWhoLiked)
                                                            .ThenInclude(s => s.HomeOffice)
+                                                           .Include(s => s.Items)
+                                                           .ThenInclude(s => s.ItemAdder)
                                                            .Include(s => s.ListDeliveryOffice)
                                                            .FirstOrDefaultAsync(s => s.Id == shoppingListId);
 
@@ -162,13 +164,14 @@ namespace shopping_bag.Services
 
         public async Task<ServiceResponse<ShoppingList>> SetOrderedAmount(long shoppingListId, OrderedAmountDto amount)
         {
-            var shoppingList = await _context.ShoppingLists.Include(it => it.Items).FirstOrDefaultAsync(s => s.Id == shoppingListId);
+            var response = await GetShoppingListById(shoppingListId);
 
-            if (shoppingList == null || shoppingList.Removed)
+            if (!response.IsSuccess)
             {
                 return new ServiceResponse<ShoppingList>(error: "Invalid shopping list");
             }
 
+            var shoppingList = response.Data;
             var item = shoppingList.Items.FirstOrDefault(i => i.Id == amount.ItemId);
 
             if (item == null)
@@ -178,6 +181,29 @@ namespace shopping_bag.Services
 
             item.AmountOrdered = amount.AmountOrdered;
 
+            await _context.SaveChangesAsync();
+
+            return new ServiceResponse<ShoppingList>(shoppingList);
+        }
+
+        public async Task<ServiceResponse<ShoppingList>> SetItemCheckedStatus(long shoppingListId, CheckedItemDto itemData)
+        {
+            var response = await GetShoppingListById(shoppingListId);
+
+            if (!response.IsSuccess)
+            {
+                return new ServiceResponse<ShoppingList>(error: "Invalid shopping list");
+            }
+
+            var shoppingList = response.Data;
+            var item = shoppingList.Items.FirstOrDefault(i => i.Id == itemData.ItemId);
+
+            if (item == null)
+            {
+                return new ServiceResponse<ShoppingList>(error: "Item not on list");
+            }
+
+            item.IsChecked = itemData.IsChecked;
             await _context.SaveChangesAsync();
 
             return new ServiceResponse<ShoppingList>(shoppingList);
@@ -303,6 +329,7 @@ namespace shopping_bag.Services
             }
             return ItemStatus.OK;
         }
+
         private enum ItemStatus {
             OK, NOT_FOUND, LIST_REMOVED, NOT_OWN_ITEM, LIST_ALREADY_ORDERED, LIST_DUE_DATE_PASSED
         }
