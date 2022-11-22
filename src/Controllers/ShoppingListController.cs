@@ -120,5 +120,20 @@ namespace shopping_bag.Controllers
             return Ok(_mapper.Map<ShoppingListDto>(response.Data));
         }
 
+        [HttpPut]
+        [Authorize(Roles = "Admin")]
+        [Route("{listId}/mark-checked")]
+        public async Task<ActionResult<ShoppingListDto>> SetItemCheckedStatus([FromRoute] long listId, [FromBody] CheckedItemDto request)
+        {
+            var response = await _shoppingListService.SetItemCheckedStatus(listId, request);
+
+            if (!response.IsSuccess)
+            {
+                return BadRequest(response.Error);
+            }
+
+            return Ok(_mapper.Map<ShoppingListDto>(response.Data));
+        }
+
     }
 }
