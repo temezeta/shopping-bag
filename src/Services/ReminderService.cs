@@ -53,6 +53,11 @@ namespace shopping_bag.Services {
         }
 
         public async Task CreateRemindersForList(long listId, long officeId) {
+            var list = await _context.ShoppingLists.FirstOrDefaultAsync(l => l.Id == listId);
+            if (list == null || (list.ExpectedDeliveryDate == null && list.DueDate == null)) {
+                // No dates set, no need to make reminders.
+                return;
+            }
             var users = await _context.Users.Include(u => u.ReminderSettings).Include(u => u.ListReminderSettings).Include(u => u.Reminders).Where(u => u.OfficeId == officeId && !u.Removed).ToListAsync();
             foreach (var user in users) {
                 var reminderSettings = user.ReminderSettings;
@@ -79,11 +84,19 @@ namespace shopping_bag.Services {
                     user.ListReminderSettings.Add(listSettings);
                 }
 
+                var dueReminder = TrimInterval(listSettings.ReminderDaysBeforeDueDate, list.DueDate);
+                var expectedReminder = TrimInterval(listSettings.ReminderDaysBeforeExpectedDate, list.ExpectedDeliveryDate);
+
+                // If no future intervals found, dont create reminders.
+                if (!dueReminder.Any() && !expectedReminder.Any()) {
+                    continue;
+                }
+
                 var reminder = new Reminder() {
                     ShoppingListId = listId,
                     UserId = user.Id,
-                    DueDaysBefore = listSettings.ReminderDaysBeforeDueDate,
-                    ExpectedDaysBefore = listSettings.ReminderDaysBeforeExpectedDate
+                    DueDaysBefore = dueReminder,
+                    ExpectedDaysBefore = expectedReminder
                 };
                 user.Reminders.Add(reminder);
             }
@@ -242,7 +255,7 @@ namespace shopping_bag.Services {
                 int daysBefore = reminder.DueDaysBefore.Max();
                 if (IsDateWithinReminderInterval(list.DueDate, daysBefore)) {
                     reminder.DueDaysBefore.Remove(daysBefore);
-                    var msg = $"Due date for list {list.Name} is {(daysBefore == 1 ? "tomorrow" : $"in {daysBefore} days")} {list.DueDate.Value.ToString("dd.MM.yyyy")}. Items should be added before the due date.";
+                    var msg = string.Format(StaticConfig.EmailDueDateReminderFormat, list.Name, (daysBefore == 1 ? "tomorrow" : $"in {daysBefore} days"), list.DueDate.Value.ToString("dd.MM.yyyy"));
                     if (remindersToSend.TryGetValue(reminder.User, out List<string>? msgList)) {
                         msgList.Add(msg);
                     } else {
@@ -257,7 +270,7 @@ namespace shopping_bag.Services {
                 int daysBefore = reminder.ExpectedDaysBefore.Max();
                 if (IsDateWithinReminderInterval(list.ExpectedDeliveryDate, daysBefore)) {
                     reminder.ExpectedDaysBefore.Remove(daysBefore);
-                    var msg = $"Expected delivery date for list {list.Name} is {(daysBefore == 1 ? "tomorrow" : $"in {daysBefore} days")} {list.ExpectedDeliveryDate.Value.ToString("dd.MM.yyyy")}.";
+                    var msg = string.Format(StaticConfig.EmailExpectedDateReminderFormat, list.Name, (daysBefore == 1 ? "tomorrow" : $"in {daysBefore} days"), list.ExpectedDeliveryDate.Value.ToString("dd.MM.yyyy"));
                     if (remindersToSend.TryGetValue(reminder.User, out List<string>? msgList)) {
                         msgList.Add(msg);
                     } else {
@@ -270,10 +283,11 @@ namespace shopping_bag.Services {
         private void SendReminderEmails(Dictionary<User, List<string>> remindersToSend) {
             foreach (var kv in remindersToSend) {
                 var sb = new StringBuilder();
-                sb.AppendLine("TODO: Something about why this email was sent.");
-                sb.AppendJoin(Environment.NewLine, kv.Value); // List of reminders
-                sb.Append(Environment.NewLine);
-                sb.AppendLine("TODO: Something about how to turn off notifications");
+                sb.Append(StaticConfig.EmailReminderIntro);
+                sb.Append("<br>");
+                sb.AppendJoin("<br>", kv.Value); // List of reminders
+                sb.Append("<br>");
+                sb.AppendLine(StaticConfig.EmailReminderTurnOffEmails);
                 try {
                     _emailService.SendEmail(new Models.Email.Email() {
                         To = kv.Key.Email,
