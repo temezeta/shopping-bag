@@ -53,6 +53,18 @@ namespace shopping_bag.Config
                     intListValueComparer);
                 e.HasOne(r => r.User).WithMany(u => u.Reminders).OnDelete(DeleteBehavior.ClientCascade);
             });
+            builder.Entity<ListReminderSettings>(e => {
+                e.Property(r => r.ReminderDaysBeforeDueDate).HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
+                    v => JsonSerializer.Deserialize<List<int>>(v, (JsonSerializerOptions)null),
+                    intListValueComparer);
+                e.Property(r => r.ReminderDaysBeforeExpectedDate).HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
+                    v => JsonSerializer.Deserialize<List<int>>(v, (JsonSerializerOptions)null),
+                    intListValueComparer);
+                e.HasKey(r => new { r.UserId, r.ShoppingListId });
+                e.HasOne(r => r.User).WithMany(u => u.ListReminderSettings).OnDelete(DeleteBehavior.ClientCascade);
+            });
             builder.Seed();
         }
 

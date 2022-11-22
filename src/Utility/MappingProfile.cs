@@ -45,6 +45,7 @@ namespace shopping_bag.Utility {
                 .ForMember(dest => dest.Removed, opt => opt.Ignore())
                 .ForMember(dest => dest.Ordered, opt => opt.Ignore());
             CreateMap<ReminderSettings, ReminderSettingsDto>();
+            CreateMap<ListReminderSettings, ListReminderSettingsDto>();
             CreateMap<Reminder, ReminderDto>()
                 .ForMember(dest => dest.DueDateRemindersDisabled, opt => opt.ConvertUsing(new ReminderDaysListToDisabledPropertyConverter(), src => src.DueDaysBefore))
                 .ForMember(dest => dest.ExpectedRemindersDisabled, opt => opt.ConvertUsing(new ReminderDaysListToDisabledPropertyConverter(), src => src.ExpectedDaysBefore))

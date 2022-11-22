@@ -53,46 +53,52 @@ namespace shopping_bag.Services {
         }
 
         public async Task CreateRemindersForList(long listId, long officeId) {
-            var users = await _context.Users.Include(u => u.ReminderSettings).Include(u => u.Reminders).Where(u => u.OfficeId == officeId && !u.Removed).ToListAsync();
+            var users = await _context.Users.Include(u => u.ReminderSettings).Include(u => u.ListReminderSettings).Include(u => u.Reminders).Where(u => u.OfficeId == officeId && !u.Removed).ToListAsync();
             foreach (var user in users) {
                 var reminderSettings = user.ReminderSettings;
                 if (reminderSettings == null || (reminderSettings.DueDateRemindersDisabled && reminderSettings.ExpectedRemindersDisabled)) {
                     continue;
                 }
-                if(user.Reminders.Any(r => r.ShoppingListId == listId)) {
+                if (user.Reminders.Any(r => r.ShoppingListId == listId)) {
                     // Skip if user already has reminders created on this list.
                     continue;
                 }
+
+                var listSettings = user.ListReminderSettings.FirstOrDefault(r => r.ShoppingListId == listId);
+
+                // Generate list settings from globals if none exist.
+                if(listSettings == null) {
+                    listSettings = new ListReminderSettings() {
+                        ReminderDaysBeforeDueDate = reminderSettings.ReminderDaysBeforeDueDate,
+                        DueDateRemindersDisabled = reminderSettings.DueDateRemindersDisabled,
+                        ExpectedRemindersDisabled = reminderSettings.ExpectedRemindersDisabled,
+                        ReminderDaysBeforeExpectedDate = reminderSettings.ReminderDaysBeforeExpectedDate,
+                        UserId = user.Id,
+                        ShoppingListId = listId
+                    };
+                    user.ListReminderSettings.Add(listSettings);
+                }
+
                 var reminder = new Reminder() {
                     ShoppingListId = listId,
                     UserId = user.Id,
-                    DueDaysBefore = reminderSettings.ReminderDaysBeforeDueDate,
-                    ExpectedDaysBefore = reminderSettings.ReminderDaysBeforeExpectedDate
+                    DueDaysBefore = listSettings.ReminderDaysBeforeDueDate,
+                    ExpectedDaysBefore = listSettings.ReminderDaysBeforeExpectedDate
                 };
                 user.Reminders.Add(reminder);
             }
             await _context.SaveChangesAsync();
         }
 
-        public async Task<ServiceResponse<User>> SetListReminder(long userId, ReminderSettingsDto settings, long listId) {
+        public async Task<ServiceResponse<User>> SetListReminder(long userId, ListReminderSettingsDto settings, long listId) {
             var resp = await _userService.GetUserById(userId);
             if(!resp.IsSuccess || resp.Data == null || resp.Data.Removed) {
                 return new ServiceResponse<User>("Invalid user");
             }
             var user = resp.Data;
-            if (!(await _context.ShoppingLists.AnyAsync(l => l.Id == listId && !l.Removed))) {
+            var list = await _context.ShoppingLists.FirstOrDefaultAsync(l => l.Id == listId && !l.Removed);
+            if (list == null) {
                 return new ServiceResponse<User>("Invalid list");
-            }
-            var reminder = user.Reminders.FirstOrDefault(r => r.ShoppingListId == listId);
-
-            // If both reminders are disabled, or both are empty, then remove the reminder and return null.
-            if((settings.DueDateRemindersDisabled && settings.ExpectedRemindersDisabled) ||
-                (settings.ReminderDaysBeforeDueDate.Count == 0 && settings.ReminderDaysBeforeExpectedDate.Count == 0)) {
-                if (reminder != null) {
-                    user.Reminders.Remove(reminder);
-                    await _context.SaveChangesAsync();
-                }
-                return new ServiceResponse<User>(user);
             }
 
             if (!IsValidReminderInterval(settings.ReminderDaysBeforeDueDate)) {
@@ -102,18 +108,49 @@ namespace shopping_bag.Services {
                 return new ServiceResponse<User>("Invalid expected delivery date reminder interval");
             }
 
+            // Save settings
+            SaveListSettings(user, settings);
+
+            var reminder = user.Reminders.FirstOrDefault(r => r.ShoppingListId == listId);
+            var currentSettings = user.ListReminderSettings.FirstOrDefault(r => r.ShoppingListId == settings.ShoppingListId);
+
+            // If both reminders are disabled, or both are empty, then remove the reminder.
+            if ((settings.DueDateRemindersDisabled && settings.ExpectedRemindersDisabled) ||
+                (settings.ReminderDaysBeforeDueDate.Count == 0 && settings.ReminderDaysBeforeExpectedDate.Count == 0)) {
+                if (reminder != null) {
+                    user.Reminders.Remove(reminder);
+                    await _context.SaveChangesAsync();
+                }
+                return new ServiceResponse<User>(user);
+            }
+
+            var dueReminder = TrimInterval(settings.ReminderDaysBeforeDueDate, list.DueDate);
+            var expectedReminder = TrimInterval(settings.ReminderDaysBeforeExpectedDate, list.ExpectedDeliveryDate);
+
+            // If all dates are passed, remove this list's listsettings and reminder.
+            if (!dueReminder.Any() && !expectedReminder.Any()) {
+                if (reminder != null) {
+                    user.Reminders.Remove(reminder);
+                }
+                user.ListReminderSettings.RemoveAll(r => r.ShoppingListId == listId);
+                await _context.SaveChangesAsync();
+                return new ServiceResponse<User>(user);
+            }
+
+            // Generate or update reminder
             if (reminder != null) {
-                reminder.DueDaysBefore = settings.DueDateRemindersDisabled ? new List<int>() : settings.ReminderDaysBeforeDueDate;
-                reminder.ExpectedDaysBefore = settings.ExpectedRemindersDisabled ? new List<int>() : settings.ReminderDaysBeforeExpectedDate;
+                reminder.DueDaysBefore = settings.DueDateRemindersDisabled ? new List<int>() : dueReminder;
+                reminder.ExpectedDaysBefore = settings.ExpectedRemindersDisabled ? new List<int>() : expectedReminder;
             } else {
                 reminder = new Reminder() {
                     ShoppingListId = listId,
                     UserId = userId,
-                    DueDaysBefore = settings.DueDateRemindersDisabled ? new List<int>() : settings.ReminderDaysBeforeDueDate,
-                    ExpectedDaysBefore = settings.ExpectedRemindersDisabled ? new List<int>() : settings.ReminderDaysBeforeExpectedDate
+                    DueDaysBefore = settings.DueDateRemindersDisabled ? new List<int>() : dueReminder,
+                    ExpectedDaysBefore = settings.ExpectedRemindersDisabled ? new List<int>() : expectedReminder
                 };
                 user.Reminders.Add(reminder);
             }
+
             await _context.SaveChangesAsync();
             return new ServiceResponse<User>(user);
         }
@@ -132,31 +169,71 @@ namespace shopping_bag.Services {
             return true;
         }
 
+        // For example don't include 3 day if there's only 2 days till the date.
+        private List<int> TrimInterval(List<int> interval, DateTime? targetDate) {
+            return interval.Where(i => !targetDate.HasValue || targetDate.Value.Subtract(new TimeSpan(i, 0, 0, 0)) > DateTime.Now).ToList();
+        }
+
+        private void SaveListSettings(User user, ListReminderSettingsDto settings) {
+            var currentSettings = user.ListReminderSettings.FirstOrDefault(r => r.ShoppingListId == settings.ShoppingListId);
+            if (currentSettings == null) {
+                user.ListReminderSettings.Add(new ListReminderSettings() {
+                    DueDateRemindersDisabled = settings.DueDateRemindersDisabled,
+                    ExpectedRemindersDisabled = settings.ExpectedRemindersDisabled,
+                    ReminderDaysBeforeDueDate = settings.ReminderDaysBeforeDueDate,
+                    ReminderDaysBeforeExpectedDate = settings.ReminderDaysBeforeExpectedDate,
+                    UserId = user.Id,
+                    ShoppingListId = settings.ShoppingListId
+                });
+            } else {
+                currentSettings.DueDateRemindersDisabled = settings.DueDateRemindersDisabled;
+                currentSettings.ExpectedRemindersDisabled = settings.ExpectedRemindersDisabled;
+                currentSettings.ReminderDaysBeforeDueDate = settings.ReminderDaysBeforeDueDate;
+                currentSettings.ReminderDaysBeforeExpectedDate = settings.ReminderDaysBeforeExpectedDate;
+            }
+        }
+
         public async Task SendReminders(CancellationToken stoppingToken) {
-            var reminders = await _context.Reminders.Include(r => r.ShoppingList).Include(r => r.User).ThenInclude(u => u.ReminderSettings).ToListAsync(cancellationToken: stoppingToken);
+            var reminders = await _context.Reminders.Include(r => r.ShoppingList).Include(r => r.User).ThenInclude(u => u.ReminderSettings)
+                .Include(r => r.User).ThenInclude(r => r.ListReminderSettings).ToListAsync(cancellationToken: stoppingToken);
             var remindersToSend = new Dictionary<User, List<string>>(new UserEqualityComparer()); // Used to gather possible multiple reminders to be sent in one email.
             foreach (var reminder in reminders) {
-                var settings = reminder.User.ReminderSettings;
-                var list = reminder.ShoppingList;
+                try {
+                    var settings = reminder.User.ReminderSettings;
+                    var list = reminder.ShoppingList;
+                    var listSettings = reminder.User.ListReminderSettings.FirstOrDefault(r => r.ShoppingListId == list.Id);
 
-                // If list/user removed or both settings disabled
-                if (settings == null || reminder.ShoppingList.Removed || reminder.User.Removed || (settings.DueDateRemindersDisabled && settings.ExpectedRemindersDisabled)) {
-                    reminder.User.Reminders.Remove(reminder);
+                    // If list or user removed, remove reminder and settings.
+                    if (reminder.ShoppingList.Removed || reminder.User.Removed) {
+                        reminder.User.Reminders.Remove(reminder);
+                        reminder.User.ListReminderSettings.RemoveAll(r => r.ShoppingListId == list.Id);
+                        await _context.SaveChangesAsync(stoppingToken);
+                        continue;
+                    }
+
+                    // If both settings null or both disabled, remove reminder.
+                    if ((settings == null || (settings.DueDateRemindersDisabled && settings.ExpectedRemindersDisabled)) &&
+                            (listSettings == null || (listSettings.DueDateRemindersDisabled && listSettings.ExpectedRemindersDisabled))) {
+                        reminder.User.Reminders.Remove(reminder);
+                        await _context.SaveChangesAsync(stoppingToken);
+                        continue;
+                    }
+
+                    HandleDueDateReminder(reminder, remindersToSend);
+                    HandleExpectedDateReminder(reminder, remindersToSend);
+
+                    // Remove empty reminders
+                    if (!reminder.DueDaysBefore.Any() && !reminder.ExpectedDaysBefore.Any()) {
+                        reminder.User.Reminders.Remove(reminder);
+                    }
+
+                    await _context.SaveChangesAsync(stoppingToken);
+                } catch(Exception) {
                     continue;
-                }
-
-                HandleDueDateReminder(reminder, remindersToSend);
-                HandleExpectedDateReminder(reminder, remindersToSend);
-
-                // Remove empty reminders
-                if (!reminder.DueDaysBefore.Any() && !reminder.ExpectedDaysBefore.Any()) {
-                    reminder.User.Reminders.Remove(reminder);
                 }
             }
             // Send emails
             SendReminderEmails(remindersToSend);
-
-            await _context.SaveChangesAsync(stoppingToken);
         }
 
         private void HandleDueDateReminder(Reminder reminder, Dictionary<User, List<string>> remindersToSend) {

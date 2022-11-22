@@ -31,13 +31,14 @@ namespace shopping_bag.Controllers {
 
         [HttpPost]
         [Route("list")]
-        public async Task<ActionResult<UserDto>> SetListReminder([FromBody] ReminderSettingsDto settings, [FromQuery] long listId) {
+        public async Task<ActionResult<UserDto>> SetListReminder([FromBody] ListReminderSettingsDto settings, [FromQuery] long listId) {
             var currentUser = await GetCurrentUser();
 
             if(currentUser == null) {
                 return BadRequest();
             }
 
+            settings.ShoppingListId = listId;
             var resp = await _reminderService.SetListReminder(currentUser.Id, settings, listId);
             if (!resp.IsSuccess) {
                 return BadRequest(resp.Error);
