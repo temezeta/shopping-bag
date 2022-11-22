@@ -15,6 +15,5 @@ namespace shopping_bag.DTOs.User {
         public Boolean Removed { get; set; } = false;
         public ReminderSettingsDto ReminderSettings { get; set; }
         public IEnumerable<ListReminderSettingsDto> ListReminderSettings { get; set; }
-        public IEnumerable<ReminderDto> Reminders { get; set; }
     }
 }
