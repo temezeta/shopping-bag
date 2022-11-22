@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Expressions;
 using Moq;
 using shopping_bag.Config;
 using shopping_bag.DTOs.ShoppingList;
@@ -407,7 +408,7 @@ namespace shopping_bag_unit_tests.Services {
         }
         #endregion
 
-        #region SetOrderedAmount
+        #region SetOrderedAmount Tests
         [Fact]
         public async Task SetOrderedAmount_ListNotFound_ReturnsError()
         {
@@ -464,6 +465,52 @@ namespace shopping_bag_unit_tests.Services {
             Assert.NotNull(item);
             Assert.Equal(2, item.AmountOrdered);
         }
+        #endregion Tests
+
+        #region SetItemCheckedStatus Tests
+
+        [Fact]
+        public async Task SetItemCheckedStatus_ValidItemAndList_ReturnsShoppingList()
+        {
+            var checkedItem = new CheckedItemDto()
+            {
+                ItemId = 1,
+                IsChecked = true
+            };
+
+            var response = await _sut.SetItemCheckedStatus(1, checkedItem);
+            Assert.True(response.IsSuccess);
+            Assert.NotNull(response.Data);
+        }
+
+        [Fact]
+        public async Task SetItemCheckedStatus_InvalidList_ReturnsError()
+        {
+            var checkedItem = new CheckedItemDto()
+            {
+                ItemId = 1,
+                IsChecked = true
+            };
+
+            var response = await _sut.SetItemCheckedStatus(2000, checkedItem);
+            Assert.False(response.IsSuccess);
+            Assert.Equal("Invalid shopping list", response.Error);
+        }
+
+        [Fact]
+        public async Task SetItemCheckedStatus_ValidListInvalidItem_ReturnsError()
+        {
+            var checkedItem = new CheckedItemDto()
+            {
+                ItemId = 12982,
+                IsChecked = true
+            };
+
+            var response = await _sut.SetItemCheckedStatus(1, checkedItem);
+            Assert.False(response.IsSuccess);
+            Assert.Equal("Item not on list", response.Error);
+        }
+
         #endregion
     }
 }

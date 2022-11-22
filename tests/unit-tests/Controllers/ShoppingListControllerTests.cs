@@ -35,13 +35,35 @@ namespace shopping_bag_unit_tests.Controllers
         }
 
         [Fact]
-        public async Task SetOrderedAmount_SetSuccess_ReturnsBadRequest()
+        public async Task SetOrderedAmount_SetSuccess_ReturnsOkRequest()
         {
             _shoppingListService.Setup(it => it.SetOrderedAmount(It.IsAny<long>(), It.IsAny<OrderedAmountDto>()))
                 .ReturnsAsync(new ServiceResponse<ShoppingList>(new ShoppingList()));
 
             var response = await _sut.SetOrderedAmount(1, new OrderedAmountDto());
 
+            Assert.NotNull(response);
+            Assert.IsType<OkObjectResult>(response.Result);
+        }
+
+        [Fact]
+        public async Task SetItemCheckedStatus_SetFailed_ReturnsBadRequest()
+        {
+            _shoppingListService.Setup(it => it.SetItemCheckedStatus(It.IsAny<long>(), It.IsAny<CheckedItemDto>()))
+                .ReturnsAsync(new ServiceResponse<ShoppingList>(error: "Error"));
+
+            var response = await _sut.SetItemCheckedStatus(2, new CheckedItemDto());
+            Assert.NotNull(response);
+            Assert.IsType<BadRequestObjectResult>(response.Result);
+        }
+
+        [Fact]
+        public async Task SetItemCheckedStatus_SetSuccess_ReturnsOkRequest()
+        {
+            _shoppingListService.Setup(it => it.SetItemCheckedStatus(It.IsAny<long>(), It.IsAny<CheckedItemDto>()))
+                .ReturnsAsync(new ServiceResponse<ShoppingList>(new ShoppingList()));
+
+            var response = await _sut.SetItemCheckedStatus(2, new CheckedItemDto());
             Assert.NotNull(response);
             Assert.IsType<OkObjectResult>(response.Result);
         }
