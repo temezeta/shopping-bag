@@ -12,6 +12,7 @@ namespace shopping_bag.DTOs.ShoppingList
         public string? Comment { get; set; }
 
         public Boolean Ordered { get; set; }
+        public DateTime? OrderedDate { get; set; }
 
         public Boolean Removed { get; set; }
 

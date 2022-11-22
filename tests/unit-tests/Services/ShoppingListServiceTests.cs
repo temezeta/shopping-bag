@@ -74,6 +74,18 @@ namespace shopping_bag_unit_tests.Services {
             Assert.Equal("Shoppinglist is already ordered", response.Error);
         }
 
+        [Fact]
+        public async Task OrderShoppingList_ValidShoppingList_OrderDateUpdated() {
+            var response = await _sut.OrderShoppingList(1);
+            Assert.True(response.IsSuccess);
+            var now = DateTime.Now;
+            var list = await _context.ShoppingLists.FirstOrDefaultAsync(l => l.Id == 1);
+            Assert.NotNull(list);
+            Assert.True(list.Ordered);
+            Assert.True(list.OrderedDate.HasValue);
+            Assert.True(now.Subtract(list.OrderedDate.Value) < new TimeSpan(0, 0, 10)); // Date within 10s, test shouldn't take longer.
+        }
+
         #endregion
 
         #region ModifyShoppingList test
