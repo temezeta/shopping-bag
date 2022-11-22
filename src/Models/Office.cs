@@ -11,5 +11,8 @@ namespace shopping_bag.Models {
 
         [Required]
         public string Name { get; set; }
+
+        [Required]
+        public bool Removed { get; set; }
     }
 }

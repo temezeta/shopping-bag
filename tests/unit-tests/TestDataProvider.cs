@@ -1,11 +1,12 @@
 ﻿using shopping_bag.Models.User;
 using shopping_bag.Models;
+using shopping_bag.Migrations;
 
 namespace shopping_bag_unit_tests
 {
     public class TestDataProvider
     {
-        public readonly Office TestOffice, ListOffice;
+        public readonly Office TestOffice, ListOffice, RemovedOffice;
         public readonly UserRole NormalRole, AdminRole;
         public readonly User NormalUser, AdminUser, RemovedUser;
         public readonly ShoppingList NormalList, DueDatePassedList, NotStartedList, OrderedList, RemovedList;
@@ -22,8 +23,9 @@ namespace shopping_bag_unit_tests
             #region Offices
             TestOffice = new Office() { Id = 1, Name = "Tampere" };
             ListOffice = new Office() { Id = 2, Name = "Helsinki" };
+            RemovedOffice = new Office() { Id = 3, Name = "Karibia", Removed = true };
             
-            Offices = new List<Office>() { TestOffice, ListOffice };
+            Offices = new List<Office>() { TestOffice, ListOffice, RemovedOffice };
             #endregion
 
             #region UserRoles

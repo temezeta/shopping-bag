@@ -102,7 +102,7 @@ namespace shopping_bag.Services {
                         return new ServiceResponse<User>(error: "You can only modify your own account");
                     }
 
-                    var homeoffice = _context.Offices.FirstOrDefault(o => o.Id == modifyData.OfficeId);
+                    var homeoffice = _context.Offices.FirstOrDefault(o => o.Id == modifyData.OfficeId && !o.Removed);
 
                     if (homeoffice == null)
                     {

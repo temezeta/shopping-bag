@@ -15,7 +15,8 @@ namespace shopping_bag.Utility {
             CreateMap<UserRole, UserRoleDto>();
             CreateMap<ShoppingList, ShoppingListDto>();
             CreateMap<AddOfficeDto, Office>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore());
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Removed, opt => opt.Ignore());
             CreateMap<Item, ItemDto>();
             CreateMap<User, RedactedUserDto>();
             CreateMap<AddItemDto, Item>()
