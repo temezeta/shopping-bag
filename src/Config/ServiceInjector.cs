@@ -13,6 +13,7 @@ namespace shopping_bag.Config
             services.AddScoped<IOfficeService, OfficeService>();
             services.AddScoped<IShoppingListService, ShoppingListService>();
             services.AddScoped<IReminderService, ReminderService>();
+            services.AddScoped<IUserRoleService, UserRoleService>();
             services.AddAutoMapper(typeof(Program).Assembly);
         }
     }
