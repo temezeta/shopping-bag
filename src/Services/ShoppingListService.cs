@@ -157,6 +157,7 @@ namespace shopping_bag.Services
             }
 
             shoppingList.Ordered = true;
+            shoppingList.OrderedDate = DateTime.Now;
             await _context.SaveChangesAsync();
 
             return new ServiceResponse<bool>(true);
