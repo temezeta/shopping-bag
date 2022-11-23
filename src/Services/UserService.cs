@@ -4,10 +4,7 @@ using shopping_bag.Models;
 using shopping_bag.Config;
 using shopping_bag.DTOs.User;
 using shopping_bag.Utility;
-using AutoMapper;
-using Org.BouncyCastle.Asn1.Ocsp;
 using shopping_bag.Models.Email;
-using Microsoft.AspNetCore.Identity;
 
 namespace shopping_bag.Services {
     public class UserService : IUserService
@@ -23,7 +20,7 @@ namespace shopping_bag.Services {
 
         public async Task<ServiceResponse<User>> GetUserByEmail(string email)
         {
-            var user = await _context.Users.Include(u => u.UserRoles).Include(u => u.HomeOffice).Include(u => u.ReminderSettings).Include(u => u.Reminders).FirstOrDefaultAsync(u => u.Email == email);
+            var user = await _context.Users.Include(u => u.UserRoles).Include(u => u.HomeOffice).Include(u => u.ReminderSettings).Include(u => u.Reminders).Include(u => u.ListReminderSettings).FirstOrDefaultAsync(u => u.Email == email);
 
             if (user == null)
             {
@@ -34,7 +31,7 @@ namespace shopping_bag.Services {
         }
 
         public async Task<ServiceResponse<User>> GetUserById(long id) {
-            var user = await _context.Users.Include(u => u.UserRoles).Include(u => u.HomeOffice).Include(u => u.ReminderSettings).Include(u => u.Reminders).FirstOrDefaultAsync(u => u.Id == id);
+            var user = await _context.Users.Include(u => u.UserRoles).Include(u => u.HomeOffice).Include(u => u.ReminderSettings).Include(u => u.Reminders).Include(u => u.ListReminderSettings).FirstOrDefaultAsync(u => u.Id == id);
 
             if (user == null || user.Removed) {
                 return new ServiceResponse<User>(error: "User not found");

@@ -22,6 +22,12 @@
         public static long DefaultAdminOfficeId { get; private set; }
         public static string[] DefaultAdminRoles { get; private set; }
         #endregion
+        #region Reminders messages
+        public static string EmailDueDateReminderFormat { get; private set; }
+        public static string EmailExpectedDateReminderFormat { get; private set; }
+        public static string EmailReminderIntro { get; private set; }
+        public static string EmailReminderTurnOffEmails { get; private set; }
+        #endregion
         public static void Setup(IConfiguration config)
         {
             #region Jwt
@@ -43,6 +49,12 @@
             DefaultAdminPassword = config.GetValue<string>("DefaultAdmin:Password");
             DefaultAdminOfficeId = config.GetValue<long>("DefaultAdmin:OfficeId");
             DefaultAdminRoles = config.GetSection("DefaultAdmin:Roles").Get<string[]>();
+            #endregion
+            #region Reminder messages
+            EmailDueDateReminderFormat = config.GetValue<string>("Reminders:DueDateReminderFormat");
+            EmailExpectedDateReminderFormat = config.GetValue<string>("Reminders:ExpectedDateReminderFormat");
+            EmailReminderIntro = config.GetValue<string>("Reminders:EmailReminderIntro");
+            EmailReminderTurnOffEmails = config.GetValue<string>("Reminders:EmailReminderTurnOffEmails");
             #endregion
         }
     }

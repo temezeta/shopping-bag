@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using shopping_bag.Config;
 
@@ -11,9 +12,10 @@ using shopping_bag.Config;
 namespace shopping_bag.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221122075339_AddListReminders")]
+    partial class AddListReminders
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -122,9 +124,6 @@ namespace shopping_bag.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<bool>("Removed")
-                        .HasColumnType("bit");
-
                     b.HasKey("Id");
 
                     b.HasIndex("Name")
@@ -136,50 +135,42 @@ namespace shopping_bag.Migrations
                         new
                         {
                             Id = 1L,
-                            Name = "Espoo",
-                            Removed = false
+                            Name = "Espoo"
                         },
                         new
                         {
                             Id = 2L,
-                            Name = "Hyvinkää",
-                            Removed = false
+                            Name = "Hyvinkää"
                         },
                         new
                         {
                             Id = 3L,
-                            Name = "Oulu",
-                            Removed = false
+                            Name = "Oulu"
                         },
                         new
                         {
                             Id = 4L,
-                            Name = "Vaasa",
-                            Removed = false
+                            Name = "Vaasa"
                         },
                         new
                         {
                             Id = 5L,
-                            Name = "Tampere",
-                            Removed = false
+                            Name = "Tampere"
                         },
                         new
                         {
                             Id = 6L,
-                            Name = "Seinäjoki",
-                            Removed = false
+                            Name = "Seinäjoki"
                         },
                         new
                         {
                             Id = 7L,
-                            Name = "Jyväskylä",
-                            Removed = false
+                            Name = "Jyväskylä"
                         },
                         new
                         {
                             Id = 8L,
-                            Name = "Kotka",
-                            Removed = false
+                            Name = "Kotka"
                         });
                 });
 
@@ -268,9 +259,6 @@ namespace shopping_bag.Migrations
                     b.Property<bool>("Ordered")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime?>("OrderedDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<bool>("Removed")
                         .HasColumnType("bit");
 
@@ -330,7 +318,6 @@ namespace shopping_bag.Migrations
                             Name = "Week 40 list",
                             OfficeId = 1L,
                             Ordered = true,
-                            OrderedDate = new DateTime(2022, 10, 10, 16, 0, 0, 0, DateTimeKind.Unspecified),
                             Removed = false
                         },
                         new
@@ -343,7 +330,6 @@ namespace shopping_bag.Migrations
                             Name = "Week 39 list",
                             OfficeId = 1L,
                             Ordered = true,
-                            OrderedDate = new DateTime(2022, 10, 10, 16, 0, 0, 0, DateTimeKind.Unspecified),
                             Removed = false
                         },
                         new

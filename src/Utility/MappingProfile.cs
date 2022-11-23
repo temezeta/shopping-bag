@@ -47,19 +47,7 @@ namespace shopping_bag.Utility {
                 .ForMember(dest => dest.Ordered, opt => opt.Ignore())
                 .ForMember(dest => dest.OrderedDate, opt => opt.Ignore());
             CreateMap<ReminderSettings, ReminderSettingsDto>();
-            CreateMap<Reminder, ReminderDto>()
-                .ForMember(dest => dest.DueDateRemindersDisabled, opt => opt.ConvertUsing(new ReminderDaysListToDisabledPropertyConverter(), src => src.DueDaysBefore))
-                .ForMember(dest => dest.ExpectedRemindersDisabled, opt => opt.ConvertUsing(new ReminderDaysListToDisabledPropertyConverter(), src => src.ExpectedDaysBefore))
-                .ForMember(dest => dest.ReminderDaysBeforeDueDate, opt => opt.MapFrom(src => src.DueDaysBefore))
-                .ForMember(dest => dest.ReminderDaysBeforeExpectedDate, opt => opt.MapFrom(src => src.ExpectedDaysBefore));
+            CreateMap<ListReminderSettings, ListReminderSettingsDto>();
         }
-    }
-
-    // Non-empty list -> false (not disabled)
-    // Empty list -> true (disabled)
-    public class ReminderDaysListToDisabledPropertyConverter : IValueConverter<List<int>, bool> {
-
-        public bool Convert(List<int> source, ResolutionContext context)
-            => !source.Any();
     }
 }

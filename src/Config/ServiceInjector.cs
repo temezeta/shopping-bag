@@ -15,6 +15,7 @@ namespace shopping_bag.Config
             services.AddScoped<IReminderService, ReminderService>();
             services.AddScoped<IUserRoleService, UserRoleService>();
             services.AddAutoMapper(typeof(Program).Assembly);
+            services.AddHostedService<ReminderBackgroundService>();
         }
     }
 }
