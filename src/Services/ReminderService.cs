@@ -40,13 +40,15 @@ namespace shopping_bag.Services {
                     ReminderDaysBeforeDueDate = settings.ReminderDaysBeforeDueDate,
                     ReminderDaysBeforeExpectedDate = settings.ReminderDaysBeforeExpectedDate,
                     DueDateRemindersDisabled = settings.DueDateRemindersDisabled,
-                    ExpectedRemindersDisabled = settings.ExpectedRemindersDisabled
+                    ExpectedRemindersDisabled = settings.ExpectedRemindersDisabled,
+                    AllRemindersDisabled = settings.AllRemindersDisabled
                 };
             } else {
                 user.ReminderSettings.ReminderDaysBeforeDueDate = settings.ReminderDaysBeforeDueDate;
                 user.ReminderSettings.ReminderDaysBeforeExpectedDate = settings.ReminderDaysBeforeExpectedDate;
                 user.ReminderSettings.DueDateRemindersDisabled = settings.DueDateRemindersDisabled;
                 user.ReminderSettings.ExpectedRemindersDisabled = settings.ExpectedRemindersDisabled;
+                user.ReminderSettings.AllRemindersDisabled = settings.AllRemindersDisabled;
             }
             await _context.SaveChangesAsync();
             return new ServiceResponse<ReminderSettings>(user.ReminderSettings);
@@ -213,6 +215,9 @@ namespace shopping_bag.Services {
             foreach (var reminder in reminders) {
                 try {
                     var settings = reminder.User.ReminderSettings;
+                    if(settings != null && settings.AllRemindersDisabled) {
+                        continue;
+                    }
                     var list = reminder.ShoppingList;
                     var listSettings = reminder.User.ListReminderSettings.FirstOrDefault(r => r.ShoppingListId == list.Id);
 
