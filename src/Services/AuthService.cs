@@ -66,7 +66,8 @@ namespace shopping_bag.Services
                         ReminderDaysBeforeExpectedDate = new List<int>(),
                         DueDateRemindersDisabled = false,
                         ExpectedRemindersDisabled = true,
-                        UserId = user.Id
+                        UserId = user.Id,
+                        AllRemindersDisabled = false
                     };
                     user.ReminderSettings = reminderSettings;
                     _context.Users.Add(user);

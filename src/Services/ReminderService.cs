@@ -40,13 +40,15 @@ namespace shopping_bag.Services {
                     ReminderDaysBeforeDueDate = settings.ReminderDaysBeforeDueDate,
                     ReminderDaysBeforeExpectedDate = settings.ReminderDaysBeforeExpectedDate,
                     DueDateRemindersDisabled = settings.DueDateRemindersDisabled,
-                    ExpectedRemindersDisabled = settings.ExpectedRemindersDisabled
+                    ExpectedRemindersDisabled = settings.ExpectedRemindersDisabled,
+                    AllRemindersDisabled = settings.AllRemindersDisabled
                 };
             } else {
                 user.ReminderSettings.ReminderDaysBeforeDueDate = settings.ReminderDaysBeforeDueDate;
                 user.ReminderSettings.ReminderDaysBeforeExpectedDate = settings.ReminderDaysBeforeExpectedDate;
                 user.ReminderSettings.DueDateRemindersDisabled = settings.DueDateRemindersDisabled;
                 user.ReminderSettings.ExpectedRemindersDisabled = settings.ExpectedRemindersDisabled;
+                user.ReminderSettings.AllRemindersDisabled = settings.AllRemindersDisabled;
             }
             await _context.SaveChangesAsync();
             return new ServiceResponse<ReminderSettings>(user.ReminderSettings);
@@ -231,9 +233,9 @@ namespace shopping_bag.Services {
                         await _context.SaveChangesAsync(stoppingToken);
                         continue;
                     }
-
-                    HandleDueDateReminder(reminder, remindersToSend);
-                    HandleExpectedDateReminder(reminder, remindersToSend);
+                    var dontSendEmail = settings?.AllRemindersDisabled ?? false;
+                    HandleDueDateReminder(reminder, remindersToSend, dontSendEmail);
+                    HandleExpectedDateReminder(reminder, remindersToSend, dontSendEmail);
 
                     // Remove empty reminders
                     if (!reminder.DueDaysBefore.Any() && !reminder.ExpectedDaysBefore.Any()) {
@@ -249,12 +251,15 @@ namespace shopping_bag.Services {
             SendReminderEmails(remindersToSend);
         }
 
-        private void HandleDueDateReminder(Reminder reminder, Dictionary<User, List<string>> remindersToSend) {
+        private void HandleDueDateReminder(Reminder reminder, Dictionary<User, List<string>> remindersToSend, bool dontSendEmail) {
             var list = reminder.ShoppingList;
             if (reminder.DueDaysBefore.Any()) {
                 int daysBefore = reminder.DueDaysBefore.Max();
                 if (IsDateWithinReminderInterval(list.DueDate, daysBefore)) {
                     reminder.DueDaysBefore.Remove(daysBefore);
+                    if (dontSendEmail) {
+                        return;
+                    }
                     var msg = string.Format(StaticConfig.EmailDueDateReminderFormat, list.Name, (daysBefore == 1 ? "tomorrow" : $"in {daysBefore} days"), list.DueDate.Value.ToString("dd.MM.yyyy"));
                     if (remindersToSend.TryGetValue(reminder.User, out List<string>? msgList)) {
                         msgList.Add(msg);
@@ -264,12 +269,15 @@ namespace shopping_bag.Services {
                 }
             }
         }
-        private void HandleExpectedDateReminder(Reminder reminder, Dictionary<User, List<string>> remindersToSend) {
+        private void HandleExpectedDateReminder(Reminder reminder, Dictionary<User, List<string>> remindersToSend, bool dontSendEmail) {
             var list = reminder.ShoppingList;
             if (reminder.ExpectedDaysBefore.Any()) {
                 int daysBefore = reminder.ExpectedDaysBefore.Max();
                 if (IsDateWithinReminderInterval(list.ExpectedDeliveryDate, daysBefore)) {
                     reminder.ExpectedDaysBefore.Remove(daysBefore);
+                    if(dontSendEmail) {
+                        return;
+                    }
                     var msg = string.Format(StaticConfig.EmailExpectedDateReminderFormat, list.Name, (daysBefore == 1 ? "tomorrow" : $"in {daysBefore} days"), list.ExpectedDeliveryDate.Value.ToString("dd.MM.yyyy"));
                     if (remindersToSend.TryGetValue(reminder.User, out List<string>? msgList)) {
                         msgList.Add(msg);

@@ -1,5 +1,6 @@
 ﻿namespace shopping_bag.DTOs.Reminder {
     public class ReminderSettingsDto {
+        public bool AllRemindersDisabled { get; set; }
         public bool DueDateRemindersDisabled { get; set; }
         public bool ExpectedRemindersDisabled { get; set; }
         public List<int> ReminderDaysBeforeDueDate { get; set; } = new List<int>();
