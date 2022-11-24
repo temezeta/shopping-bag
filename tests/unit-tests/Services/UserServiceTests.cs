@@ -34,9 +34,10 @@ namespace shopping_bag_unit_tests.Services
         [Fact]
         public async Task GetUserByEmail_InvalidEmail_UserNotReturned()
         {
-            // Removed account is still account in the database
+            // Removed accounts are not returned
             var response = await _sut.GetUserByEmail("admin2@huld.io");
-            Assert.True(response.IsSuccess);
+            Assert.False(response.IsSuccess);
+            Assert.Equal("User not found", response.Error);
         }
         #endregion
 
@@ -74,11 +75,11 @@ namespace shopping_bag_unit_tests.Services
         public async Task RemoveUser_ValidUser_UserRemovedOnlyOnce()
         {
             // User is trying to remove themselves
-            var response = await _sut.RemoveUser(NormalUser, 1);
+            var response = await _sut.DisableUser(NormalUser, 1);
             Assert.True(response.IsSuccess);
 
             // Try remove again
-            response = await _sut.RemoveUser(NormalUser, 1);
+            response = await _sut.DisableUser(NormalUser, 1);
             Assert.False(response.IsSuccess);
             Assert.Equal("User not found", response.Error);
         }
@@ -86,7 +87,7 @@ namespace shopping_bag_unit_tests.Services
         [Fact]
         public async Task RemoveUser_UserHasNoPermission_UserNotRemoved()
         {
-            var response = await _sut.RemoveUser(NormalUser, 2);
+            var response = await _sut.DisableUser(NormalUser, 2);
             Assert.False(response.IsSuccess);
             Assert.Equal("You can only remove your own account", response.Error);
         }

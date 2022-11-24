@@ -8,7 +8,7 @@ namespace shopping_bag_unit_tests
     {
         public readonly Office TestOffice, ListOffice, RemovedOffice;
         public readonly UserRole NormalRole, AdminRole;
-        public readonly User NormalUser, AdminUser, RemovedUser;
+        public readonly User NormalUser, AdminUser, DisabledUser;
         public readonly ShoppingList NormalList, DueDatePassedList, NotStartedList, OrderedList, RemovedList;
         public readonly Item OwnItemInList, OwnItem2InList, OthersItemInList, ItemInDueDatePassedList, ItemInOrderedList;
 
@@ -38,9 +38,9 @@ namespace shopping_bag_unit_tests
             #region Users
             NormalUser = new User() { Id = 1, UserRoles = new List<UserRole>() { UserRoles[0] }, Email = "regular@huld.io", FirstName = "Normal", LastName = "User", PasswordHash = Array.Empty<byte>(), PasswordSalt = Array.Empty<byte>(), HomeOffice = Offices[0], VerifiedAt = DateTime.Now };
             AdminUser = new User() { Id = 2, UserRoles = new List<UserRole>() { UserRoles[1] }, Email = "admin@huld.io", FirstName = "Admin", LastName = "User", PasswordHash = Array.Empty<byte>(), PasswordSalt = Array.Empty<byte>(), HomeOffice = Offices[0], VerifiedAt = DateTime.Now };
-            RemovedUser = new User() { Id = 3, UserRoles = new List<UserRole>() { UserRoles[1] }, Email = "admin2@huld.io", FirstName = "Admin", LastName = "User 2", PasswordHash = Array.Empty<byte>(), PasswordSalt = Array.Empty<byte>(), HomeOffice = Offices[0], Removed = true };
+            DisabledUser = new User() { Id = 3, UserRoles = new List<UserRole>() { UserRoles[1] }, Email = "admin2@huld.io", FirstName = "Admin", LastName = "User 2", PasswordHash = Array.Empty<byte>(), PasswordSalt = Array.Empty<byte>(), HomeOffice = Offices[0], Disabled = true };
             
-            Users = new List<User>() { NormalUser, AdminUser, RemovedUser };
+            Users = new List<User>() { NormalUser, AdminUser, DisabledUser };
             #endregion
 
             #region ShoppingLists

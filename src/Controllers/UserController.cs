@@ -108,7 +108,7 @@ namespace shopping_bag.Controllers {
                 return BadRequest();
             }
 
-            var response = await _userService.RemoveUser(user, userId);
+            var response = await _userService.DisableUser(user, userId);
 
             if (!response.IsSuccess)
             {
