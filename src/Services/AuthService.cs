@@ -242,7 +242,7 @@ namespace shopping_bag.Services
                 {
                     var response = await _userService.GetUserByEmail(email);
 
-                    if (!response.IsSuccess)
+                    if (response == null)
                     {
                         return new ServiceResponse<bool>(error: "User not found");
                     }

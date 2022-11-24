@@ -65,14 +65,14 @@ namespace shopping_bag_unit_tests.Services
             var response = await _sut.GetUsers();
             Assert.True(response.IsSuccess);
             // One is removed thus not shown
-            Assert.Equal(2, response.Data.Count());
+            Assert.Equal(3, response.Data.Count());
         }
 
         #endregion
 
-        #region RemoveUser Tests
+        #region DisableUser Tests
         [Fact]
-        public async Task RemoveUser_ValidUser_UserRemovedOnlyOnce()
+        public async Task DisableUser_ValidUser_UserRemovedOnlyOnce()
         {
             // User is trying to remove themselves
             var response = await _sut.DisableUser(NormalUser, 1);
@@ -85,7 +85,7 @@ namespace shopping_bag_unit_tests.Services
         }
 
         [Fact]
-        public async Task RemoveUser_UserHasNoPermission_UserNotRemoved()
+        public async Task DisableUser_UserHasNoPermission_UserNotRemoved()
         {
             var response = await _sut.DisableUser(NormalUser, 2);
             Assert.False(response.IsSuccess);
@@ -191,7 +191,7 @@ namespace shopping_bag_unit_tests.Services
         [Fact]
         public async Task ChangeUserPassword_UserNotFound_ReturnsError()
         {
-            var res = await _sut.ChangeUserPassword(4, new ChangePasswordDto
+            var res = await _sut.ChangeUserPassword(5, new ChangePasswordDto
             {
                 CurrentPassword = "string1A?",
                 NewPassword = "string1B?",
