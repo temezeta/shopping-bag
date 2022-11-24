@@ -12,6 +12,7 @@ namespace shopping_bag.Services
         Task<ServiceResponse<bool>> SetRefreshToken(User user);
         Task<ServiceResponse<bool>> VerifyUserToken(string verificationToken);
         Task<ServiceResponse<string>> SetPasswordResetToken(string email);
+        Task<ServiceResponse<bool>> ResendVerificationEmail(string email, string hexToken, string verificationBodyText);
         Task<ServiceResponse<bool>> ResetPassword(ResetPasswordDto request);
     }
 }

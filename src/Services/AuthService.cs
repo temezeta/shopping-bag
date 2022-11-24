@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Ocsp;
 using shopping_bag.Config;
 using shopping_bag.DTOs.User;
 using shopping_bag.Models;
@@ -186,7 +187,7 @@ namespace shopping_bag.Services
                     var emailResponse = _emailService.SendEmail(new Email
                     {
                         To = email,
-                        Subject = "Shopping Bag - Account Recovery",
+                        Subject = "Huld Shopping Bag - Account Recovery",
                         Body = recoveryBodytext
                     });
 
@@ -231,6 +232,50 @@ namespace shopping_bag.Services
             user.ResetTokenExpires = null;
             await _context.SaveChangesAsync();
             return new ServiceResponse<bool>(data: true);
+        }
+
+        public async Task<ServiceResponse<bool>> ResendVerificationEmail(string email, string hexToken, string verificationBodyText)
+        {
+            try
+            {
+                using (var transaction = _context.Database.BeginTransaction())
+                {
+                    var response = await _userService.GetUserByEmail(email);
+
+                    if (!response.IsSuccess)
+                    {
+                        return new ServiceResponse<bool>(error: "User not found");
+                    }
+
+                    var user = response.Data;
+
+                    if (user.VerifiedAt != null)
+                    {
+                        return new ServiceResponse<bool>(error: "User is already verified");
+                    }
+
+                    user.VerificationToken = hexToken;
+                    await _context.SaveChangesAsync();
+
+                    var emailResponse = _emailService.SendEmail(new Email
+                    {
+                        To = email,
+                        Subject = "Huld Shopping Bag - Account Verification",
+                        Body = verificationBodyText
+                    });
+
+                    if (!emailResponse.IsSuccess)
+                    {
+                        return new ServiceResponse<bool>(error: "Failed to send verification email");
+                    }
+
+                    transaction.Commit();
+                    return new ServiceResponse<bool>(true);
+                }
+            } catch (Exception ex)
+            {
+                return new ServiceResponse<bool>(error: ex.Message);
+            }
         }
     }
 }

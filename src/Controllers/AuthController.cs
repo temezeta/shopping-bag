@@ -143,6 +143,21 @@ namespace shopping_bag.Controllers
             return Ok();
         }
 
+        [HttpPost, AllowAnonymous]
+        [Route("resend-verification")]
+        public async Task<ActionResult> ResendVerificationEmail([FromBody] string email)
+        {
+            var hexToken = AuthHelper.CreateHexToken();
+            var verificationBodyText = GetVerificationBodyText(hexToken);
+            var response = await _authService.ResendVerificationEmail(email, hexToken, verificationBodyText);
+
+            if (!response.IsSuccess)
+            {
+                return BadRequest();
+            }
+
+            return Ok();
+        }
         private async Task SetRefreshToken(User user, RefreshToken refreshToken)
         {
             var cookieOptions = new CookieOptions
