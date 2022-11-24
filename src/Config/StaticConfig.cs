@@ -16,6 +16,10 @@
         #region Verification Email
         public static string VerificationEmailBodyText { get; private set; }
         #endregion
+
+        #region Recover Email
+        public static string RecoveryEmailBodyText  { get; private set; }
+        #endregion
         #region Default Admin
         public static string DefaultAdminEmail { get; private set; }
         public static string DefaultAdminPassword { get; private set; }
@@ -43,6 +47,9 @@
             #endregion
             #region Verification Email
             VerificationEmailBodyText = config.GetValue<string>("VerificationEmail:BodyText");
+            #endregion
+            #region Recover Email
+            RecoveryEmailBodyText = config.GetValue<string>("RecoverEmail:BodyText");
             #endregion
             #region Default Admin
             DefaultAdminEmail = config.GetValue<string>("DefaultAdmin:Email");

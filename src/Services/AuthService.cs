@@ -182,12 +182,12 @@ namespace shopping_bag.Services
                     response.Data.ResetTokenExpires = DateTime.Now.AddHours(2);
                     _context.SaveChanges();
 
-                    // TODO Make password email more nice
+                    var recoveryBodytext = string.Format(StaticConfig.RecoveryEmailBodyText, resetToken);
                     var emailResponse = _emailService.SendEmail(new Email
                     {
                         To = email,
-                        Subject = "Password Reset",
-                        Body = resetToken
+                        Subject = "Shopping Bag - Account Recovery",
+                        Body = recoveryBodytext
                     });
 
                     if (!emailResponse.IsSuccess)
