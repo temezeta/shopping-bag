@@ -6,7 +6,7 @@ namespace shopping_bag.Services
 {
     public interface IUserService
     {
-        Task<ServiceResponse<User>> GetUserByEmail(string email);
+        Task<ServiceResponse<User>> GetUserByEmail(string email, bool ignoreDisabled = true);
         Task<ServiceResponse<User>> GetUserById(long id);
         Task<ServiceResponse<IEnumerable<User>>> GetUsers();
         Task<ServiceResponse<bool>> DisableUser(User user, long userId);

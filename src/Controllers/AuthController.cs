@@ -116,8 +116,8 @@ namespace shopping_bag.Controllers
         }
 
         [HttpPost, AllowAnonymous]
-        [Route("forgot-password")]
-        public async Task<ActionResult> ForgotPassword([FromBody] string email)
+        [Route("recover-account")]
+        public async Task<ActionResult> ResetAccount([FromBody] string email)
         {
             var response = await _authService.SetPasswordResetToken(email);
 

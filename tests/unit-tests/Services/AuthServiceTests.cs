@@ -35,7 +35,7 @@ namespace shopping_bag_unit_tests
             AuthHelper.CreatePasswordHash(password, out passwordHash, out passwordSalt);
             var user = new User() { Email = email, PasswordHash = passwordHash, PasswordSalt = passwordSalt, VerifiedAt = DateTime.Now };
             var userResponse = new ServiceResponse<User>(data: user);
-            _iUserServiceMock.Setup(x => x.GetUserByEmail(It.IsAny<string>())).ReturnsAsync(userResponse);
+            _iUserServiceMock.Setup(x => x.GetUserByEmail(It.IsAny<string>(), It.IsAny<bool>())).ReturnsAsync(userResponse);
 
             // Act
             var loginDto = new LoginDto() { Email = email, Password = password };

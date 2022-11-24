@@ -171,7 +171,7 @@ namespace shopping_bag.Services
                 using (var transaction = _context.Database.BeginTransaction())
                 {
                     var resetToken = AuthHelper.CreateHexToken();
-                    var response = await _userService.GetUserByEmail(email);
+                    var response = await _userService.GetUserByEmail(email, false);
 
                     if (!response.IsSuccess)
                     {
@@ -216,6 +216,11 @@ namespace shopping_bag.Services
             else if (user.ResetTokenExpires < DateTime.Now)
             {
                 return new ServiceResponse<bool>(error: "Reset token expired");
+            }
+            else if (user.Disabled)
+            {
+                user.Disabled = false;
+                user.VerifiedAt = DateTime.Now;
             }
 
             AuthHelper.CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
