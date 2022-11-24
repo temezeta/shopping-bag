@@ -22,7 +22,7 @@ namespace shopping_bag.Services {
         {
             var user = await _context.Users.Include(u => u.UserRoles).Include(u => u.HomeOffice).Include(u => u.ReminderSettings).Include(u => u.Reminders).Include(u => u.ListReminderSettings).FirstOrDefaultAsync(u => u.Email == email);
 
-            if (user == null)
+            if (user == null || user.Removed)
             {
                 return new ServiceResponse<User>(error: "User not found");
             }
