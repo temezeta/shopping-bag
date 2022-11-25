@@ -60,7 +60,7 @@ namespace shopping_bag.Services {
                 // No dates set, no need to make reminders.
                 return;
             }
-            var users = await _context.Users.Include(u => u.ReminderSettings).Include(u => u.ListReminderSettings).Include(u => u.Reminders).Where(u => u.OfficeId == officeId && !u.Removed).ToListAsync();
+            var users = await _context.Users.Include(u => u.ReminderSettings).Include(u => u.ListReminderSettings).Include(u => u.Reminders).Where(u => u.OfficeId == officeId && !u.Disabled).ToListAsync();
             foreach (var user in users) {
                 var reminderSettings = user.ReminderSettings;
                 if (reminderSettings == null || (reminderSettings.DueDateRemindersDisabled && reminderSettings.ExpectedRemindersDisabled)) {
@@ -107,7 +107,7 @@ namespace shopping_bag.Services {
 
         public async Task<ServiceResponse<User>> SetListReminder(long userId, ListReminderSettingsDto settings, long listId) {
             var resp = await _userService.GetUserById(userId);
-            if(!resp.IsSuccess || resp.Data == null || resp.Data.Removed) {
+            if(!resp.IsSuccess || resp.Data == null || resp.Data.Disabled) {
                 return new ServiceResponse<User>("Invalid user");
             }
             var user = resp.Data;
@@ -219,7 +219,7 @@ namespace shopping_bag.Services {
                     var listSettings = reminder.User.ListReminderSettings.FirstOrDefault(r => r.ShoppingListId == list.Id);
 
                     // If list or user removed, remove reminder and settings.
-                    if (reminder.ShoppingList.Removed || reminder.User.Removed) {
+                    if (reminder.ShoppingList.Removed || reminder.User.Disabled) {
                         reminder.User.Reminders.Remove(reminder);
                         reminder.User.ListReminderSettings.RemoveAll(r => r.ShoppingListId == list.Id);
                         await _context.SaveChangesAsync(stoppingToken);

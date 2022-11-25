@@ -15,7 +15,7 @@ namespace shopping_bag_unit_tests.Controllers
 
         public UserControllerTests() : base()
         {
-            _userService.Setup(x => x.GetUserByEmail(It.IsAny<string>())).ReturnsAsync(new ServiceResponse<User>(new User()));
+            _userService.Setup(x => x.GetUserByEmail(It.IsAny<string>(), It.IsAny<bool>())).ReturnsAsync(new ServiceResponse<User>(new User()));
             _sut = new UserController(_userService.Object, UnitTestHelper.GetMapper())
             {
                 ControllerContext = GetLoggedInControllerContext(),
@@ -27,7 +27,7 @@ namespace shopping_bag_unit_tests.Controllers
         [Fact]
         public async Task ModifyUser_UserNotFound_ReturnsBadRequest()
         {
-            _userService.Setup(x => x.GetUserByEmail(It.IsAny<string>())).ReturnsAsync(new ServiceResponse<User>(error: "User not found"));
+            _userService.Setup(x => x.GetUserByEmail(It.IsAny<string>(), It.IsAny<bool>())).ReturnsAsync(new ServiceResponse<User>(error: "User not found"));
 
             var response = await _sut.ModifyUser(new ModifyUserDto
             {
@@ -84,7 +84,7 @@ namespace shopping_bag_unit_tests.Controllers
         [Fact]
         public async Task ChangePassword_UserNotFound_ReturnsBadRequest()
         {
-            _userService.Setup(x => x.GetUserByEmail(It.IsAny<string>())).ReturnsAsync(new ServiceResponse<User>(error: "User not found"));
+            _userService.Setup(x => x.GetUserByEmail(It.IsAny<string>(), It.IsAny<bool>())).ReturnsAsync(new ServiceResponse<User>(error: "User not found"));
 
             var res = await _sut.ChangePassword(new ChangePasswordDto
             {

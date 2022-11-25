@@ -18,11 +18,12 @@ namespace shopping_bag.Services {
             _emailService = emailService;
         }
 
-        public async Task<ServiceResponse<User>> GetUserByEmail(string email)
+        public async Task<ServiceResponse<User>> GetUserByEmail(string email, bool ignoreDisabled = true)
         {
             var user = await _context.Users.Include(u => u.UserRoles).Include(u => u.HomeOffice).Include(u => u.ReminderSettings).Include(u => u.Reminders).Include(u => u.ListReminderSettings).FirstOrDefaultAsync(u => u.Email == email);
 
-            if (user == null)
+            // Ignore disabled controls whether to return disabled accounts
+            if (user == null || (user.Disabled && ignoreDisabled))
             {
                 return new ServiceResponse<User>(error: "User not found");
             }
@@ -33,7 +34,7 @@ namespace shopping_bag.Services {
         public async Task<ServiceResponse<User>> GetUserById(long id) {
             var user = await _context.Users.Include(u => u.UserRoles).Include(u => u.HomeOffice).Include(u => u.ReminderSettings).Include(u => u.Reminders).Include(u => u.ListReminderSettings).FirstOrDefaultAsync(u => u.Id == id);
 
-            if (user == null || user.Removed) {
+            if (user == null || user.Disabled) {
                 return new ServiceResponse<User>(error: "User not found");
             }
 
@@ -41,15 +42,15 @@ namespace shopping_bag.Services {
         }
 
         public async Task<ServiceResponse<IEnumerable<User>>> GetUsers() {
-            var users = await _context.Users.Include(u => u.UserRoles).Include(u => u.HomeOffice).Where(u => !u.Removed).ToListAsync();
+            var users = await _context.Users.Include(u => u.UserRoles).Include(u => u.HomeOffice).Where(u => !u.Disabled).ToListAsync();
             return new ServiceResponse<IEnumerable<User>>(users);
         }
 
-        public async Task<ServiceResponse<bool>> RemoveUser(User user, long userId)
+        public async Task<ServiceResponse<bool>> DisableUser(User user, long userId)
         {
             var removeUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
 
-            if (removeUser == null || removeUser.Removed)
+            if (removeUser == null || removeUser.Disabled)
             {
                 return new ServiceResponse<bool>(error: "User not found");
             }
@@ -61,7 +62,12 @@ namespace shopping_bag.Services {
                 return new ServiceResponse<bool>(error: "You can only remove your own account");
             }
 
-            removeUser.Removed = true;
+            removeUser.Disabled = true;
+            removeUser.RefreshToken = null;
+            removeUser.TokenCreatedAt = null;
+            removeUser.TokenExpiresAt = null;
+            removeUser.VerifiedAt = null;
+
             await _context.SaveChangesAsync();
 
             return new ServiceResponse<bool>(true);
@@ -75,7 +81,7 @@ namespace shopping_bag.Services {
                 {
                     var modifyUser = (await GetUserById(userId)).Data;
 
-                    if (modifyUser == null || modifyUser.Removed)
+                    if (modifyUser == null || modifyUser.Disabled)
                     {
                         return new ServiceResponse<User>(error: "User not found");
                     }
@@ -147,7 +153,7 @@ namespace shopping_bag.Services {
         {
             var user = (await GetUserById(id)).Data;
 
-            if(user == null || user.Removed)
+            if(user == null || user.Disabled)
             {
                 return new ServiceResponse<User>(error: "User not found");
             }

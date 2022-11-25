@@ -17,7 +17,7 @@ namespace shopping_bag_unit_tests.Controllers {
 
         public ItemControllerTests() : base() {
             _userService = new Mock<IUserService>();
-            _userService.Setup(x => x.GetUserByEmail(It.IsAny<string>())).ReturnsAsync(new ServiceResponse<User>(new User()));
+            _userService.Setup(x => x.GetUserByEmail(It.IsAny<string>(), It.IsAny<bool>())).ReturnsAsync(new ServiceResponse<User>(new User()));
             _shoppingListService = new Mock<IShoppingListService>();
             var profile = new MappingProfile();
             var configuration = new MapperConfiguration(cfg => cfg.AddProfile(profile));

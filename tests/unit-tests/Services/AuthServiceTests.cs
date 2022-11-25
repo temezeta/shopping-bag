@@ -5,6 +5,7 @@ using Moq;
 using shopping_bag.Config;
 using shopping_bag.DTOs.User;
 using shopping_bag.Models;
+using shopping_bag.Models.Email;
 using shopping_bag.Models.User;
 using shopping_bag.Services;
 using shopping_bag.Utility;
@@ -15,15 +16,17 @@ namespace shopping_bag_unit_tests
     public class AuthServiceTests : BaseServiceTest
     {
         private AuthService _authServiceMock;
-        private readonly Mock<AppDbContext> _appDbContextMock = new Mock<AppDbContext>();
+        private readonly AppDbContext _appDbContext;
         private readonly Mock<IUserService> _iUserServiceMock = new Mock<IUserService>();
         private readonly Mock<IEmailService> _emailServiceMock = new Mock<IEmailService>();
 
-        public AuthServiceTests() :base()
+        public AuthServiceTests() : base()
         {
-            _authServiceMock = new AuthService(_appDbContextMock.Object, _iUserServiceMock.Object, _emailServiceMock.Object);
+            _appDbContext = GetDatabase();
+            _authServiceMock = new AuthService(_appDbContext, _iUserServiceMock.Object, _emailServiceMock.Object);
         }
 
+        #region Login/Logout Tests
         [Fact]
         public async void Login_LoginSuccessful_ReturnToken()
         {
@@ -35,7 +38,7 @@ namespace shopping_bag_unit_tests
             AuthHelper.CreatePasswordHash(password, out passwordHash, out passwordSalt);
             var user = new User() { Email = email, PasswordHash = passwordHash, PasswordSalt = passwordSalt, VerifiedAt = DateTime.Now };
             var userResponse = new ServiceResponse<User>(data: user);
-            _iUserServiceMock.Setup(x => x.GetUserByEmail(It.IsAny<string>())).ReturnsAsync(userResponse);
+            _iUserServiceMock.Setup(x => x.GetUserByEmail(It.IsAny<string>(), It.IsAny<bool>())).ReturnsAsync(userResponse);
 
             // Act
             var loginDto = new LoginDto() { Email = email, Password = password };
@@ -74,5 +77,37 @@ namespace shopping_bag_unit_tests
             // Assert
             Assert.True(logOutResponse.IsSuccess, "Logout failed");
         }
+        #endregion
+
+        #region ResendVerificationEmail Tests
+
+        [Fact]
+        public async Task ResendVerificationEmail_ValidEmailAndUser_EmailResent()
+        {
+            _emailServiceMock.Setup(x => x.SendEmail(It.IsAny<Email>())).Returns(new ServiceResponse<bool>(true));
+            var getUser = new ServiceResponse<User>(data: UnverifiedUser);
+            _iUserServiceMock.Setup(x => x.GetUserByEmail(It.IsAny<string>(), It.IsAny<bool>())).ReturnsAsync(getUser);
+            var hexToken = AuthHelper.CreateHexToken();
+            var bodyText = "Something sensible";
+
+            var response = await _authServiceMock.ResendVerificationEmail(UnverifiedUser.Email, hexToken, bodyText);
+            Assert.True(response.IsSuccess);
+            Assert.NotNull(UnverifiedUser.VerificationToken);
+        }
+
+        [Fact]
+        public async Task ResendVerificationEmail_ValidEmailUserAlreadyVerified_EmailNotSent()
+        {
+            _emailServiceMock.Setup(x => x.SendEmail(It.IsAny<Email>())).Returns(new ServiceResponse<bool>(false));
+            var getUser = new ServiceResponse<User>(data: NormalUser);
+            _iUserServiceMock.Setup(x => x.GetUserByEmail(It.IsAny<string>(), It.IsAny<bool>())).ReturnsAsync(getUser);
+            var hexToken = AuthHelper.CreateHexToken();
+            var bodyText = "Something sensible";
+
+            var response = await _authServiceMock.ResendVerificationEmail(UnverifiedUser.Email, hexToken, bodyText);
+            Assert.False(response.IsSuccess);
+            Assert.Equal("User is already verified", response.Error);
+        }
+        #endregion
     }
 }

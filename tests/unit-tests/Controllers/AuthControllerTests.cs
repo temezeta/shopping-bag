@@ -46,7 +46,7 @@ namespace shopping_bag_unit_tests
             var authServiceResponse = new ServiceResponse<bool>(data: true);
             _authServiceMock.Setup(x => x.Logout(It.IsAny<User>())).ReturnsAsync(authServiceResponse);
             var userServiceResponse = new ServiceResponse<User>(data: new User());
-            _userServiceMock.Setup(x => x.GetUserByEmail(It.IsAny<string>())).ReturnsAsync(userServiceResponse);
+            _userServiceMock.Setup(x => x.GetUserByEmail(It.IsAny<string>(), It.IsAny<bool>())).ReturnsAsync(userServiceResponse);
 
             var registerResponse = await _authControllerMock.Logout();
 

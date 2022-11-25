@@ -15,7 +15,7 @@ namespace shopping_bag_unit_tests.Controllers
         private readonly Mock<IShoppingListService> _shoppingListService = new Mock<IShoppingListService>();
         public ShoppingListControllerTests() : base()
         {
-            _userService.Setup(x => x.GetUserByEmail(It.IsAny<string>())).ReturnsAsync(new ServiceResponse<User>(new User()));
+            _userService.Setup(x => x.GetUserByEmail(It.IsAny<string>(), It.IsAny<bool>())).ReturnsAsync(new ServiceResponse<User>(new User()));
             _sut = new ShoppingListController(_userService.Object, _shoppingListService.Object, UnitTestHelper.GetMapper())
             {
                 ControllerContext = GetLoggedInControllerContext()

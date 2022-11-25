@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Ocsp;
 using shopping_bag.Config;
 using shopping_bag.DTOs.User;
 using shopping_bag.Models;
@@ -171,7 +172,7 @@ namespace shopping_bag.Services
                 using (var transaction = _context.Database.BeginTransaction())
                 {
                     var resetToken = AuthHelper.CreateHexToken();
-                    var response = await _userService.GetUserByEmail(email);
+                    var response = await _userService.GetUserByEmail(email, false);
 
                     if (!response.IsSuccess)
                     {
@@ -182,12 +183,12 @@ namespace shopping_bag.Services
                     response.Data.ResetTokenExpires = DateTime.Now.AddHours(2);
                     _context.SaveChanges();
 
-                    // TODO Make password email more nice
+                    var recoveryBodytext = string.Format(StaticConfig.RecoveryEmailBodyText, resetToken);
                     var emailResponse = _emailService.SendEmail(new Email
                     {
                         To = email,
-                        Subject = "Password Reset",
-                        Body = resetToken
+                        Subject = "Huld Shopping Bag - Account Recovery",
+                        Body = recoveryBodytext
                     });
 
                     if (!emailResponse.IsSuccess)
@@ -217,6 +218,11 @@ namespace shopping_bag.Services
             {
                 return new ServiceResponse<bool>(error: "Reset token expired");
             }
+            else if (user.Disabled)
+            {
+                user.Disabled = false;
+                user.VerifiedAt = DateTime.Now;
+            }
 
             AuthHelper.CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
 
@@ -226,6 +232,50 @@ namespace shopping_bag.Services
             user.ResetTokenExpires = null;
             await _context.SaveChangesAsync();
             return new ServiceResponse<bool>(data: true);
+        }
+
+        public async Task<ServiceResponse<bool>> ResendVerificationEmail(string email, string hexToken, string verificationBodyText)
+        {
+            try
+            {
+                using (var transaction = _context.Database.BeginTransaction())
+                {
+                    var response = await _userService.GetUserByEmail(email);
+
+                    if (!response.IsSuccess)
+                    {
+                        return new ServiceResponse<bool>(error: "User not found");
+                    }
+
+                    var user = response.Data;
+
+                    if (user.VerifiedAt != null)
+                    {
+                        return new ServiceResponse<bool>(error: "User is already verified");
+                    }
+
+                    user.VerificationToken = hexToken;
+                    await _context.SaveChangesAsync();
+
+                    var emailResponse = _emailService.SendEmail(new Email
+                    {
+                        To = email,
+                        Subject = "Huld Shopping Bag - Account Verification",
+                        Body = verificationBodyText
+                    });
+
+                    if (!emailResponse.IsSuccess)
+                    {
+                        return new ServiceResponse<bool>(error: "Failed to send verification email");
+                    }
+
+                    transaction.Commit();
+                    return new ServiceResponse<bool>(true);
+                }
+            } catch (Exception ex)
+            {
+                return new ServiceResponse<bool>(error: ex.Message);
+            }
         }
     }
 }
