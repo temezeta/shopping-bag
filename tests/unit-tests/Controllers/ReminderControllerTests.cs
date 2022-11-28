@@ -15,7 +15,7 @@ namespace shopping_bag_unit_tests.Controllers {
 
         public ReminderControllerTests() : base() {
             var user= new ServiceResponse<User>(data: new User());
-            _userService.Setup(x => x.GetUserByEmail(It.IsAny<string>())).ReturnsAsync(user);
+            _userService.Setup(x => x.GetUserByEmail(It.IsAny<string>(), It.IsAny<bool>())).ReturnsAsync(user);
             _sut = new ReminderController(_userService.Object, _reminderService.Object, UnitTestHelper.GetMapper()) {
                 ControllerContext = GetLoggedInControllerContext()
             };
