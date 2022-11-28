@@ -170,7 +170,7 @@ namespace shopping_bag.Services {
             return new ServiceResponse<User>(user);
         }
 
-        private bool IsValidReminderInterval(List<int> interval) {
+        public bool IsValidReminderInterval(List<int>? interval) {
             if(interval == null) {
                 return true;
             }
@@ -185,7 +185,7 @@ namespace shopping_bag.Services {
         }
 
         // For example don't include 3 day if there's only 2 days till the date.
-        private List<int> TrimInterval(List<int> interval, DateTime? targetDate) {
+        public List<int> TrimInterval(List<int> interval, DateTime? targetDate) {
             return interval.Where(i => !targetDate.HasValue || targetDate.Value.Subtract(new TimeSpan(i, 0, 0, 0)) > DateTime.Now).ToList();
         }
 
@@ -251,7 +251,7 @@ namespace shopping_bag.Services {
             SendReminderEmails(remindersToSend);
         }
 
-        private void HandleDueDateReminder(Reminder reminder, Dictionary<User, List<string>> remindersToSend, bool dontSendEmail) {
+        public void HandleDueDateReminder(Reminder reminder, Dictionary<User, List<string>> remindersToSend, bool dontSendEmail) {
             var list = reminder.ShoppingList;
             if (reminder.DueDaysBefore.Any()) {
                 int daysBefore = reminder.DueDaysBefore.Max();
@@ -269,7 +269,7 @@ namespace shopping_bag.Services {
                 }
             }
         }
-        private void HandleExpectedDateReminder(Reminder reminder, Dictionary<User, List<string>> remindersToSend, bool dontSendEmail) {
+        public void HandleExpectedDateReminder(Reminder reminder, Dictionary<User, List<string>> remindersToSend, bool dontSendEmail) {
             var list = reminder.ShoppingList;
             if (reminder.ExpectedDaysBefore.Any()) {
                 int daysBefore = reminder.ExpectedDaysBefore.Max();
@@ -313,8 +313,8 @@ namespace shopping_bag.Services {
             public bool Equals(User? user1, User? user2) { return user1?.Id == user2?.Id; }
         }
 
-        private bool IsDateWithinReminderInterval(DateTime? date, int daysBefore) {
-            return date.HasValue && date > DateTime.Now && date.Value.Subtract(new TimeSpan(daysBefore, 0, 0, 0)) < DateTime.Now;
+        public bool IsDateWithinReminderInterval(DateTime? date, int daysBefore) {
+            return date.HasValue && date > DateTime.Now && date.Value.Subtract(new TimeSpan(daysBefore, 0, 0, 0)) <= DateTime.Now;
         }
     }
 }

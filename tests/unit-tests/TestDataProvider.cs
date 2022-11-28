@@ -45,7 +45,7 @@ namespace shopping_bag_unit_tests
             #endregion
 
             #region ShoppingLists
-            NormalList = new ShoppingList() { Id = 1, Name = "Test list", DueDate = DateTime.Now.AddMinutes(10), Ordered = false, ListDeliveryOffice = Offices[1] };
+            NormalList = new ShoppingList() { Id = 1, Name = "Test list", DueDate = DateTime.Now.AddDays(2), ExpectedDeliveryDate = DateTime.Now.AddDays(2), Ordered = false, ListDeliveryOffice = Offices[1] };
             DueDatePassedList = new ShoppingList() { Id = 2, Name = "Test list 2", DueDate = DateTime.Now.AddMinutes(-10), Ordered = false, ListDeliveryOffice = Offices[1] };
             NotStartedList = new ShoppingList() { Id = 3, Name = "Test list 3", Ordered = false, ListDeliveryOffice = Offices[1] };
             OrderedList = new ShoppingList() { Id = 4, Name = "Test list 2", DueDate = DateTime.Now.AddMinutes(-10), Ordered = true, ListDeliveryOffice = Offices[1] };
