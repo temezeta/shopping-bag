@@ -63,8 +63,12 @@ namespace shopping_bag.Services
 
         public async Task<ServiceResponse<ShoppingList>> ModifyShoppingList(ModifyShoppingListDto shoppingListData, long shoppingListId)
         {
-            var shoppingList = await _context.ShoppingLists.Include(s => s.Items).FirstOrDefaultAsync(s => s.Id == shoppingListId);
+            var response = await GetShoppingListById(shoppingListId);
 
+            if(!response.IsSuccess) {
+                return response;
+            }
+            var shoppingList = response.Data;
             if (shoppingList == null || shoppingList.Removed)
             {
                 return new ServiceResponse<ShoppingList>(error: "Invalid shoppingListId");
@@ -137,6 +141,8 @@ namespace shopping_bag.Services
                                                             .ThenInclude(i => i.UsersWhoLiked)
                                                             .ThenInclude(u => u.HomeOffice)
                                                             .Include(s => s.ListDeliveryOffice)
+                                                            .Include(s => s.Items)
+                                                            .ThenInclude(s => s.ItemAdder)
                                                             .Where(s => s.OfficeId == officeId && !s.Removed)
                                                             .ToListAsync();
             return new ServiceResponse<IEnumerable<ShoppingList>>(shoppingLists);
@@ -253,8 +259,12 @@ namespace shopping_bag.Services
             return new ServiceResponse<bool>(true);
         }
 
+        private async Task<Item?> GetItemById(long itemId) {
+            return await _context.Items.Include(i => i.ShoppingList).Include(i => i.ItemAdder).Include(i => i.UsersWhoLiked).FirstOrDefaultAsync(i => i.Id == itemId);
+        }
+
         public async Task<ServiceResponse<Item>> ModifyItem(User user, ModifyItemDto itemToModify, long itemId) {
-            var item = await _context.Items.Include(i => i.ShoppingList).ThenInclude(list => list.Items).FirstOrDefaultAsync(i => i.Id == itemId);
+            var item = await GetItemById(itemId);
             var result = CanUserInteractWithItem(user, item);
             if (result == ItemStatus.NOT_FOUND || result == ItemStatus.LIST_REMOVED) {
                 return new ServiceResponse<Item>(error: "Item doesn't exist.");
@@ -287,7 +297,7 @@ namespace shopping_bag.Services
         }
 
         public async Task<ServiceResponse<Item>> UpdateLikeStatus(User user, long itemId, bool unlike) {
-            var item = await _context.Items.Include(i => i.ShoppingList).Include(i => i.UsersWhoLiked).FirstOrDefaultAsync(i => i.Id == itemId);
+            var item = await GetItemById(itemId);
             var result = CanUserInteractWithItem(user, item);
             if(result == ItemStatus.NOT_FOUND || result == ItemStatus.LIST_REMOVED) {
                 return new ServiceResponse<Item>(error: "Item doesn't exist.");
