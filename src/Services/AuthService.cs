@@ -64,7 +64,7 @@ namespace shopping_bag.Services
                     user.UserRoles.Add(defaultRole);
                     var reminderSettings = new ReminderSettings() {
                         ReminderDaysBeforeDueDate = new List<int>() { 2 },
-                        ReminderDaysBeforeExpectedDate = new List<int>(),
+                        ReminderDaysBeforeExpectedDate = new List<int>() { 2 },
                         DueDateRemindersDisabled = false,
                         ExpectedRemindersDisabled = true,
                         UserId = user.Id,
