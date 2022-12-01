@@ -118,6 +118,11 @@ namespace shopping_bag.Services {
 
                     if (modifyData.Email != modifyUser.Email)
                     {
+                        if (_context.Users.Any(u => u.Email == modifyData.Email))
+                        {
+                            return new ServiceResponse<User>(error: "Email already in use");
+                        }
+
                         modifyUser.Email = modifyData.Email;
                         modifyUser.VerificationToken = hexToken;
                         modifyUser.VerifiedAt = null;
