@@ -281,11 +281,6 @@ namespace shopping_bag.Services {
                     HandleDueDateReminder(reminder, remindersToSend, dontSendEmail);
                     HandleExpectedDateReminder(reminder, remindersToSend, dontSendEmail);
 
-                    // Remove empty reminders
-                    if (!reminder.DueDaysBefore.Any() && !reminder.ExpectedDaysBefore.Any()) {
-                        reminder.User.Reminders.Remove(reminder);
-                    }
-
                     await _context.SaveChangesAsync(stoppingToken);
                 } catch(Exception) {
                     continue;
