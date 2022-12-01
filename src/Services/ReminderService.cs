@@ -292,14 +292,14 @@ namespace shopping_bag.Services {
             foreach (var kv in remindersToSend) {
                 var sb = new StringBuilder();
                 sb.Append(StaticConfig.EmailReminderIntro);
-                sb.Append("<br>");
+                sb.Append("<h2>Notifications</h2>");
                 sb.AppendJoin("<br>", kv.Value); // List of reminders
-                sb.Append("<br>");
+                sb.Append("<br><br>");
                 sb.AppendLine(StaticConfig.EmailReminderTurnOffEmails);
                 try {
                     _emailService.SendEmail(new Models.Email.Email() {
                         To = kv.Key.Email,
-                        Subject = "TODO: subject",
+                        Subject = "Huld Shopping Bag - Reminder",
                         Body = sb.ToString()
                     });
                 }catch (Exception) {
