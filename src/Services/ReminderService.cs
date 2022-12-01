@@ -105,6 +105,50 @@ namespace shopping_bag.Services {
             await _context.SaveChangesAsync();
         }
 
+        public async Task ReCreateRemindersForList(long listId) {
+            var list = await _context.ShoppingLists.FirstOrDefaultAsync(l => l.Id == listId);
+            var toRecreate = await _context.Reminders.Include(r => r.User).ThenInclude(u => u.ReminderSettings)
+                .Include(r => r.User).ThenInclude(u => u.ListReminderSettings).Where(r => r.ShoppingListId == listId).ToListAsync();
+
+            if (list == null || (list.ExpectedDeliveryDate == null && list.DueDate == null)) {
+                // No dates set, ignore.
+                return;
+            }
+
+            foreach (var reminders in toRecreate) {
+                var user = reminders.User;
+                var reminderSettings = user.ReminderSettings;
+
+                var listSettings = user.ListReminderSettings.FirstOrDefault(r => r.ShoppingListId == listId);
+
+                // Generate list settings from globals if none exist.
+                if (listSettings == null) {
+                    listSettings = new ListReminderSettings() {
+                        ReminderDaysBeforeDueDate = reminderSettings.ReminderDaysBeforeDueDate,
+                        DueDateRemindersDisabled = reminderSettings.DueDateRemindersDisabled,
+                        ExpectedRemindersDisabled = reminderSettings.ExpectedRemindersDisabled,
+                        ReminderDaysBeforeExpectedDate = reminderSettings.ReminderDaysBeforeExpectedDate,
+                        UserId = user.Id,
+                        ShoppingListId = listId
+                    };
+                    user.ListReminderSettings.Add(listSettings);
+                }
+
+                var dueReminder = TrimInterval(listSettings.ReminderDaysBeforeDueDate, list.DueDate);
+                var expectedReminder = TrimInterval(listSettings.ReminderDaysBeforeExpectedDate, list.ExpectedDeliveryDate);
+
+                // No future intervals found, dont recreate.
+                if (!dueReminder.Any() && !expectedReminder.Any()) {
+                    continue;
+                }
+
+                // Recreate reminder
+                reminders.DueDaysBefore = dueReminder;
+                reminders.ExpectedDaysBefore = expectedReminder;
+            }
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<ServiceResponse<User>> SetListReminder(long userId, ListReminderSettingsDto settings, long listId) {
             var resp = await _userService.GetUserById(userId);
             if(!resp.IsSuccess || resp.Data == null || resp.Data.Disabled) {

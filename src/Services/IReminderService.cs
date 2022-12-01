@@ -9,5 +9,6 @@ namespace shopping_bag.Services {
         Task CreateRemindersForList(long listId, long officeId);
         Task<ServiceResponse<User>> SetListReminder(long userId, ListReminderSettingsDto settings, long listId);
         Task SendReminders(CancellationToken stoppingToken);
+        Task ReCreateRemindersForList(long listId);
     }
 }

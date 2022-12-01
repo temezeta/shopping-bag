@@ -88,16 +88,15 @@ namespace shopping_bag.Services
             {
                 return new ServiceResponse<ShoppingList>(error: "Active shopping list with that name already exists.");
             }
-
-            // If either date is changed. Re-create reminders for that list.
-            if (shoppingListData.DueDate != shoppingList.DueDate || shoppingListData.ExpectedDeliveryDate != shoppingList.ExpectedDeliveryDate) {
-                var toDelete = await _context.Reminders.Where(r => r.ShoppingListId == shoppingListId).ToListAsync();
-                _context.Reminders.RemoveRange(toDelete);
-                await _context.SaveChangesAsync();
-                await _reminderService.CreateRemindersForList(shoppingListId, shoppingList.OfficeId);
-            }
+            var dueDate = shoppingList.DueDate;
+            var expectedDate = shoppingList.ExpectedDeliveryDate;
             _mapper.Map(shoppingListData, shoppingList);
             await _context.SaveChangesAsync();
+
+            // If either date is changed. Re-create reminders for that list.
+            if (shoppingListData.DueDate != dueDate || shoppingListData.ExpectedDeliveryDate != expectedDate) {
+                await _reminderService.ReCreateRemindersForList(shoppingListId);
+            }
 
             return new ServiceResponse<ShoppingList>(shoppingList);
         }
