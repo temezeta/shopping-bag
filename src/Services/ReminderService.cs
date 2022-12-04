@@ -270,6 +270,16 @@ namespace shopping_bag.Services {
                         continue;
                     }
 
+                    // If list is ordered and expected delivery date is X days in the past, remove reminder and settings.
+                    if(reminder.ShoppingList.Ordered && reminder.ShoppingList.ExpectedDeliveryDate.HasValue 
+                        && reminder.ShoppingList.ExpectedDeliveryDate.Value > DateTime.Now
+                        && (reminder.ShoppingList.ExpectedDeliveryDate.Value - DateTime.Now).Days >= StaticConfig.OrderedRemindersCleanUpDays) {
+                        reminder.User.Reminders.Remove(reminder);
+                        reminder.User.ListReminderSettings.RemoveAll(r => r.ShoppingListId == list.Id);
+                        await _context.SaveChangesAsync(stoppingToken);
+                        continue;
+                    }
+
                     // If both settings null or both disabled, remove reminder.
                     if ((settings == null || (settings.DueDateRemindersDisabled && settings.ExpectedRemindersDisabled)) &&
                             (listSettings == null || (listSettings.DueDateRemindersDisabled && listSettings.ExpectedRemindersDisabled))) {

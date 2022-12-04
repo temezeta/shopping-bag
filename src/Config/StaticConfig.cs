@@ -26,11 +26,12 @@
         public static long DefaultAdminOfficeId { get; private set; }
         public static string[] DefaultAdminRoles { get; private set; }
         #endregion
-        #region Reminders messages
+        #region Reminders
         public static string EmailDueDateReminderFormat { get; private set; }
         public static string EmailExpectedDateReminderFormat { get; private set; }
         public static string EmailReminderIntro { get; private set; }
         public static string EmailReminderTurnOffEmails { get; private set; }
+        public static int OrderedRemindersCleanUpDays { get; private set; }
         #endregion
         public static void Setup(IConfiguration config)
         {
@@ -57,11 +58,12 @@
             DefaultAdminOfficeId = config.GetValue<long>("DefaultAdmin:OfficeId");
             DefaultAdminRoles = config.GetSection("DefaultAdmin:Roles").Get<string[]>();
             #endregion
-            #region Reminder messages
+            #region Reminders
             EmailDueDateReminderFormat = config.GetValue<string>("Reminders:DueDateReminderFormat");
             EmailExpectedDateReminderFormat = config.GetValue<string>("Reminders:ExpectedDateReminderFormat");
             EmailReminderIntro = config.GetValue<string>("Reminders:EmailReminderIntro");
             EmailReminderTurnOffEmails = config.GetValue<string>("Reminders:EmailReminderTurnOffEmails");
+            OrderedRemindersCleanUpDays = config.GetValue<int>("Reminders:OrderedRemindersCleanUpDays");
             #endregion
         }
     }
