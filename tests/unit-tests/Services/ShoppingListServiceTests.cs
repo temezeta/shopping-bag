@@ -224,12 +224,12 @@ namespace shopping_bag_unit_tests.Services {
         }
 
         [Fact]
-        public async Task RemoveItem_UserValidListNotOwnItem_ItemNotRemoved() {
+        public async Task RemoveItem_UserValidListNotOwnItem_ItemRemoved() {
             var result = await _sut.RemoveItemFromShoppingList(NormalUser, OthersItemInList.Id);
-            Assert.False(result.IsSuccess);
+            Assert.True(result.IsSuccess);
 
             var item = _context.Items.FirstOrDefault(i => i.Id == OthersItemInList.Id);
-            Assert.NotNull(item);
+            Assert.Null(item);
         }
 
         [Fact]
@@ -283,10 +283,9 @@ namespace shopping_bag_unit_tests.Services {
         }
 
         [Fact]
-        public async Task ModifyItem_UserNotOwnItem_ItemNotModified() {
+        public async Task ModifyItem_UserNotOwnItem_ItemModified() {
             var result = await _sut.ModifyItem(NormalUser, new ModifyItemDto() { Name = "Test item", Url = "New url" }, OthersItemInList.Id);
-            Assert.False(result.IsSuccess);
-            Assert.Equal("You can only modify items you have added", result.Error);
+            Assert.True(result.IsSuccess);
         }
 
         [Fact]

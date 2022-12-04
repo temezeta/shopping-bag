@@ -257,9 +257,6 @@ namespace shopping_bag.Services
             if(result == ItemStatus.LIST_ALREADY_ORDERED || result == ItemStatus.LIST_DUE_DATE_PASSED) {
                 return new ServiceResponse<bool>(error: "Can't remove items from ordered lists");
             }
-            if (result == ItemStatus.NOT_OWN_ITEM) {
-                return new ServiceResponse<bool>(error: "You can only remove items added by you");
-            }
             _context.Items.Remove(item);
             await _context.SaveChangesAsync();
             return new ServiceResponse<bool>(true);
@@ -276,9 +273,6 @@ namespace shopping_bag.Services
                 return new ServiceResponse<Item>(error: "Item doesn't exist.");
             }
             var isAdmin = user.UserRoles.Any(r => r.RoleName.Equals(Roles.AdminRole));
-            if(result == ItemStatus.NOT_OWN_ITEM) {
-                return new ServiceResponse<Item>(error: "You can only modify items you have added");
-            }
             if (result == ItemStatus.LIST_ALREADY_ORDERED) {
                 return new ServiceResponse<Item>(error: "Shopping list already ordered");
             }
@@ -308,7 +302,7 @@ namespace shopping_bag.Services
             if(result == ItemStatus.NOT_FOUND || result == ItemStatus.LIST_REMOVED) {
                 return new ServiceResponse<Item>(error: "Item doesn't exist.");
             }
-            if(result == ItemStatus.LIST_DUE_DATE_PASSED || result == ItemStatus.LIST_ALREADY_ORDERED) {
+            if(result == ItemStatus.LIST_ALREADY_ORDERED) {
                 return new ServiceResponse<Item>(error: "You can only (un)like active list's items");
             }
             var liked = item.UsersWhoLiked.Any(u => u.Id == user.Id);
