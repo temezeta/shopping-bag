@@ -33,7 +33,7 @@ namespace shopping_bag.Services
             {
                 return new ServiceResponse<ShoppingList>(error: "Active shopping list with that name already exists.");
             }
-
+            
             try
             {
                 {
@@ -52,7 +52,7 @@ namespace shopping_bag.Services
                     await _context.SaveChangesAsync();
                     await _reminderService.CreateRemindersForList(shoppingList.Id, shoppingListData.OfficeId);
 
-                    return new ServiceResponse<ShoppingList>(data: shoppingList);
+                    return await GetShoppingListById(shoppingList.Id);
                 }
             }
             catch (Exception ex)
