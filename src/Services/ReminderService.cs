@@ -309,7 +309,12 @@ namespace shopping_bag.Services {
                     if (dontSendEmail) {
                         return;
                     }
-                    var msg = string.Format(StaticConfig.EmailDueDateReminderFormat, list.Name, (daysBefore == 1 ? "tomorrow" : $"in {daysBefore} days"), list.DueDate.Value.ToString("dd.MM.yyyy"));
+                    var link = string.Format(StaticConfig.FrontendListUrl, list.Id);
+                    var msg = string.Format(StaticConfig.EmailDueDateReminderFormat, 
+                        list.Name,
+                        (daysBefore == 1 ? "tomorrow" : $"in {daysBefore} days"),
+                        list.DueDate.Value.ToString("dd.MM.yyyy"),
+                        link);
                     if (remindersToSend.TryGetValue(reminder.User, out List<string>? msgList)) {
                         msgList.Add(msg);
                     } else {
@@ -327,7 +332,12 @@ namespace shopping_bag.Services {
                     if(dontSendEmail) {
                         return;
                     }
-                    var msg = string.Format(StaticConfig.EmailExpectedDateReminderFormat, list.Name, (daysBefore == 1 ? "tomorrow" : $"in {daysBefore} days"), list.ExpectedDeliveryDate.Value.ToString("dd.MM.yyyy"));
+                    var link = string.Format(StaticConfig.FrontendListUrl, list.Id);
+                    var msg = string.Format(StaticConfig.EmailExpectedDateReminderFormat, 
+                        list.Name,
+                        (daysBefore == 1 ? "tomorrow" : $"in {daysBefore} days"),
+                        list.ExpectedDeliveryDate.Value.ToString("dd.MM.yyyy"),
+                        link);
                     if (remindersToSend.TryGetValue(reminder.User, out List<string>? msgList)) {
                         msgList.Add(msg);
                     } else {

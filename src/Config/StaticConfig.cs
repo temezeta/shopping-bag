@@ -33,6 +33,10 @@
         public static string EmailReminderTurnOffEmails { get; private set; }
         public static int OrderedRemindersCleanUpDays { get; private set; }
         #endregion
+        #region Frontend Urls
+        public static string FrontendBaseUrl { get; private set; }
+        public static string FrontendListUrl { get; private set; }
+        #endregion
         public static void Setup(IConfiguration config)
         {
             #region Jwt
@@ -64,6 +68,10 @@
             EmailReminderIntro = config.GetValue<string>("Reminders:EmailReminderIntro");
             EmailReminderTurnOffEmails = config.GetValue<string>("Reminders:EmailReminderTurnOffEmails");
             OrderedRemindersCleanUpDays = config.GetValue<int>("Reminders:OrderedRemindersCleanUpDays");
+            #endregion
+            #region Frontend Urls
+            FrontendBaseUrl = config.GetValue<string>("FrontEndUrls:Base");
+            FrontendListUrl = FrontendBaseUrl + config.GetValue<string>("FrontEndUrls:ListUrl");
             #endregion
         }
     }
