@@ -108,7 +108,7 @@ namespace shopping_bag.Config
             var reminderSettings = new ReminderSettings()
             {
                 ReminderDaysBeforeDueDate = new List<int>() { 2 },
-                ReminderDaysBeforeExpectedDate = new List<int>() { 2 },
+                ReminderDaysBeforeExpectedDate = new List<int>(),
                 DueDateRemindersDisabled = false,
                 ExpectedRemindersDisabled = true,
                 UserId = user.Id,
