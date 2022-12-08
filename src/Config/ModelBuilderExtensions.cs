@@ -11,77 +11,77 @@ namespace shopping_bag.Config
             new Office()
             {
                 Id = 1,
-                Name = "Tampere HVT11 (61.49142122101034, 23.770750652503075)"
+                Name = "Tampere HVT11"
             },
             new Office()
             {
                 Id = 2,
-                Name = "Tampere HVT34 (61.4872349013685, 23.771011831141426)"
+                Name = "Tampere HVT34"
             },
             new Office()
             {
                 Id = 3,
-                Name = "Espoo (60.17320724919939, 24.82951312687209)"
+                Name = "Espoo"
             },
             new Office()
             {
                 Id = 4,
-                Name = "Hyvinkää (60.61885645330777, 24.81364812340716)"
+                Name = "Hyvinkää"
             },
             new Office()
             {
                 Id = 5,
-                Name = "Oulu (65.0573847614918, 25.443263561914264)"
+                Name = "Oulu"
             },
             new Office()
             {
                 Id = 6,
-                Name = "Vaasa Wasa Innovation Center (63.116523411260665, 21.62020520510232)"
+                Name = "Vaasa Wasa Innovation Center"
             },
             new Office()
             {
                 Id = 7,
-                Name = "Vaasa Wulffintie (63.09815319119998, 21.601082366419462)"
+                Name = "Vaasa Wulffintie"
             },
             new Office()
             {
                 Id = 8,
-                Name = "Seinäjoki (62.80052477778116, 22.822913653422315)"
+                Name = "Seinäjoki"
             },
             new Office()
             {
                 Id = 9,
-                Name = "Jyväskylä (62.244890931070074, 25.750669670647447)"
+                Name = "Jyväskylä"
             },
             new Office()
             {
                 Id = 10,
-                Name = "Kotka (60.51600193933175, 26.928281488329468)"
+                Name = "Kotka"
             },
             new Office()
             {
                 Id = 11,
-                Name = "Ylivieska (64.07478730741482, 24.51536955120399)"
+                Name = "Ylivieska"
             },
             new Office()
             {
                 Id = 12,
-                Name = "Kokkola (63.83473200917329, 23.123709317260648)"
+                Name = "Kokkola"
             },
             new Office()
             {
                 Id = 13,
-                Name = "Turku (60.44991173801938, 22.293984601059858)"
+                Name = "Turku"
             },
             new Office()
             {
                 Id = 14,
-                Name = "Kuopio (62.890139950100824, 27.63171036451606)"
+                Name = "Kuopio"
             },
             new Office()
             {
                 Id = 15,
-                Name = "Prague (50.08481700492511, 14.44251624731215)"
+                Name = "Prague"
             }};
 
         private static readonly UserRole[] UserRoles = new UserRole[] {

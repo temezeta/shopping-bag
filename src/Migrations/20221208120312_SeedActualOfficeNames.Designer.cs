@@ -12,7 +12,7 @@ using shopping_bag.Config;
 namespace shopping_bag.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20221207171827_SeedActualOfficeNames")]
+    [Migration("20221208120312_SeedActualOfficeNames")]
     partial class SeedActualOfficeNames
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -138,91 +138,91 @@ namespace shopping_bag.Migrations
                         new
                         {
                             Id = 1L,
-                            Name = "Tampere HVT11 (61.49142122101034, 23.770750652503075)",
+                            Name = "Tampere HVT11",
                             Removed = false
                         },
                         new
                         {
                             Id = 2L,
-                            Name = "Tampere HVT34 (61.4872349013685, 23.771011831141426)",
+                            Name = "Tampere HVT34",
                             Removed = false
                         },
                         new
                         {
                             Id = 3L,
-                            Name = "Espoo (60.17320724919939, 24.82951312687209)",
+                            Name = "Espoo",
                             Removed = false
                         },
                         new
                         {
                             Id = 4L,
-                            Name = "Hyvinkää (60.61885645330777, 24.81364812340716)",
+                            Name = "Hyvinkää",
                             Removed = false
                         },
                         new
                         {
                             Id = 5L,
-                            Name = "Oulu (65.0573847614918, 25.443263561914264)",
+                            Name = "Oulu",
                             Removed = false
                         },
                         new
                         {
                             Id = 6L,
-                            Name = "Vaasa Wasa Innovation Center (63.116523411260665, 21.62020520510232)",
+                            Name = "Vaasa Wasa Innovation Center",
                             Removed = false
                         },
                         new
                         {
                             Id = 7L,
-                            Name = "Vaasa Wulffintie (63.09815319119998, 21.601082366419462)",
+                            Name = "Vaasa Wulffintie",
                             Removed = false
                         },
                         new
                         {
                             Id = 8L,
-                            Name = "Seinäjoki (62.80052477778116, 22.822913653422315)",
+                            Name = "Seinäjoki",
                             Removed = false
                         },
                         new
                         {
                             Id = 9L,
-                            Name = "Jyväskylä (62.244890931070074, 25.750669670647447)",
+                            Name = "Jyväskylä",
                             Removed = false
                         },
                         new
                         {
                             Id = 10L,
-                            Name = "Kotka (60.51600193933175, 26.928281488329468)",
+                            Name = "Kotka",
                             Removed = false
                         },
                         new
                         {
                             Id = 11L,
-                            Name = "Ylivieska (64.07478730741482, 24.51536955120399)",
+                            Name = "Ylivieska",
                             Removed = false
                         },
                         new
                         {
                             Id = 12L,
-                            Name = "Kokkola (63.83473200917329, 23.123709317260648)",
+                            Name = "Kokkola",
                             Removed = false
                         },
                         new
                         {
                             Id = 13L,
-                            Name = "Turku (60.44991173801938, 22.293984601059858)",
+                            Name = "Turku",
                             Removed = false
                         },
                         new
                         {
                             Id = 14L,
-                            Name = "Kuopio (62.890139950100824, 27.63171036451606)",
+                            Name = "Kuopio",
                             Removed = false
                         },
                         new
                         {
                             Id = 15L,
-                            Name = "Prague (50.08481700492511, 14.44251624731215)",
+                            Name = "Prague",
                             Removed = false
                         });
                 });
