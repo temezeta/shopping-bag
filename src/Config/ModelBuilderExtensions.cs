@@ -11,42 +11,77 @@ namespace shopping_bag.Config
             new Office()
             {
                 Id = 1,
-                Name = "Espoo"
+                Name = "Tampere HVT11"
             },
             new Office()
             {
                 Id = 2,
-                Name = "Hyvinkää"
+                Name = "Tampere HVT34"
             },
             new Office()
             {
                 Id = 3,
-                Name = "Oulu"
+                Name = "Espoo"
             },
             new Office()
             {
                 Id = 4,
-                Name = "Vaasa"
+                Name = "Hyvinkää"
             },
             new Office()
             {
                 Id = 5,
-                Name = "Tampere"
+                Name = "Oulu"
             },
             new Office()
             {
                 Id = 6,
-                Name = "Seinäjoki"
+                Name = "Vaasa Wasa Innovation Center"
             },
             new Office()
             {
                 Id = 7,
-                Name = "Jyväskylä"
+                Name = "Vaasa Wulffintie"
             },
             new Office()
             {
                 Id = 8,
+                Name = "Seinäjoki"
+            },
+            new Office()
+            {
+                Id = 9,
+                Name = "Jyväskylä"
+            },
+            new Office()
+            {
+                Id = 10,
                 Name = "Kotka"
+            },
+            new Office()
+            {
+                Id = 11,
+                Name = "Ylivieska"
+            },
+            new Office()
+            {
+                Id = 12,
+                Name = "Kokkola"
+            },
+            new Office()
+            {
+                Id = 13,
+                Name = "Turku"
+            },
+            new Office()
+            {
+                Id = 14,
+                Name = "Kuopio"
+            },
+            new Office()
+            {
+                Id = 15,
+                Name = "Prague"
             }};
 
         private static readonly UserRole[] UserRoles = new UserRole[] {
