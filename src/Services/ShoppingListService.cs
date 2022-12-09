@@ -33,7 +33,15 @@ namespace shopping_bag.Services
             {
                 return new ServiceResponse<ShoppingList>(error: "Active shopping list with that name already exists.");
             }
-            
+
+            if (shoppingListData.DueDate.HasValue && shoppingListData.DueDate < DateTime.Now) {
+                return new ServiceResponse<ShoppingList>(error: "Shopping list due date passed");
+            }
+
+            if (shoppingListData.ExpectedDeliveryDate.HasValue && shoppingListData.ExpectedDeliveryDate < DateTime.Now) {
+                return new ServiceResponse<ShoppingList>(error: "Shopping list expected delivery date passed");
+            }
+
             try
             {
                 {
