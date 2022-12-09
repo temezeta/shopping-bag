@@ -23,6 +23,32 @@ namespace shopping_bag_unit_tests.Services {
             var result = await _sut.AddShoppingList(new AddShoppingListDto() { Name = "Office supplies", OfficeId = 1, UserId = 3});
             Assert.True(result.IsSuccess);
         }
+
+        [Fact]
+        public async Task AddShoppingList_FutureDueDate_Ok() {
+            var result = await _sut.AddShoppingList(new AddShoppingListDto() { Name = "Office supplies", OfficeId = TestOffice.Id, UserId = NormalUser.Id, DueDate = DateTime.Now.AddDays(1) });
+            Assert.True(result.IsSuccess);
+        }
+
+        [Fact]
+        public async Task AddShoppingList_PastDueDate_Error() {
+            var result = await _sut.AddShoppingList(new AddShoppingListDto() { Name = "Office supplies", OfficeId = TestOffice.Id, UserId = NormalUser.Id, DueDate = DateTime.Now.AddDays(-1) });
+            Assert.False(result.IsSuccess);
+            Assert.Equal("Shopping list due date passed", result.Error);
+        }
+
+        [Fact]
+        public async Task AddShoppingList_FutureExpectedDeliveryDate_Ok() {
+            var result = await _sut.AddShoppingList(new AddShoppingListDto() { Name = "Office supplies", OfficeId = TestOffice.Id, UserId = NormalUser.Id, ExpectedDeliveryDate = DateTime.Now.AddDays(1) });
+            Assert.True(result.IsSuccess);
+        }
+
+        [Fact]
+        public async Task AddShoppingList_PastExpectedDeliveryDate_Error() {
+            var result = await _sut.AddShoppingList(new AddShoppingListDto() { Name = "Office supplies", OfficeId = TestOffice.Id, UserId = NormalUser.Id, ExpectedDeliveryDate = DateTime.Now.AddDays(-1) });
+            Assert.False(result.IsSuccess);
+            Assert.Equal("Shopping list expected delivery date passed", result.Error);
+        }
         #endregion
 
         #region GetShoppingListById Tests
