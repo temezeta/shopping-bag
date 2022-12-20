@@ -12,8 +12,8 @@ using shopping_bag.Config;
 namespace shopping_bag.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20221123140716_AllNotificationsDisabledFlag")]
-    partial class AllNotificationsDisabledFlag
+    [Migration("20221216170752_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -138,49 +138,91 @@ namespace shopping_bag.Migrations
                         new
                         {
                             Id = 1L,
-                            Name = "Espoo",
+                            Name = "Tampere HVT11",
                             Removed = false
                         },
                         new
                         {
                             Id = 2L,
-                            Name = "Hyvinkää",
+                            Name = "Tampere HVT34",
                             Removed = false
                         },
                         new
                         {
                             Id = 3L,
-                            Name = "Oulu",
+                            Name = "Espoo",
                             Removed = false
                         },
                         new
                         {
                             Id = 4L,
-                            Name = "Vaasa",
+                            Name = "Hyvinkää",
                             Removed = false
                         },
                         new
                         {
                             Id = 5L,
-                            Name = "Tampere",
+                            Name = "Oulu",
                             Removed = false
                         },
                         new
                         {
                             Id = 6L,
-                            Name = "Seinäjoki",
+                            Name = "Vaasa Wasa Innovation Center",
                             Removed = false
                         },
                         new
                         {
                             Id = 7L,
-                            Name = "Jyväskylä",
+                            Name = "Vaasa Wulffintie",
                             Removed = false
                         },
                         new
                         {
                             Id = 8L,
+                            Name = "Seinäjoki",
+                            Removed = false
+                        },
+                        new
+                        {
+                            Id = 9L,
+                            Name = "Jyväskylä",
+                            Removed = false
+                        },
+                        new
+                        {
+                            Id = 10L,
                             Name = "Kotka",
+                            Removed = false
+                        },
+                        new
+                        {
+                            Id = 11L,
+                            Name = "Ylivieska",
+                            Removed = false
+                        },
+                        new
+                        {
+                            Id = 12L,
+                            Name = "Kokkola",
+                            Removed = false
+                        },
+                        new
+                        {
+                            Id = 13L,
+                            Name = "Turku",
+                            Removed = false
+                        },
+                        new
+                        {
+                            Id = 14L,
+                            Name = "Kuopio",
+                            Removed = false
+                        },
+                        new
+                        {
+                            Id = 15L,
+                            Name = "Prague",
                             Removed = false
                         });
                 });
@@ -289,77 +331,6 @@ namespace shopping_bag.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("ShoppingLists");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1L,
-                            Comment = "Weekly order",
-                            CreatedDate = new DateTime(2022, 10, 12, 12, 0, 0, 0, DateTimeKind.Unspecified),
-                            DueDate = new DateTime(2022, 12, 18, 17, 0, 0, 0, DateTimeKind.Unspecified),
-                            ExpectedDeliveryDate = new DateTime(2022, 12, 20, 17, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Week 50 list",
-                            OfficeId = 1L,
-                            Ordered = false,
-                            Removed = false
-                        },
-                        new
-                        {
-                            Id = 2L,
-                            Comment = "List for office supplies",
-                            CreatedDate = new DateTime(2022, 10, 12, 12, 0, 0, 0, DateTimeKind.Unspecified),
-                            DueDate = new DateTime(2023, 1, 15, 22, 0, 0, 0, DateTimeKind.Unspecified),
-                            ExpectedDeliveryDate = new DateTime(2023, 2, 15, 12, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Office supplies",
-                            OfficeId = 1L,
-                            Ordered = false,
-                            Removed = false
-                        },
-                        new
-                        {
-                            Id = 3L,
-                            Comment = "No due or delivery dates set",
-                            CreatedDate = new DateTime(2022, 10, 12, 12, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Tampere office list",
-                            OfficeId = 5L,
-                            Ordered = false,
-                            Removed = false
-                        },
-                        new
-                        {
-                            Id = 4L,
-                            Comment = "Order that is overdue but not delivered",
-                            CreatedDate = new DateTime(2022, 10, 12, 12, 0, 0, 0, DateTimeKind.Unspecified),
-                            DueDate = new DateTime(2022, 10, 9, 17, 0, 0, 0, DateTimeKind.Unspecified),
-                            ExpectedDeliveryDate = new DateTime(2023, 1, 15, 12, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Week 40 list",
-                            OfficeId = 1L,
-                            Ordered = true,
-                            OrderedDate = new DateTime(2022, 10, 10, 16, 0, 0, 0, DateTimeKind.Unspecified),
-                            Removed = false
-                        },
-                        new
-                        {
-                            Id = 5L,
-                            Comment = "Order that is overdue and delivered",
-                            CreatedDate = new DateTime(2022, 10, 12, 12, 0, 0, 0, DateTimeKind.Unspecified),
-                            DueDate = new DateTime(2022, 9, 30, 17, 0, 0, 0, DateTimeKind.Unspecified),
-                            ExpectedDeliveryDate = new DateTime(2022, 10, 3, 12, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Week 39 list",
-                            OfficeId = 1L,
-                            Ordered = true,
-                            OrderedDate = new DateTime(2022, 10, 10, 16, 0, 0, 0, DateTimeKind.Unspecified),
-                            Removed = false
-                        },
-                        new
-                        {
-                            Id = 6L,
-                            CreatedDate = new DateTime(2022, 10, 12, 12, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "List with only a name",
-                            OfficeId = 1L,
-                            Ordered = false,
-                            Removed = false
-                        });
                 });
 
             modelBuilder.Entity("shopping_bag.Models.User.User", b =>
@@ -369,6 +340,9 @@ namespace shopping_bag.Migrations
                         .HasColumnType("bigint");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
+
+                    b.Property<bool>("Disabled")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -398,9 +372,6 @@ namespace shopping_bag.Migrations
 
                     b.Property<string>("RefreshToken")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("Removed")
-                        .HasColumnType("bit");
 
                     b.Property<DateTime?>("ResetTokenExpires")
                         .HasColumnType("datetime2");
