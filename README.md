@@ -4,7 +4,7 @@
 
 - [.NET 6 SDK](https://dotnet.microsoft.com/en-us/download/visual-studio-sdks)
 - [MS SQL Server Express](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
-- Recommended: [SQL Server Management Studio]()
+- Recommended: SQL Server Management Studio
 
 ## Recommended IDE
 
@@ -26,12 +26,12 @@
 
 ## Getting started with Docker
 
-1. Follow steps 1-6 from above
+1. Follow steps 3-6 from above
 2. Install [Docker Desktop](https://docs.docker.com/desktop/windows/wsl/)
 3. Ensure WSL 2 support is enabled and virtualization (SVM etc.) is enabled in BIOS
 4. If you can start Docker Desktop and `wsl -l -v` command returns version 2 distro you should be fine
 5. You need to have a SSL cert at path `%USERPROFILE%\.aspnet\https\aspnetapp.pfx`. Use [this](https://learn.microsoft.com/en-us/aspnet/core/security/docker-compose-https?view=aspnetcore-6.0) guide to setup dev-cert at that path. You may need to delete your previous one. `dotnet dev-certs https --clean`
-6. See the `docker-compose.yml` for the password to set up for the dev-cert.
+6. See the `docker-compose.yml` for the password you need to set up for the dev-cert.
 7. Modify `appsettings.Docker.json` with any missing details. If you run via command line, user secrets cannot be found.
 8. Build `shopping-bag.csproj` project by right clicking it in Visual Studio Solution Explorer and Build (or run `docker-compose up` in the src directory)
 9. Select `docker-compose` from the top bar dropdown with green Play-button
